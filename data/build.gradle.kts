@@ -44,6 +44,16 @@ android {
     }
 }
 
+// KSP: argumentos para el compilador de Room.
+ksp {
+// Exporta el JSON del esquema de la BD a esta carpeta para poder escribir
+    // tests de migración con MigrationTestHelper y para auditar la evolución
+    // del esquema en el repo. Cada versión genera un archivo de snapshot.
+    arg("room.schemaLocation", "$projectDir/schemas")
+    // Genera código para consultas de Room verificadas en tiempo de compilación.
+    arg("room.generateKotlin", "true")
+}
+
 dependencies {
     // --- Clean Architecture: :data depende de :domain (no al revés). ----
     implementation(project(":domain"))

@@ -1,0 +1,232 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8f9bb995ad46aeea14c554c880e10c99",
+    "entities": [
+      {
+        "tableName": "torneos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `nombre` TEXT NOT NULL, `sitio` TEXT NOT NULL, `fecha_inicio` TEXT NOT NULL, `fecha_fin` TEXT, `arbitro` TEXT NOT NULL, `notas` TEXT NOT NULL, `creado_en` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sitio",
+            "columnName": "sitio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaInicio",
+            "columnName": "fecha_inicio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaFin",
+            "columnName": "fecha_fin",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "arbitro",
+            "columnName": "arbitro",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notas",
+            "columnName": "notas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creadoEn",
+            "columnName": "creado_en",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "partidas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `torneo_id` TEXT, `evento` TEXT NOT NULL, `sitio` TEXT NOT NULL, `fecha` TEXT NOT NULL, `ronda` TEXT NOT NULL, `blancas` TEXT NOT NULL, `negras` TEXT NOT NULL, `elo_blancas` INTEGER, `elo_negras` INTEGER, `resultado` TEXT NOT NULL, `fecha_hora` TEXT, `modo` TEXT NOT NULL, `fen` TEXT, `posicion_setup` INTEGER NOT NULL, `pgn` TEXT NOT NULL, `actualizado_en` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`torneo_id`) REFERENCES `torneos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "torneoId",
+            "columnName": "torneo_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "evento",
+            "columnName": "evento",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sitio",
+            "columnName": "sitio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ronda",
+            "columnName": "ronda",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blancas",
+            "columnName": "blancas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "negras",
+            "columnName": "negras",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eloBlancas",
+            "columnName": "elo_blancas",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eloNegras",
+            "columnName": "elo_negras",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultado",
+            "columnName": "resultado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaHora",
+            "columnName": "fecha_hora",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "modo",
+            "columnName": "modo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fen",
+            "columnName": "fen",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "posicionSetup",
+            "columnName": "posicion_setup",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pgn",
+            "columnName": "pgn",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actualizadoEn",
+            "columnName": "actualizado_en",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_partidas_torneo_id",
+            "unique": false,
+            "columnNames": [
+              "torneo_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_partidas_torneo_id` ON `${TABLE_NAME}` (`torneo_id`)"
+          },
+          {
+            "name": "index_partidas_blancas",
+            "unique": false,
+            "columnNames": [
+              "blancas"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_partidas_blancas` ON `${TABLE_NAME}` (`blancas`)"
+          },
+          {
+            "name": "index_partidas_negras",
+            "unique": false,
+            "columnNames": [
+              "negras"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_partidas_negras` ON `${TABLE_NAME}` (`negras`)"
+          },
+          {
+            "name": "index_partidas_fecha",
+            "unique": false,
+            "columnNames": [
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_partidas_fecha` ON `${TABLE_NAME}` (`fecha`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "torneos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "torneo_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8f9bb995ad46aeea14c554c880e10c99')"
+    ]
+  }
+}
