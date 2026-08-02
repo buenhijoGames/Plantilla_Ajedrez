@@ -1,0 +1,76 @@
+================================================================================
+ Plantilla_ajedrez - Archivo NOTICE / TERCEROS
+================================================================================
+ Copyright (C) 2026  Manuel Salmerón Cerdán <manuelsalmeroncerdan@gmail.com>
+
+ Código fuente de la app: https://github.com/Salmeron52/plantillas_ajedrez
+
+ Este proyecto se distribuye bajo Licencia Pública General GNU v3.0 (GPLv3)
+ o posterior (ver archivo LICENSE). Incorpora componentes de terceros cuyas
+ licencias se reproducen a continuación. La atribución de cada uno es
+ obligatoria y se mantiene visible en la app desde Ajustes -> Licencias.
+
+--------------------------------------------------------------------------------
+ 1. Stockfish (motor de ajedrez UCI)
+--------------------------------------------------------------------------------
+ Licencia: GNU General Public License v3.0 (GPLv3)
+ upstream : https://stockfishchess.org/
+ código   : https://github.com/official-stockfish/Stockfish
+ derechos : © the Stockfish developers (see AUTHORS file at upstream).
+
+ Uso: binarios nativos Android empaquetados en jniLibs/<abi>/libstockfish.so
+      para arm64-v8a y armeabi-v7a. La comunicación se realiza vía el
+      protocolo UCI estándar en un subproceso.
+
+--------------------------------------------------------------------------------
+ 2. Piezas cburnett (renderizado de tablero y figurín de planilla)
+--------------------------------------------------------------------------------
+ Licencia: GNU General Public License v2.0 or any later version (GPLv2+)
+ upstream : https://github.com/lichess-org/lila/tree/main/public/piece/cburnett
+ autor    : Colin Burnette (cburnett), distribuido vía Lichess.
+ uso      : SVG convertidas a ImageVector de Compose para el set por defecto.
+
+--------------------------------------------------------------------------------
+ 3. chesslib (validación de jugadas, SAN, FEN, PGN)
+--------------------------------------------------------------------------------
+ Licencia: Apache License 2.0
+ upstream : https://github.com/bhlangonijr/chesslib
+ Copyright (c) bhlangonijr y colaboradores.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+--------------------------------------------------------------------------------
+ 4. AndroidX, Jetpack Compose, Material 3, Hilt, Room, Navigation
+--------------------------------------------------------------------------------
+ Licencia: Apache License 2.0
+ upstream : https://source.android.com/  (Jetpack)
+ Copyright (c) The Android Open Source Project.
+
+--------------------------------------------------------------------------------
+ 5. Kotlin, Kotlin Coroutines, KSP
+--------------------------------------------------------------------------------
+ Licencia: Apache License 2.0
+ upstream : https://kotlinlang.org/
+ Copyright (c) JetBrains s.r.o.
+
+================================================================================
+ Oferta de código fuente (GPLv3, sección 6)
+================================================================================
+ De acuerdo con la sección 6 de la GPLv3, el código fuente completo y
+ correspondiente de esta aplicación está disponible públicamente en:
+   https://github.com/Salmeron52/plantillas_ajedrez
+ Esta oferta es válida durante al menos los 3 años siguientes a la
+ publicación de cada versión, o mientras se distribuya el producto, lo que
+ dure más. Si por algún motivo no pudieras acceder al repositorio, escríbenos
+ a manuelsalmeroncerdan@gmail.com y te haremos llegar el código fuente en un
+ medio físico duradero a coste de reproducción.

@@ -1,0 +1,86 @@
+# ============================================================================
+# .gitignore - Plantilla_ajedrez
+# ----------------------------------------------------------------------------
+# Evita comprometer secretos de firma, credenciales, configuración local y
+# artefactos generados. Cualquier fichero sensible nuevo debe acabar aquí.
+# ============================================================================
+
+# --- Secrets y credenciales (NUNCA al repo) ----------------------------------
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+keystore.properties
+secrets.properties
+signing.properties
+google-services.json
+agp-config.json
+api-keys.json
+*.env
+.env
+.env.*
+
+# --- Configuración local -----------------------------------------------------
+local.properties
+.gradle/config/
+*.log
+
+# --- Gradle ------------------------------------------------------------------
+.gradle/
+build/
+*/build/
+**/build/
+captures/
+.cxx/
+.externalNativeBuild/
+
+# --- IDE: IntelliJ / Android Studio -----------------------------------------
+*.iml
+.idea/
+!.idea/codeStyles/
+!.idea/copyright/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/inspectionProfiles/
+.idea/deploymentTargetDropDown.xml
+.idea/other.xml
+
+# --- IDE: Eclipse / VS Code --------------------------------------------------
+.classpath
+.project
+.settings/
+bin/
+gen/
+out/
+.vscode/
+*.swp
+*.swo
+
+# --- OS ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Kotlin / Java -----------------------------------------------------------
+*.class
+hs_err_pid*
+
+# --- Nativo y binarios grandes (>50MB) --------------------------------------
+# Los binarios de Stockfish se descargan e instalan en jniLibs durante la
+# preparación del entorno, no se versionan para no inflar el repo.
+app/src/main/jniLibs/*/libstockfish.so
+*.so.tmp
+*.tar
+*.zip
+# Excepción: librerías .so propias pequeñas sí pueden subirse si las creamos.
+!app/src/main/jniLibs/**/libplantilla_*.so
+
+# --- Reportes y volcados -----------------------------------------------------
+*.hprof
+heapdump-*.hprof
+dumps/
