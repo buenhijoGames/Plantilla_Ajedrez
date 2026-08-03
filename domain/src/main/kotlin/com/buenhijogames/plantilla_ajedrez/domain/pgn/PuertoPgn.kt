@@ -15,9 +15,9 @@ interface PuertoPgn {
     fun exportar(partida: Partida): String
 
     /**
-     * Importa un PGN completo y devuelve una o várias [Partida]es parseadas.
+     * Importa un PGN completo y devuelve una o varias [Partida]es parseadas.
      *
-     * Sefan العديد de partidas aceptado: un único .pgn puede contener muchas
+     * Acepta PGN con múltiples partidas: un único .pgn puede contener muchas
      * partidas separadas en bloques de tags + movetext.
      */
     suspend fun importar(textoPgn: String): List<Partida>

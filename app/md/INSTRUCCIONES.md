@@ -105,9 +105,9 @@ Multimódulo Gradle (Clean Architecture + DIP):
   - APKs generadas: `app-arm64-v8a-debug.apk` y `app-armeabi-v7a-debug.apk`
     (~120 MB cada una, incluye Stockfish).
 
-### 🚧 Fase 1 — EN CURSO (rama `fase-1-repositorios-casos-uso`)
+### ✅ Fase 1 — HECHA (rama `fase-1-repositorios-casos-uso`, commit `c6ce478`)
 
-Sin commit todavía. Cambios ya escritos en disco:
+`c6ce478` "Fase 1: repositorios, mappers, infraestructura y tests unitarios":
 
 - **Mappers** en `data/bd/mapeadores/Mapeadores.kt`:
   `TorneoEntity.aDominio()`, `Torneo.aEntity(creadoEn)`,
@@ -117,26 +117,54 @@ Sin commit todavía. Cambios ya escritos en disco:
   `RepositorioTorneosImpl`, `RepositorioPartidasImpl`,
   `GeneradorIdsUuid`, `RelojSistema`.
 - **Módulo Hilt** `data/di/ModuloRepositorios.kt` con `@Binds` para los 4 bindings.
+- **Tests**: `MapeadoresTest`, `RepositorioTorneosImplTest`,
+  `RepositorioPartidasImplTest`, `InfraestructuraRepositoriosTest` en
+  `data/src/test/kotlin/`.
+
+### 🚧 Fase 2 — EN CURSO (rama `fase-2-chesslib-adapter`)
+
+Sin commit todavía. Cambios ya escritos en disco (sin rastrear por git):
+
+- **`data/ajedrez/AdaptadorChesslib.kt`** → implementa `PuertoMotorAjedrez`
+  con chesslib. Sin estado (Board efímero por operación). `fenInicial`,
+  `aplicarJugada(fen, san)`, `jugadaASan(fen, desde, hasta, promocion)`,
+  `jugadasLegalesDesde`, `esFinal` (mate/ahogado), `esTablas` (50 jugadas,
+  repetición, material insuficiente). `JugadaIlegalException` propia para
+  validación de usuario; FEN inválido → `IllegalStateException` con contexto.
+- **`data/pgn/AdaptadorPgn.kt`** → implementa `PuertoPgn` con chesslib.
+  Exportación: Seven Tag Roster + WhiteElo/BlackElo/Time/Mode + SetUp/FEN,
+  movetext conservado tal cual (variantes/comentarios/NAGs), resultado
+  añadido al final si falta. Importación: `PgnIterator` + `LargeFile` sobre
+  `ByteArrayInputStream`, acepta PGN multi-partida.
+- **`data/di/ModuloServicios.kt`** → `@Binds` de `PuertoMotorAjedrez` y
+  `PuertoPgn` (separado de `ModuloRepositorios` por responsabilidad única).
+- **Fix doc** en `domain/pgn/PuertoPgn.kt` (KDoc corregido, sin cambio de API).
+- **Tests**: `AdaptadorChesslibTest` (13 tests: FEN inicial, e4, ilegal,
+  SAN e4/Nf3, promoción, legales desde casilla, mate del loco, material
+  insuficiente...) y `AdaptadorPgnTest` (7 tests: Tag Roster, SetUp/FEN,
+  interrogantes, vacío, Fischer-Spassky, round-trip, variantes/comentarios).
 
 **Pendiente**:
-- Tests de mappers y repositorios (Regla 4.3 Testing).
-- Commit detallado en español.
-- Checkpoint Manolo.
+- Compilar desde Android Studio y ejecutar tests de `:data` (checkpoint Manolo).
+- Commit detallado en español (tras OK de Manolo).
 
 ### ⏳ Fases pendientes
 
 | Fase | Descripción |
 |---|---|
-| 2 | ChesslibAdapter (motor/SAN/FEN/PGN con chesslib 1.3.7) |
 | 3 | Tema M3 (varios temas seleccionables) + Nav + StartupDialog + Torneos |
 | 3b | Settings (tema/piezas/licencias) + LicensesScreen |
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
 | 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave |
-| 6 | StockfishAdapter UCI + AnalysisSheet (**sólo post-partida**, anti-fraude) |
+| 6 | StockfishAdapter UCI → `PuertoEvaluacionMotor` + AnalysisSheet (**sólo post-partida**, anti-fraude). Ojo: los `.so` ya están en `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito. |
 | 7 | Import/Export PGN + PDF plantilla FIDE + overflow menu (3 puntos) |
 | 8 | Tests + lint + typecheck |
 | 9 | Pulido estético (animaciones, microinteracciones) |
 | 10 | Preparación Play Console (splits, sign, versioning) |
+
+**Nota sobre casos de uso**: `:domain` es pura (sin javax.inject). Cuando se
+implementen, serán clases Kotlin sin anotaciones DI, provistas con `@Provides`
+desde un módulo Hilt en `:data` (o `:app`).
 
 ---
 
@@ -175,33 +203,39 @@ Sin commit todavía. Cambios ya escritos en disco:
 
 ### Ramas existentes
 - `fase-0-estructura-inicial` (Fase 0 completa)
-- `fase-1-repositorios-casos-uso` (Fase 1 en curso, HEAD actual)
+- `fase-1-repositorios-casos-uso` (Fase 1 completa, commit `c6ce478`)
+- `fase-2-chesslib-adapter` (Fase 2 en curso, HEAD actual)
+
+### ⚠️ Remoto
+- El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
+  se ha hecho push. Todo el trabajo existe solo en local. Pendiente
+  `git push -u origin` de las tres ramas cuando Manolo lo autorice.
 
 ---
 
 ## ➡️ Continuación exacta al retomar
 
-1. Estar en `fase-1-repositorios-casos-uso`: `git checkout fase-1-repositorios-casos-uso`.
-2. Build debe pasar: `.\gradlew.bat :app:assembleDebug` → BUILD SUCCESSFUL.
-3. Faltan: tests de `Mapeadores.kt` y de `RepositorioTorneosImpl`/`RepositorioPartidasImpl`
-   - Usar MockK para el DAO, Turbine para los Flow.
-   - Carpeta: `data/src/test/kotlin/...`.
-4. Tras tests OK → commit detallado en español con todo lo hecho.
-5. **Checkpoint**: pedir a Manolo compilar desde Android Studio y verificar
-   estabilidad. No avanzar a Fase 2 sin su OK.
+1. Estar en `fase-2-chesslib-adapter`: `git checkout fase-2-chesslib-adapter`.
+2. Manolo compila desde Android Studio y ejecuta los tests de `:data`
+   (`AdaptadorChesslibTest`, `AdaptadorPgnTest`, más los de Fase 1).
+3. Si todo va verde → commit detallado en español de Fase 2
+   (adaptadores chesslib + ModuloServicios + tests + fix doc PuertoPgn).
+4. Tras el OK de Manolo → Fase 3 (Tema M3 + Nav + StartupDialog + Torneos).
+   NOTA: los casos de uso de `:domain` siguen sin implementarse; decidir con
+   Manolo si se crean junto a los ViewModels de Fase 3 o en fase aparte.
 
 ---
 
 ## 📝 Notas de la última sesión
 
-- Se leyeron `AGENTS.md` y `Esta_App.md` por completo; se reconciliaron
-  conflictos:
-  - Stockfish anti-fraude: sólo post-partida.
-  - Stockfish versión 18 (no 8).
-  - Varios temas seleccionables (no sólo dynamic).
-  - Overflow menu en lugar de botones sueltos.
-  - Autosave tras cada jugada.
-  - `INSTRUCCIONES.md` creado en `app\md` (este archivo).
-  - Checkpoint Manolo después de cada fase.
-- Se eliminó un fichero espurio `nul` (nombre reservado Windows) del working tree.
-- Build limpio verificado verde.
+- Sesión anterior: Fase 1 commiteada (`c6ce478`) con tests incluidos.
+- Se creó la rama `fase-2-chesslib-adapter` y se escribió Fase 2 completa
+  (sin commit): `AdaptadorChesslib`, `AdaptadorPgn`, `ModuloServicios`,
+  tests de ambos adaptadores y fix de KDoc en `PuertoPgn`.
+- Confusión inicial en esta sesión: el asistente no localizó los `.md` de
+  planificación y creyó que el plan se había perdido. **No se perdió**:
+  está en `app/md/INSTRUCCIONES.md` (este archivo) + `AGENTS.md` +
+  `Esta_App.md` en raíz. Se eliminó un `docs/ROADMAP.md` que el asistente
+  creó por error en ubicación incorrecta (regla 5: los `.md` van en `app\md`).
+- Detectado: remoto GitHub vacío, nunca se ha hecho push (ver sección Remoto).
+- Build limpio verificado verde (Fase 0). Fase 2 pendiente de compilar.
