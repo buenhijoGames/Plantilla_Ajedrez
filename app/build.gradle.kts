@@ -98,6 +98,9 @@ dependencies {
     // --- Navegación Compose. ---
     implementation(libs.androidx.navigation.compose)
 
+    // --- DataStore Preferences (preferencias persistentes: tema, etc.) ---
+    implementation(libs.androidx.datastore.preferences)
+
     // --- Hilt. ---
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

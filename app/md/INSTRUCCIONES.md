@@ -121,9 +121,9 @@ Multimódulo Gradle (Clean Architecture + DIP):
   `RepositorioPartidasImplTest`, `InfraestructuraRepositoriosTest` en
   `data/src/test/kotlin/`.
 
-### 🚧 Fase 2 — EN CURSO (rama `fase-2-chesslib-adapter`)
+### ✅ Fase 2 — HECHA (rama `fase-2-chesslib-adapter`, commit `572ea87`)
 
-Sin commit todavía. Cambios ya escritos en disco (sin rastrear por git):
+`572ea87` "Fase 2: AdaptadorChesslib y AdaptadorPgn con chesslib + tests unitarios". Detalle en el mensaje del commit.
 
 - **`data/ajedrez/AdaptadorChesslib.kt`** → implementa `PuertoMotorAjedrez`
   con chesslib. Sin estado (Board efímero por operación). `fenInicial`,

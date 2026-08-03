@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Plantilla_ajedrez</string>
+    <string name="fase_actual">Fase %1$s</string>
+    <string name="tema_claro">Claro</string>
+    <string name="tema_oscuro">Oscuro</string>
+    <string name="tema_dinamico">Dinámico (Material You)</string>
+    <string name="tema_madera">Madera</string>
+    <string name="tema_marmol">Mármol</string>
 </resources>
