@@ -24,7 +24,16 @@
     <!-- Pantalla Ajustes -->
     <string name="ajustes_titulo">Ajustes</string>
 
-    <!-- Pantalla Torneos (placeholder Fase 3c) -->
+    <!-- Pantalla Torneos -->
     <string name="torneos_titulo">Torneos guardados</string>
-    <string name="torneos_vacio">Aún no hay torneos guardados.</string>
+    <string name="torneos_vacio">Aún no hay torneos guardados. Pulsa + para crear uno.</string>
+    <string name="torneos_error">No se pudieron cargar los torneos guardados.</string>
+    <string name="torneo_sin_datos">—</string>
+    <string name="torneo_nuevo_titulo">Nuevo torneo</string>
+    <string name="torneo_nombre">Nombre del torneo</string>
+    <string name="torneo_sitio">Sitio (opcional)</string>
+    <string name="torneo_fecha_inicio">Fecha de inicio (opcional)</string>
+    <string name="torneo_fecha_formato">YYYY-MM-DD</string>
+    <string name="torneo_crear">Crear</string>
+    <string name="torneo_eliminar">Eliminar torneo</string>
 </resources>

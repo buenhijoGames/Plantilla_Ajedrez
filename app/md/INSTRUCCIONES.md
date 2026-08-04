@@ -148,12 +148,46 @@ Multimódulo Gradle (Clean Architecture + DIP):
 - Compilar desde Android Studio y ejecutar tests de `:data` (checkpoint Manolo).
 - Commit detallado en español (tras OK de Manolo).
 
-### ⏳ Fases pendientes
+### ✅ Fase 3 — HECHA (temas + navegación + startup + torneos)
+
+**3a — `9d924c9` "Fase 3a: sistema de temas persistente con DataStore"**
+(rama `fase-3a-temas-datastore`):
+- Dep: `androidx.datastore:datastore-preferences:1.1.7`.
+- `preferencias/PreferenciasUsuario.kt`: `@Singleton` con
+  `Flow<TemaAplicacion>` y `guardarTema`. Clave disco `tema` (no renombrar).
+  `ModuloPreferencias` provee el `DataStore<Preferences>`.
+- `ui/theme/TemaAplicacion.kt`: enum CLARO/OSCURO/DINAMICO/MADERA/MARMOL,
+  `desdeNombre` resiliente (nunca null).
+- `ui/theme/EsquemasMarca.kt`: paletas Madera (cálida) y Mármol (fría),
+  variantes claro/oscuro.
+- `ui/theme/PlantillaAjedrezTheme.kt`: tema raíz que lee DataStore,
+  `forzarTema` para previews. Reemplaza al `Theme.kt` (borrado).
+- `MainActivity`: `@Inject preferencias` → tema reactivo.
+
+**3b — `062075b` "Fase 3b: navegacion Compose, StartupDialog y pantalla de Ajustes"**
+(rama `fase-3b-navegacion-startup-tema`):
+- Deps: `lifecycle-runtime-compose`, `material-icons-extended`.
+- `navegacion/Destinos.kt` (INICIO/TORNEOS/AJUSTES) +
+  `navegacion/NavegacionPlantilla.kt` (NavHost).
+- `ui/inicio/StartupDialog.kt` + `PantallaInicio.kt`: diálogo "¿Nuevo o
+  abrir guardado?" + TopAppBar con overflow (3 puntos → Ajustes).
+- `ui/ajustes/AjustesViewModel.kt` (`@HiltViewModel`, StateFlow de tema) +
+  `PantallaAjustes.kt` (RadioButton por tema, persistencia automática).
+
+**3c — pendiente commit (rama `fase-3c-torneos`)**:
+- `ui/torneos/TorneosViewModel.kt`: `@HiltViewModel`, observa
+  `RepositorioTorneos.observarTorneos()`, un único `MutableStateFlow`
+  como fuente de verdad (lista+cargando+error+diálogo). `catch` sin
+  tumbar la app. `crearTorneo`/`eliminarTorneo` en `viewModelScope`.
+- `ui/torneos/DialogoNuevoTorneo.kt`: formulario (nombre obligatorio).
+- `ui/torneos/PantallaTorneos.kt`: reemplaza el placeholder (4 estados:
+  cargando/error/vacío/lista), LazyColumn con tarjetas + FAB(+).
+
+**Pendiente Fase 3c**: commit detallado en español (tras checkpoint Manolo).
 
 | Fase | Descripción |
 |---|---|
-| 3 | Tema M3 (varios temas seleccionables) + Nav + StartupDialog + Torneos |
-| 3b | Settings (tema/piezas/licencias) + LicensesScreen |
+| 3b (resto) | Settings: piezas/licencias + LicensesScreen |
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
 | 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave |
 | 6 | StockfishAdapter UCI → `PuertoEvaluacionMotor` + AnalysisSheet (**sólo post-partida**, anti-fraude). Ojo: los `.so` ya están en `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito. |
@@ -204,38 +238,40 @@ desde un módulo Hilt en `:data` (o `:app`).
 ### Ramas existentes
 - `fase-0-estructura-inicial` (Fase 0 completa)
 - `fase-1-repositorios-casos-uso` (Fase 1 completa, commit `c6ce478`)
-- `fase-2-chesslib-adapter` (Fase 2 en curso, HEAD actual)
+- `fase-2-chesslib-adapter` (Fase 2 completa, commit `572ea87`)
+- `fase-3a-temas-datastore` (Fase 3a completa, commit `9d924c9`)
+- `fase-3b-navegacion-startup-tema` (Fase 3b completa, commit `062075b`)
+- `fase-3c-torneos` (Fase 3c en curso, HEAD actual, pendiente commit)
 
 ### ⚠️ Remoto
 - El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
   se ha hecho push. Todo el trabajo existe solo en local. Pendiente
-  `git push -u origin` de las tres ramas cuando Manolo lo autorice.
+  `git push -u origin` de las ramas cuando Manolo lo autorice.
 
 ---
 
 ## ➡️ Continuación exacta al retomar
 
-1. Estar en `fase-2-chesslib-adapter`: `git checkout fase-2-chesslib-adapter`.
-2. Manolo compila desde Android Studio y ejecuta los tests de `:data`
-   (`AdaptadorChesslibTest`, `AdaptadorPgnTest`, más los de Fase 1).
-3. Si todo va verde → commit detallado en español de Fase 2
-   (adaptadores chesslib + ModuloServicios + tests + fix doc PuertoPgn).
-4. Tras el OK de Manolo → Fase 3 (Tema M3 + Nav + StartupDialog + Torneos).
-   NOTA: los casos de uso de `:domain` siguen sin implementarse; decidir con
-   Manolo si se crean junto a los ViewModels de Fase 3 o en fase aparte.
+1. Estar en `fase-3c-torneos`: `git checkout fase-3c-torneos`.
+2. Manolo compila desde Android Studio y verifica estabilidad de la
+   pantalla de Torneos (crear/eliminar torneo, persistencia en Room).
+3. Si todo va verde → commit detallado en español de Fase 3c
+   (`TorneosViewModel`, `DialogoNuevoTorneo`, `PantallaTorneos`, strings).
+4. Tras el OK de Manolo → **Fase 4** (BoardComposable Canvas + piezas
+   cburnett + entrada táctil). De momento no se han creado casos de uso de
+   `:domain`: los ViewModels usan los puertos directamente (patrón
+   establecido y testable); decidir con Manolo si crearlos en el futuro.
 
 ---
 
 ## 📝 Notas de la última sesión
 
-- Sesión anterior: Fase 1 commiteada (`c6ce478`) con tests incluidos.
-- Se creó la rama `fase-2-chesslib-adapter` y se escribió Fase 2 completa
-  (sin commit): `AdaptadorChesslib`, `AdaptadorPgn`, `ModuloServicios`,
-  tests de ambos adaptadores y fix de KDoc en `PuertoPgn`.
-- Confusión inicial en esta sesión: el asistente no localizó los `.md` de
-  planificación y creyó que el plan se había perdido. **No se perdió**:
-  está en `app/md/INSTRUCCIONES.md` (este archivo) + `AGENTS.md` +
-  `Esta_App.md` en raíz. Se eliminó un `docs/ROADMAP.md` que el asistente
-  creó por error en ubicación incorrecta (regla 5: los `.md` van en `app\md`).
-- Detectado: remoto GitHub vacío, nunca se ha hecho push (ver sección Remoto).
-- Build limpio verificado verde (Fase 0). Fase 2 pendiente de compilar.
+- Fase 2 commiteada (`572ea87`). Fases 3a (`9d924c9`) y 3b (`062075b`)
+  commiteadas tras checkpoint Manolo. Fase 3c (torneos reactivos) escrita
+  y validada por Manolo (compila); pendiente de commit.
+- Sistema de temas completo: 5 temas (Claro, Oscuro, Dinámico, Madera,
+  Mármol) persistidos en DataStore; selección en Ajustes vía RadioButton.
+- Navegación Compose con StartupDialog ("¿Nuevo o abrir guardado?") y
+  overflow menu (3 puntos) en la TopAppBar de inicio.
+- Pantalla de Torneos reactiva (Room): crear con FAB, eliminar con icono.
+- Remoto GitHub sigue vacío (sin push nunca). Ver sección Remoto.
