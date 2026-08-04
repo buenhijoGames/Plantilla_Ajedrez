@@ -51,10 +51,12 @@ import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
  *     de eliminar.
  *
  * @param viewModel Inyectado por Hilt por defecto; parámetro para tests.
+ * @param onAbrirTorneo Navega al detalle de un torneo con su id.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaTorneos(
+    onAbrirTorneo: (String) -> Unit,
     viewModel: TorneosViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -125,6 +127,7 @@ fun PantallaTorneos(
                 items(estado.torneos, key = { it.id }) { torneo ->
                     FilaTorneo(
                         torneo = torneo,
+                        onAbrir = { onAbrirTorneo(torneo.id) },
                         onEliminar = { viewModel.eliminarTorneo(torneo.id) },
                     )
                 }
@@ -135,15 +138,19 @@ fun PantallaTorneos(
 
 /**
  * Tarjeta de un torneo: nombre (cabecera), sitio y fecha (detalle) y un
- * botón de eliminar. La navegación al detalle del torneo se añadirá en
- * una fase posterior (detalle -> partidas).
+ * botón de eliminar. Pulsar la tarjeta navega al detalle del torneo
+ * (lista de partidas).
  */
 @Composable
 private fun FilaTorneo(
     torneo: Torneo,
+    onAbrir: () -> Unit,
     onEliminar: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onAbrir,
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

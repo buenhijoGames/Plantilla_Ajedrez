@@ -149,7 +149,6 @@ Multimódulo Gradle (Clean Architecture + DIP):
 - Commit detallado en español (tras OK de Manolo).
 
 ### ✅ Fase 3 — HECHA (temas + navegación + startup + torneos)
-
 **3a — `9d924c9` "Fase 3a: sistema de temas persistente con DataStore"**
 (rama `fase-3a-temas-datastore`):
 - Dep: `androidx.datastore:datastore-preferences:1.1.7`.
@@ -184,6 +183,51 @@ Multimódulo Gradle (Clean Architecture + DIP):
   cargando/error/vacío/lista), LazyColumn con tarjetas + FAB(+).
 
 **Pendiente Fase 3c**: commit detallado en español (tras checkpoint Manolo).
+
+### ✅ Fase 4 — EN CURSO (rama `fase-4-tablero`, pendiente de commit)
+
+Tablero de ajedrez interactivo con Canvas + piezas cburnett de Lichess +
+entrada táctil + navegación Torneo→Partida. Verificada por Manolo (compila
+y funciona). Pendiente de commit extenso en español.
+
+- **12 VectorDrawables** de piezas cburnett en `app/src/main/res/drawable/
+  pieza_{blanca|negra}_{rey|dama|torre|alfil|caballo|peon}.xml` (GPLv2+).
+  Regenerados con `herramientas/descargar_piezas.py` (script que normaliza
+  `<path>`, `fill` negro por defecto, `<circle>`→pathData y stroke caps;
+  los XML son idénticos 1:1 a los SVGs de lichess).
+- **`domain/motor/PuertoMotorAjedrez.kt`** + **`AdaptadorChesslib.kt`**:
+  nuevo método `resultadoActual(fen)` → `ResultadoPartida`
+  (mate/ahogado/tablas/en curso) + 4 tests en `AdaptadorChesslibTest`.
+- **`ui/tablero/UtilidadesTablero.kt`**: `piezasDesdeFen`, `filaYColumnaDeCasilla`/
+  `casillaDeFilaColumna`, `recursoPieza`, `movetextDesdeSans`/`sansDesdeMovetext`,
+  `ladoEnTurno`, y **`segmentosDeSan`** (descompone un SAN en segmentos texto/
+  pieza para la planilla). Tests en `UtilidadesTableroTest` (11 + 7 = 18).
+- **`ui/tablero/TableroAjedrez.kt`**: Canvas 8×8 (colores `#F0D9B5`/`#B58863`),
+  selección ámbar, destinos (círculo/ anillo), piezas con `painterResource`,
+  toque→casilla vía `detectTapGestures` (clave `fen, tamanoCasilla`),
+  coordenadas del borde a 11sp fijo (letras a-h abajo, números 1-8 izquierda).
+- **`ui/tablero/PartidaViewModel.kt`**: carga Partida de Room (SavedStateHandle),
+  rejuega movetext, selección origen→destino, promoción con diálogo, fin de
+  partida bloquea tablero, **autosave** del movetext tras cada jugada.
+  **Movimiento directo** bidireccional: si una pieza solo tiene un destino
+  legal se mueve sola al tocarla, y si una casilla solo es alcanzable por una
+  pieza propia, esa pieza se mueve directa al tocar el destino.
+  **Deshacer jugadas**: `deshacerJugada()` rejuega el movetext desde `fenInicio`
+  sin la última jugada y persiste.
+- **`ui/tablero/PantallaPartida.kt`**: tablero + TopAppBar con botón deshacer
+  (↩) + `DialogoPromocion`.
+- **`ui/tablero/PlanillaPartida.kt`**: planilla con las jugadas a 18sp y con
+  **dibujo de la pieza en lugar de la letra** (estándar: todas las piezas en
+  silueta blanca con contorno, sin distinguir bando). Flujo con salto de línea
+  y scroll vertical (máx. 140dp).
+- **`ui/torneos/DetalleTorneoViewModel.kt`** + **`PantallaDetalleTorneo.kt`**:
+  carga torneo por id, lista reactiva de partidas, FAB crea partida nueva
+  (ronda correlativa, hereda tags) y navega; pulsar partida navega.
+- **`navegacion/Destinos.kt`** + **`NavegacionPlantilla.kt`**: rutas
+  `DETALLE_TORNEO`/`PARTIDA` con `{torneoId}`/`{partidaId}` y ARGs.
+- **`ui/torneos/PantallaTorneos.kt`**: `FilaTorneo` como `Card(onClick)`.
+- **`strings.xml`**: cadenas de detalle de torneo, partida, promoción,
+  acciones comunes y deshacer.
 
 | Fase | Descripción |
 |---|---|
@@ -241,7 +285,8 @@ desde un módulo Hilt en `:data` (o `:app`).
 - `fase-2-chesslib-adapter` (Fase 2 completa, commit `572ea87`)
 - `fase-3a-temas-datastore` (Fase 3a completa, commit `9d924c9`)
 - `fase-3b-navegacion-startup-tema` (Fase 3b completa, commit `062075b`)
-- `fase-3c-torneos` (Fase 3c en curso, HEAD actual, pendiente commit)
+- `fase-3c-torneos` (Fase 3c completa, commit `9c3a0cb`)
+- `fase-4-tablero` (Fase 4 en curso, HEAD actual, pendiente commit)
 
 ### ⚠️ Remoto
 - El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
@@ -252,26 +297,24 @@ desde un módulo Hilt en `:data` (o `:app`).
 
 ## ➡️ Continuación exacta al retomar
 
-1. Estar en `fase-3c-torneos`: `git checkout fase-3c-torneos`.
-2. Manolo compila desde Android Studio y verifica estabilidad de la
-   pantalla de Torneos (crear/eliminar torneo, persistencia en Room).
-3. Si todo va verde → commit detallado en español de Fase 3c
-   (`TorneosViewModel`, `DialogoNuevoTorneo`, `PantallaTorneos`, strings).
-4. Tras el OK de Manolo → **Fase 4** (BoardComposable Canvas + piezas
-   cburnett + entrada táctil). De momento no se han creado casos de uso de
-   `:domain`: los ViewModels usan los puertos directamente (patrón
+1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`.
+2. **Commit extenso en español de Fase 4** (tablero + piezas + planilla +
+   deshacer + detalle de torneo). Confirmar con Manolo antes de commitear.
+3. Tras el OK → **Fase 5** (ScoresheetPanel completo: variantes/comentarios/
+   NAGs/figurín + autosave completo). De momento no se han creado casos de
+   uso de `:domain`: los ViewModels usan los puertos directamente (patrón
    establecido y testable); decidir con Manolo si crearlos en el futuro.
 
 ---
 
 ## 📝 Notas de la última sesión
 
-- Fase 2 commiteada (`572ea87`). Fases 3a (`9d924c9`) y 3b (`062075b`)
-  commiteadas tras checkpoint Manolo. Fase 3c (torneos reactivos) escrita
-  y validada por Manolo (compila); pendiente de commit.
-- Sistema de temas completo: 5 temas (Claro, Oscuro, Dinámico, Madera,
-  Mármol) persistidos en DataStore; selección en Ajustes vía RadioButton.
-- Navegación Compose con StartupDialog ("¿Nuevo o abrir guardado?") y
-  overflow menu (3 puntos) en la TopAppBar de inicio.
-- Pantalla de Torneos reactiva (Room): crear con FAB, eliminar con icono.
-- Remoto GitHub sigue vacío (sin push nunca). Ver sección Remoto.
+- Fase 4 (tablero) casi completa en rama `fase-4-tablero`. Manolo verificó
+  los checkpoints (piezas en posición, coordenadas, movimiento perfecto).
+- Mejoras de esta sesión: coordenadas del borde fijas a 11sp; planilla con
+  jugadas grandes (18sp) y **dibujo de pieza en silueta blanca estándar** en
+  lugar de la letra (nuevo `segmentosDeSan` + `PlanillaPartida`); **movimiento
+  directo** bidireccional (pieza con un solo destino → se mueve; casilla solo
+  alcanzable por una pieza → se mueve); **deshacer jugadas** con botón ↩.
+- Pendiente: commit extenso de Fase 4, luego Fase 5 (ScoresheetPanel).
+- Fase 3c commiteada (`9c3a0cb`). Remoto GitHub sigue vacío (sin push nunca).

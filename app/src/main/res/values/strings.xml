@@ -36,4 +36,29 @@
     <string name="torneo_fecha_formato">YYYY-MM-DD</string>
     <string name="torneo_crear">Crear</string>
     <string name="torneo_eliminar">Eliminar torneo</string>
+
+    <!-- Acciones comunes -->
+    <string name="accion_volver">Volver</string>
+    <string name="accion_cancelar">Cancelar</string>
+    <string name="accion_deshacer">Deshacer jugada</string>
+
+    <!-- Detalle de torneo -->
+    <string name="torneo_detalle_titulo">Detalle del torneo</string>
+    <string name="torneo_detalle_vacio">Este torneo aún no tiene partidas. Pulsa + para crear una.</string>
+    <string name="torneo_detalle_error">No se pudieron cargar los datos del torneo.</string>
+
+    <!-- Partida -->
+    <string name="partida_titulo">Partida</string>
+    <string name="partida_error">No se pudo abrir la partida.</string>
+    <string name="partida_nueva_titulo">Nueva partida</string>
+    <string name="partida_ronda">Ronda %1$s</string>
+    <string name="partida_enfrentamiento">%1$s – %2$s</string>
+    <string name="partida_jugador_blanco">Blancas</string>
+    <string name="partida_jugador_negro">Negras</string>
+    <string name="partida_turno">Turno de %1$s</string>
+    <string name="partida_ganan_blancas">Ganan las blancas</string>
+    <string name="partida_ganan_negras">Ganan las negras</string>
+    <string name="partida_tablas">Tablas</string>
+    <string name="partida_en_curso">En curso</string>
+    <string name="promocion_titulo">Promoción de peón</string>
 </resources>

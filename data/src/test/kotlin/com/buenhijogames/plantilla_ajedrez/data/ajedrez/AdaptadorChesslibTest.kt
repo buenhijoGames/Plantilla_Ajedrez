@@ -1,5 +1,6 @@
 package com.buenhijogames.plantilla_ajedrez.data.ajedrez
 
+import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.motor.PuertoMotorAjedrez
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -113,5 +114,30 @@ class AdaptadorChesslibTest {
         val san = motor.jugadaASan(fenPromocion, "e7", "e8", 'Q')
         // Puede ser e8=Q o e8=Q+ segun la posicion del rey negro
         assertTrue("SAN de promocion debe empezar por e8=Q", san.startsWith("e8=Q"))
+    }
+
+    @Test
+    fun `resultadoActual devuelve EN_CURSO en posicion inicial`() {
+        assertEquals(ResultadoPartida.EN_CURSO, motor.resultadoActual(motor.fenInicial()))
+    }
+
+    @Test
+    fun `resultadoActual devuelve GANA_NEGRAS en el mate del loco`() {
+        // Mate del loco: 1.f3 e5 2.g4?? Qh4#. Le toca a blancas y estan en mate.
+        val fenMate = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3"
+        assertEquals(ResultadoPartida.GANA_NEGRAS, motor.resultadoActual(fenMate))
+    }
+
+    @Test
+    fun `resultadoActual devuelve GANA_BLANCAS con rey negro en mate`() {
+        // Mate de dama y rey: le toca a negras y estan en mate.
+        val fenMate = "6k1/8/8/8/8/8/5Q2/6K1 b - - 0 1"
+        assertEquals(ResultadoPartida.GANA_BLANCAS, motor.resultadoActual(fenMate))
+    }
+
+    @Test
+    fun `resultadoActual devuelve TABLAS con material insuficiente`() {
+        val fenInsuficiente = "8/8/8/4k3/8/4K3/8/8 w - - 0 1"
+        assertEquals(ResultadoPartida.TABLAS, motor.resultadoActual(fenInsuficiente))
     }
 }

@@ -1,5 +1,7 @@
 package com.buenhijogames.plantilla_ajedrez.domain.motor
 
+import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
+
 /**
  * Puerto de motor de ajedrez: validación legal, conversión a SAN, FEN y estado.
  *
@@ -27,4 +29,13 @@ interface PuertoMotorAjedrez {
 
     /** Comprueba si [fen] corresponde a tablas por regla de 50 jugadas o triple repetición. */
     fun esTablas(fen: String): Boolean
+
+    /**
+     * Calcula el [ResultadoPartida] actual de la posición [fen].
+     *
+     * Diferencia entre jaque mate (gana el bando que no está en mate),
+     * ahogado, tablas reglamentarias y partida en curso. Es la fuente de
+     * verdad del resultado para la UI cuando el usuario termina la partida.
+     */
+    fun resultadoActual(fen: String): ResultadoPartida
 }

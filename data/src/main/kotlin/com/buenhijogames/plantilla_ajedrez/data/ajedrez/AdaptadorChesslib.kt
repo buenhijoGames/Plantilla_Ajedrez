@@ -1,5 +1,6 @@
 package com.buenhijogames.plantilla_ajedrez.data.ajedrez
 
+import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.motor.PuertoMotorAjedrez
 import com.github.bhlangonijr.chesslib.Board
 import com.github.bhlangonijr.chesslib.Piece
@@ -136,6 +137,25 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
     override fun esTablas(fen: String): Boolean {
         val board = Board().cargar(fen)
         return board.isDraw || board.isInsufficientMaterial || board.isRepetition()
+    }
+
+    /**
+     * Calcula el [ResultadoPartida] actual de la posicion [fen].
+     *
+     * Si el lado al que le toca mover esta en mate, gana el bando contrario;
+     * el ahogado y el resto de tablas reglamentarias devuelven [ResultadoPartida.TABLAS];
+     * en cualquier otro caso la partida sigue en curso.
+     */
+    override fun resultadoActual(fen: String): ResultadoPartida {
+        val board = Board().cargar(fen)
+        return when {
+            board.isMated ->
+                if (board.getSideToMove() == Side.WHITE) ResultadoPartida.GANA_NEGRAS
+                else ResultadoPartida.GANA_BLANCAS
+            board.isStaleMate || board.isDraw || board.isInsufficientMaterial || board.isRepetition() ->
+                ResultadoPartida.TABLAS
+            else -> ResultadoPartida.EN_CURSO
+        }
     }
 
     companion object {
