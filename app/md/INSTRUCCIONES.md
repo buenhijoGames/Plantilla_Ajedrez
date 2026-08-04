@@ -184,7 +184,7 @@ Multimódulo Gradle (Clean Architecture + DIP):
 
 **Pendiente Fase 3c**: commit detallado en español (tras checkpoint Manolo).
 
-### ✅ Fase 4 — EN CURSO (rama `fase-4-tablero`, pendiente de commit)
+### ✅ Fase 4 — HECHA (rama `fase-4-tablero`, commit `5eb8193`)
 
 Tablero de ajedrez interactivo con Canvas + piezas cburnett de Lichess +
 entrada táctil + navegación Torneo→Partida. Verificada por Manolo (compila
@@ -228,6 +228,45 @@ y funciona). Pendiente de commit extenso en español.
 - **`ui/torneos/PantallaTorneos.kt`**: `FilaTorneo` como `Card(onClick)`.
 - **`strings.xml`**: cadenas de detalle de torneo, partida, promoción,
   acciones comunes y deshacer.
+
+### ✅ Fase 5a — VISUALIZACIÓN PLANILLA (rama `fase-4-tablero`, pendiente commit)
+
+Alcance decidido por Manolo: **visualizar** variantes, comentarios y NAGs ya
+guardados (sin edición) + navegación por toque entre jugadas. Verificada por
+Manolo (compila y funciona). Pendiente de commit extenso.
+
+- **`ui/tablero/ParseadorMovetext.kt`** (nuevo, puro y testable):
+  - `ElementoMovetext` (Jugada/Variante/Comentario/Nag/Resultado).
+  - `parsearMovetext`: tokenizador robusto que respeta `(...)` (variantes
+    anidadas), `{...}` y `;...` (comentarios con espacios), `$n` (NAGs),
+    números de jugada pegados ("12.Nf3") y descarta tags `[...]`.
+  - `sansLineaPrincipal`: SANs solo de la línea principal (ignora variantes,
+    comentarios, NAGs y resultado) → para rejugar el FEN real.
+  - `movetextSinCabecera`: extrae el movetext puro de un PGN con tags.
+  - `simboloNag`: mapa NAG→símbolo (!, !!, ?!, ±, ∞...).
+- **`ui/tablero/PlanillaPartida.kt`** (reescrita): recibe `movetext` +
+  `posicionVisible` + `onJugadaPulsada`. Renderiza estructura completa con
+  figurín (silueta blanca estándar), variantes en bloque indentado con fondo
+  suave, comentarios en cursiva, NAGs en color terciario y resultado en
+  negrita. Las jugadas pulsables navegan; la jugada visible se resalta con
+  `tertiaryContainer`.
+- **`PartidaViewModel`**: nuevo estado `movetext`, `fenVisible`,
+  `resultadoVisible`, `ladoEnTurnoVisible` y `posicionVisible: Int?`
+  (null = final). `mostrarPosicion(plies)` rejuega hasta ese ply y muestra la
+  posición; `volverAlFinal()` desbloquea. El tablero **se bloquea** mientras
+  se revisa (`onCasillaPulsada` con `posicionVisible != null` → return). Al
+  jugar o deshacer se vuelve al final. La carga usa `sansLineaPrincipal`
+  (robusto ante variantes).
+- **`PantallaPartida`**: tablero usa `fenVisible`; botón "Volver al final"
+  visible solo en modo revisión; `textoEstado` refleja la posición visible.
+- **`strings.xml`**: `partida_volver_final`.
+- **Tests**: `ParseadorMovetextTest` (11 tests: línea principal, numeración
+  larga/pegada, variantes anidadas, comentarios, NAGs, resultado, tags,
+  línea principal ignorando variantes, símbolos NAG).
+
+Pendiente: checkpoint Manolo + commit extenso.
+
+### Fases siguientes (pendientes)
 
 | Fase | Descripción |
 |---|---|
@@ -298,23 +337,23 @@ desde un módulo Hilt en `:data` (o `:app`).
 ## ➡️ Continuación exacta al retomar
 
 1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`.
-2. **Commit extenso en español de Fase 4** (tablero + piezas + planilla +
-   deshacer + detalle de torneo). Confirmar con Manolo antes de commitear.
-3. Tras el OK → **Fase 5** (ScoresheetPanel completo: variantes/comentarios/
-   NAGs/figurín + autosave completo). De momento no se han creado casos de
-   uso de `:domain`: los ViewModels usan los puertos directamente (patrón
-   establecido y testable); decidir con Manolo si crearlos en el futuro.
+2. **Commit extenso en español de Fase 5a** (parser + planilla + navegación).
+   Confirmar con Manolo antes de commitear.
+3. Tras el OK → **Fase 5b** (edición en la planilla o lo que Manolo decida).
+   De momento no se han creado casos de uso de `:domain`: los ViewModels usan
+   los puertos directamente (patrón establecido y testable); decidir con
+   Manolo si crearlos en el futuro.
 
 ---
 
 ## 📝 Notas de la última sesión
 
-- Fase 4 (tablero) casi completa en rama `fase-4-tablero`. Manolo verificó
-  los checkpoints (piezas en posición, coordenadas, movimiento perfecto).
-- Mejoras de esta sesión: coordenadas del borde fijas a 11sp; planilla con
-  jugadas grandes (18sp) y **dibujo de pieza en silueta blanca estándar** en
-  lugar de la letra (nuevo `segmentosDeSan` + `PlanillaPartida`); **movimiento
-  directo** bidireccional (pieza con un solo destino → se mueve; casilla solo
-  alcanzable por una pieza → se mueve); **deshacer jugadas** con botón ↩.
-- Pendiente: commit extenso de Fase 4, luego Fase 5 (ScoresheetPanel).
-- Fase 3c commiteada (`9c3a0cb`). Remoto GitHub sigue vacío (sin push nunca).
+- Fase 4 commiteada (`5eb8193`) tras OK de Manolo.
+- Mejoras Fase 4: coordenadas a 11sp fijo; planilla con jugadas grandes
+  (18sp) y figurín en silueta blanca estándar (nuevo `segmentosDeSan`);
+  **movimiento directo bidireccional** (pieza con un solo destino → se mueve;
+  casilla solo alcanzable por una pieza → se mueve); **deshacer jugadas** ↩.
+- **Fase 5a implementada** (sin verificar aún): parser de movetext PGN con
+  variantes/comentarios/NAGs, planilla estructurada con navegación por toque
+  y revisión de posiciones. Pendiente de checkpoint Manolo y commit.
+- Remoto GitHub sigue vacío (sin push nunca).

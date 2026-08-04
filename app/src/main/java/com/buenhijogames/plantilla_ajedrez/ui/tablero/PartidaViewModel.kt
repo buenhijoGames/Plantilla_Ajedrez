@@ -32,32 +32,43 @@ data class JugadaPromocion(
  * Estado de la pantalla de partida.
  *
  * @property cargando          true mientras se carga la partida de Room.
- * @property fen               FEN actual de la posición sobre el tablero.
- * @property jugadasSan        Lista de jugadas SAN jugadas hasta ahora.
- * @property resultado         Resultado actual de la partida ([ResultadoPartida.EN_CURSO]
- *                             si sigue en juego).
+ * @property fen               FEN de la posición final (última jugada aplicada).
+ * @property fenVisible        FEN que se muestra en el tablero: coincide con [fen]
+ *                             salvo cuando se está revisando una jugada pasada.
+ * @property movetext          Movetext PGN completo a mostrar en la planilla.
+ * @property jugadasSan        Lista de jugadas SAN (línea principal) jugadas.
+ * @property resultado         Resultado real de la partida.
+ * @property resultadoVisible  Resultado de la posición visible (para revisión).
  * @property ladoEnTurno       'w' (blancas) o 'b' (negras): quién debe mover.
+ * @property ladoEnTurnoVisible Bando al que le toca en la posición visible.
  * @property blancas           Nombre del jugador de blancas (puede estar vacío).
  * @property negras            Nombre del jugador de negras (puede estar vacío).
  * @property evento            Nombre del evento (torneo) para la cabecera.
  * @property casillaSeleccionada Casilla seleccionada por el usuario (origen).
  * @property destinosLegales   Casillas destino legales desde [casillaSeleccionada].
  * @property promocionPendiente Jugada esperando a que el usuario elija pieza.
+ * @property posicionVisible   Número de plies mostrado al revisar la partida,
+ *                             o null si se muestra la posición final.
  * @property hayError          true si la partida no se pudo cargar o hubo un
  *                             movimiento ilegal (la UI resuelve el texto).
  */
 data class EstadoPartida(
     val cargando: Boolean = true,
     val fen: String = "",
+    val fenVisible: String = "",
+    val movetext: String = "",
     val jugadasSan: List<String> = emptyList(),
     val resultado: ResultadoPartida = ResultadoPartida.EN_CURSO,
+    val resultadoVisible: ResultadoPartida = ResultadoPartida.EN_CURSO,
     val ladoEnTurno: Char = 'w',
+    val ladoEnTurnoVisible: Char = 'w',
     val blancas: String = "",
     val negras: String = "",
     val evento: String = "",
     val casillaSeleccionada: String? = null,
     val destinosLegales: List<String> = emptyList(),
     val promocionPendiente: JugadaPromocion? = null,
+    val posicionVisible: Int? = null,
     val hayError: Boolean = false,
 )
 
@@ -71,9 +82,11 @@ data class EstadoPartida(
  *   - Aplicar jugadas con el [PuertoMotorAjedrez] (validación legal vía
  *     [PuertoMotorAjedrez.jugadasLegalesDesde] y conversión a SAN vía
  *     [PuertoMotorAjedrez.jugadaASan]).
- *   - Gestionar la selección origen -> destino por toques, incluyendo el
+ *  - Gestionar la selección origen -> destino por toques, incluyendo el
  *     diálogo de promoción de peón.
- *   - Persistir automáticamente el movetext y el resultado tras cada jugada
+ *  - Navegar por la partida: tocar una jugada de la planilla muestra esa
+ *     posición en el tablero (revisión) y volver al final desbloquea el juego.
+ *  - Persistir automáticamente el movetext y el resultado tras cada jugada
  *     (autosave ligero; el panel de planilla completo llega en la Fase 5).
  *
  * La fuente de verdad es un único [MutableStateFlow]. Las jugadas ilegales
@@ -113,20 +126,26 @@ class PartidaViewModel @Inject constructor(
                 return@launch
             }
             partidaBase = partida
-            val sans = sansDesdeMovetext(partida.pgn)
+            val movetext = movetextSinCabecera(partida.pgn)
+            val sans = sansLineaPrincipal(movetext)
             fenInicio = if (partida.posicionSetup) {
                 partida.fen?.takeIf { it.isNotBlank() } ?: motor.fenInicial()
             } else {
                 motor.fenInicial()
             }
             val fen = rejugarMovetext(fenInicio, sans)
+            val resultado = motor.resultadoActual(fen)
             _estado.update {
                 it.copy(
                     cargando = false,
                     fen = fen,
+                    fenVisible = fen,
+                    movetext = movetext,
                     jugadasSan = sans,
-                    resultado = motor.resultadoActual(fen),
+                    resultado = resultado,
+                    resultadoVisible = resultado,
                     ladoEnTurno = ladoEnTurno(fen),
+                    ladoEnTurnoVisible = ladoEnTurno(fen),
                     blancas = partida.blancas,
                     negras = partida.negras,
                     evento = partida.evento,
@@ -156,6 +175,9 @@ class PartidaViewModel @Inject constructor(
         val actual = _estado.value
         if (actual.cargando || actual.resultado != ResultadoPartida.EN_CURSO) return
         if (actual.promocionPendiente != null) return
+        // Mientras se revisa una posición pasada, el tablero solo muestra:
+        // no se permiten jugadas nuevas.
+        if (actual.posicionVisible != null) return
 
         val seleccionada = actual.casillaSeleccionada
         when {
@@ -302,12 +324,17 @@ class PartidaViewModel @Inject constructor(
         _estado.update {
             it.copy(
                 fen = nuevoFen,
+                fenVisible = nuevoFen,
+                movetext = movetextDesdeSans(nuevasJugadas),
                 jugadasSan = nuevasJugadas,
                 resultado = resultado,
+                resultadoVisible = resultado,
                 ladoEnTurno = ladoEnTurno(nuevoFen),
+                ladoEnTurnoVisible = ladoEnTurno(nuevoFen),
                 casillaSeleccionada = null,
                 destinosLegales = emptyList(),
                 promocionPendiente = null,
+                posicionVisible = null,
                 hayError = false,
             )
         }
@@ -332,16 +359,60 @@ class PartidaViewModel @Inject constructor(
         _estado.update {
             it.copy(
                 fen = fen,
+                fenVisible = fen,
+                movetext = movetextDesdeSans(jugadasRestantes),
                 jugadasSan = jugadasRestantes,
                 resultado = resultado,
+                resultadoVisible = resultado,
                 ladoEnTurno = ladoEnTurno(fen),
+                ladoEnTurnoVisible = ladoEnTurno(fen),
                 casillaSeleccionada = null,
                 destinosLegales = emptyList(),
                 promocionPendiente = null,
+                posicionVisible = null,
                 hayError = false,
             )
         }
         guardarPartida(jugadasRestantes, resultado)
+    }
+
+    /**
+     * Muestra en el tablero la posición alcanzada tras [plies] jugadas.
+     *
+     * Permite revisar la partida tocar las jugadas de la planilla: el tablero
+     * se actualiza a esa posición (bloqueando la entrada de nuevas jugadas
+     * mientras se revisa). [plies] se ajusta al rango válido 0..total de SANs.
+     *
+     * @param plies Número de jugadas (plies) a mostrar.
+     */
+    fun mostrarPosicion(plies: Int) {
+        val actual = _estado.value
+        if (actual.cargando) return
+        val pliesAjustado = plies.coerceIn(0, actual.jugadasSan.size)
+        val fenVisible = rejugarMovetext(fenInicio, actual.jugadasSan.take(pliesAjustado))
+        val resultadoVisible = motor.resultadoActual(fenVisible)
+        _estado.update {
+            it.copy(
+                posicionVisible = pliesAjustado,
+                fenVisible = fenVisible,
+                resultadoVisible = resultadoVisible,
+                ladoEnTurnoVisible = ladoEnTurno(fenVisible),
+            )
+        }
+    }
+
+    /** Vuelve a la posición final (última jugada) y desbloquea el tablero. */
+    fun volverAlFinal() {
+        val actual = _estado.value
+        if (actual.cargando) return
+        _estado.update {
+            it.copy(
+                posicionVisible = null,
+                fenVisible = actual.fen,
+                resultadoVisible = actual.resultado,
+                ladoEnTurnoVisible = actual.ladoEnTurno,
+            )
+        }
     }
 
     /**

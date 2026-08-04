@@ -129,18 +129,28 @@ fun PantallaPartida(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 TableroAjedrez(
-                    fen = estado.fen,
+                    fen = estado.fenVisible,
                     casillaSeleccionada = estado.casillaSeleccionada,
                     destinosLegales = estado.destinosLegales,
                     onCasillaPulsada = viewModel::onCasillaPulsada,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                if (estado.jugadasSan.isNotEmpty()) {
+                if (estado.movetext.isNotBlank()) {
                     PlanillaPartida(
-                        jugadas = estado.jugadasSan,
+                        movetext = estado.movetext,
+                        posicionVisible = estado.posicionVisible,
+                        onJugadaPulsada = viewModel::mostrarPosicion,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    // Mientras se revisa una posición pasada, botón para
+                    // volver al final y seguir jugando.
+                    if (estado.posicionVisible != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextButton(onClick = viewModel::volverAlFinal) {
+                            Text(stringResource(R.string.partida_volver_final))
+                        }
+                    }
                 }
             }
         }
@@ -161,11 +171,12 @@ fun PantallaPartida(
 private fun textoEstado(estado: EstadoPartida): String {
     val nombreBlancas = estado.blancas.ifBlank { stringResource(R.string.partida_jugador_blanco) }
     val nombreNegras = estado.negras.ifBlank { stringResource(R.string.partida_jugador_negro) }
-    return if (estado.resultado == ResultadoPartida.EN_CURSO) {
-        val quienToca = if (estado.ladoEnTurno == 'w') nombreBlancas else nombreNegras
+    val resultado = estado.resultadoVisible
+    return if (resultado == ResultadoPartida.EN_CURSO) {
+        val quienToca = if (estado.ladoEnTurnoVisible == 'w') nombreBlancas else nombreNegras
         stringResource(R.string.partida_turno, quienToca)
     } else {
-        when (estado.resultado) {
+        when (resultado) {
             ResultadoPartida.GANA_BLANCAS -> stringResource(R.string.partida_ganan_blancas)
             ResultadoPartida.GANA_NEGRAS -> stringResource(R.string.partida_ganan_negras)
             ResultadoPartida.TABLAS -> stringResource(R.string.partida_tablas)

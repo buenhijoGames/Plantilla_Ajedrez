@@ -60,5 +60,6 @@
     <string name="partida_ganan_negras">Ganan las negras</string>
     <string name="partida_tablas">Tablas</string>
     <string name="partida_en_curso">En curso</string>
+    <string name="partida_volver_final">Volver al final</string>
     <string name="promocion_titulo">Promoción de peón</string>
 </resources>
