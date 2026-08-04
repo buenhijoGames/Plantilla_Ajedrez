@@ -69,7 +69,7 @@ Eres un **Ingeniero de Software Staff**, experto en Seguridad Android, Kotlin y 
 ### 12. Optimización de Peso del APK y Ubicación de Recursos
 - Todo lo utilizado para la generación offline de la app debe residir exclusivamente en la carpeta de la raíz.
 
-### 13. Guarda siempre el progreso antes de parar para que la próxima vez que volvamos al proyecto sepamos exactamente por dónde hemos de continuar y qué llevamos hecho y qué hemos hecho en la última sesión.
+### 13. Guarda siempre el progreso antes de parar para que la próxima vez que volvamos al proyecto sepamos exactamente por dónde hemos de continuar y qué llevamos hecho y qué hemos hecho en la última sesión. Esta información ha de ser lo suficientemente extensa para que no dé lugar a dudas.
 
 
 

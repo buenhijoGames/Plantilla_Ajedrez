@@ -229,11 +229,11 @@ y funciona). Pendiente de commit extenso en español.
 - **`strings.xml`**: cadenas de detalle de torneo, partida, promoción,
   acciones comunes y deshacer.
 
-### ✅ Fase 5a — VISUALIZACIÓN PLANILLA (rama `fase-4-tablero`, pendiente commit)
+### ✅ Fase 5a — VISUALIZACIÓN PLANILLA (rama `fase-4-tablero`, commit `b1190d4`)
 
 Alcance decidido por Manolo: **visualizar** variantes, comentarios y NAGs ya
 guardados (sin edición) + navegación por toque entre jugadas. Verificada por
-Manolo (compila y funciona). Pendiente de commit extenso.
+Manolo (compila y funciona). **Commiteada como `b1190d4`**.
 
 - **`ui/tablero/ParseadorMovetext.kt`** (nuevo, puro y testable):
   - `ElementoMovetext` (Jugada/Variante/Comentario/Nag/Resultado).
@@ -266,13 +266,139 @@ Manolo (compila y funciona). Pendiente de commit extenso.
 
 Pendiente: checkpoint Manolo + commit extenso.
 
+### ✅ Fase 5b — EDICIÓN COMENTARIOS/NAGS + VARIANTES (rama `fase-4-tablero`, HECHA y VERIFICADA por Manolo, commiteada esta sesión)
+
+Alcance **rediseñado por Manolo** tras feedback de la 1ª implementación
+("no se abre el diálogo" con pulsación larga):
+1. **Siempre ha de haber un botón para editar y añadir comentarios** (modo
+   edición activable por botón de la barra superior, nunca pulsación larga).
+2. En modo edición las **variantes se introducen jugando en el tablero**.
+3. **Al pulsar una jugada en modo edición** se selecciona y el tablero va a su
+   posición previa para poder jugar la variante.
+4. **Se acumulan variantes** y dentro de cada una se pueden añadir
+   **subvariantes** pulsando la jugada (sin límite de profundidad); el tablero
+   muestra la posición de la variante/subvariante pulsada.
+
+Implementado, compilado y **verificado por Manolo** ("Perfecto todo").
+Detalle completo de implementación:
+
+- **`ui/tablero/ParseadorMovetext.kt`** — **modelo de "camino"** para navegar
+  y operar el árbol de la planilla de forma inequívoca:
+  - `PasoCamino` (sealed): `Lineal(cantidad)` (avanza N jugadas en la lista
+    actual) y `EntrarVariante(indice)` (entra en la variante nº X pegada a la
+    jugada). `CaminoPlanilla(pasos)` con `operator plus` y `INICIO`.
+  - Travesores privados: `localizarEnArbol` (lista+índice de la jugada),
+    `localizarListaFinal`, `localizarYOperar`, `localizarYOperarLista`
+    (parsean, localizan, operan y re-serializan con `serializarMovetext`).
+  - Públicos:
+    - `sansDeCamino(movetext, camino)`: SANs que hay que rejugar para llegar a
+      la posición del camino. Al entrar en una variante se CONSERVA el SAN de la
+      jugada "padre": la variante se reproduce DESPUÉS de esa jugada, porque la
+      app genera las variantes jugando sobre la posición que deja la jugada
+      seleccionada (la primera jugada de la variante es la respuesta del rival)
+      → rejugar devuelve la posición exacta incluso en variantes/subvariantes
+      anidadas.
+    - `anotacionEnCamino` / `actualizarAnotacionEnCamino`: leer/reemplazar
+      comentario y NAG de una jugada **cualquiera** (principal o variante).
+    - `insertarVarianteEnCamino(movetext, camino, sans)`: inserta una variante
+      **después** de las anotaciones y variantes ya pegadas a la jugada → su
+      índice coincide con `numeroDeVariantesPegadas` previo (así se acumulan).
+    - `agregarJugadaAVarianteEnCamino(movetext, caminoVariante, san)`: extiende
+      la línea de una variante (para construirla jugada a jugada).
+    - `numeroDeVariantesPegadas(movetext, camino)`: cuenta variantes de la
+      jugada → índice de la siguiente.
+  - Se mantienen las funciones por-ply (`anotacionDeJugada`,
+    `actualizarAnotacionDeJugada`) de la 1ª iteración: ya NO se usan en
+    producción (el ViewModel usa caminos) pero siguen con sus tests.
+- **`ui/tablero/PartidaViewModel.kt`** — **modo edición** basado en caminos:
+  - Estado nuevo: `caminoVisible: CaminoPlanilla?` (sustituye a
+    `posicionVisible: Int?`), `modoEdicion: Boolean`, `caminoSeleccion`,
+    `comentarioEdicion`, `nagEdicion`, `varianteEnConstruccion`.
+  - `entrarModoEdicion()` / `salirModoEdicion()` (botón TopAppBar).
+  - `seleccionarJugada(camino)` (al pulsar jugada en modo edición): carga el
+    comentario/NAG actuales y **muestra la posición que deja esa jugada**
+    (rejuega `sansDeCamino` completo) para poder jugar la variante desde ahí.
+  - `realizarJugadaEdicion(desde,hasta,promocion)`: 1ª jugada crea la variante
+    (`insertarVarianteEnCamino`, índice = `numeroDeVariantesPegadas`) y fija
+    `varianteEnConstruccion`; las siguientes la extienden
+    (`agregarJugadaAVarianteEnCamino`). Persiste tras cada jugada (autosave).
+  - `alPulsarJugada(camino)` (en modo edición → `seleccionarJugada`; en juego
+    normal → `mostrarCamino`). `mostrarCamino` sustituye a `mostrarPosicion`.
+  - `actualizarComentarioEdicion` / `actualizarNagEdicion` / `guardarEdicion`
+    (escribe `actualizarAnotacionEnCamino` y persiste).
+  - `onCasillaPulsada` y `confirmarPromocion` ramifican modo edición (operan
+    sobre `fenVisible`/`ladoEnTurnoVisible`) vs juego normal. `deshacerJugada`
+    se bloquea en modo edición. `realizarJugada`/`deshacerJugada` siguen
+    usando `agregarJugadaAlMovetext`/`eliminarUltimaJugadaDelMovetext` (las
+    anotaciones se conservan al jugar/deshacer).
+- **`ui/tablero/PlanillaPartida.kt`** (reescrita): renderizado **recursivo**
+  del árbol. Cada jugada lleva su `CaminoPlanilla` (`baseCamino` +
+  `Lineal(n)`); las variantes usan `baseCamino` + `EntrarVariante(indice)` y
+  se renderizan con `VarianteVisual` → **subvariantes anidadas sin límite**.
+  Parámetros: `caminoVisible`, `caminoSeleccion`, `onJugadaPulsada
+  (CaminoPlanilla)`. Se elimina `combinedClickable`/pulsación larga. Resaltado
+  doble: `tertiaryContainer` = jugada visible, `primaryContainer` = jugada
+  seleccionada en edición.
+- **`ui/tablero/PantallaPartida.kt`** (reescrita): botón **siempre visible**
+  en TopAppBar para entrar/salir de edición (icono Editar ↔ Cerrar; deshacer
+  desactivado en edición). `PanelEdicion` inline (sustituye al antiguo
+  `DialogoEditarJugada`): instrucción si no hay jugada seleccionada; con
+  selección → fila comentario+Guardar + chips NAG compactos + aviso de variante.
+  El **tablero siempre a tamaño completo** (`fillMaxWidth`, sin `weight`); el
+  contenido es `verticalScroll` para que el teclado no oculte los controles.
+- **`strings.xml`**: `partida_editar`, `partida_salir_edicion`,
+  `edicion_instrucciones`, `edicion_variante_hint`,
+  `edicion_variante_en_curso` (más las de edición ya existentes).
+- **Tests** `ParseadorMovetextTest` (+11 de caminos): `sansDeCamino` (principal,
+  variantes anidadas), `anotacionEnCamino` (principal y variante),
+  `actualizarAnotacionEnCamino`, `insertarVarianteEnCamino` (tras jugada,
+  acumula varias, subvariante dentro de variante), `agregarJugadaAVarianteEnCamino`,
+  `numeroDeVariantesPegadas`.
+
+Pendiente Fase 5b: NINGUNO. Manolo compiló y verificó el modo edición completo,
+la distinción visual de las variantes (cursiva + llaves) y la navegación a
+jugadas de análisis. TODO COMMITEADO esta sesión. Siguiente trabajo: ver
+"Continuación exacta al retomar".
+
+**Bug NAG corregido (sesión actual)**: el NAG no tenía marca visual asociada
+a la jugada seleccionada. Se añadió `caminoJugadaActual` en `ContenidoLista`
+para rastrear a qué jugada pertenecen los comentarios/NAGs. Ahora el NAG de
+la jugada seleccionada se resalta en `primary` en lugar de `tertiary`. Se
+añadieron 5 tests de round-trip NAG (verificar posición tras
+guardar→serializar→re-parsear).
+
+**Variantes: distinción visual + navegación (sesión actual)**:
+- Manolo confirmó que **sí se guardan** las variantes (aparecen en la
+  planilla) y que los comentarios también; pero pidió que el análisis se
+  distinga claramente de la partida real.
+- **Distinción visual** en `PlanillaPartida.kt`: `VarianteVisual` ahora
+  delimita el bloque con llaves "{ ... }" (`LlaveCursiva`) y muestra las
+  jugadas del análisis **en cursiva**. Se añadió el parámetro `cursiva` a
+  `ContenidoLista` (texto de jugadas y NAGs) y a `JugadaConIcono` (solo el
+  texto; el figurín es imagen y no se afecta). Las subvariantes se renderizan
+  recursivamente con el mismo estilo.
+- **Bug de navegación corregido** en `sansDeCamino` (ParseadorMovetext.kt):
+  antes, al entrar en una variante se descartaba el SAN de la jugada "padre",
+  por lo que al pulsar una jugada de análisis el rejuego fallaba (p.ej. `d5`
+  como jugada negra se intentaba aplicar desde la posición inicial con blancas
+  al turno) y el tablero se quedaba en la posición inicial/prevía de la partida
+  real. Ahora se conserva el SAN de la jugada padre y las jugadas de la
+  variante se reproducen después de ella → la posición mostrada es la de la
+  jugada de análisis pulsada (también en subvariantes).
+- **Tests**: se sustituyeron los 2 tests de `sansDeCamino` que documentaban el
+  comportamiento anterior (descarte del padre) por 2 nuevos que reflejan el
+  comportamiento corregido con notación del estilo de la app:
+  `sansDeCamino conserva la jugada padre al entrar en una variante`
+  (`1. e4 ( d5 ) e5` → `[e4, d5]`) y `sansDeCamino atraviesa subvariantes
+  anidadas` (`1. e4 ( d5 Nf3 ( Bg7 ) ) e5` → `[e4, d5, Nf3, Bg7]`).
+
 ### Fases siguientes (pendientes)
 
 | Fase | Descripción |
 |---|---|
 | 3b (resto) | Settings: piezas/licencias + LicensesScreen |
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
-| 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave |
+| 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave — **5a visualización ✅ (`b1190d4`), 5b edición ✅ (commit de esta sesión): modo edición con comentarios/NAGs + variantes/subvariantes desde el tablero, análisis en cursiva con llaves, navegación por toque** |
 | 6 | StockfishAdapter UCI → `PuertoEvaluacionMotor` + AnalysisSheet (**sólo post-partida**, anti-fraude). Ojo: los `.so` ya están en `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito. |
 | 7 | Import/Export PGN + PDF plantilla FIDE + overflow menu (3 puntos) |
 | 8 | Tests + lint + typecheck |
@@ -325,7 +451,7 @@ desde un módulo Hilt en `:data` (o `:app`).
 - `fase-3a-temas-datastore` (Fase 3a completa, commit `9d924c9`)
 - `fase-3b-navegacion-startup-tema` (Fase 3b completa, commit `062075b`)
 - `fase-3c-torneos` (Fase 3c completa, commit `9c3a0cb`)
-- `fase-4-tablero` (Fase 4 en curso, HEAD actual, pendiente commit)
+- `fase-4-tablero` (Fase 4 `5eb8193` + Fase 5a `b1190d4` + **Fase 5b commiteada esta sesión**; HEAD actual)
 
 ### ⚠️ Remoto
 - El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
@@ -336,24 +462,63 @@ desde un módulo Hilt en `:data` (o `:app`).
 
 ## ➡️ Continuación exacta al retomar
 
-1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`.
-2. **Commit extenso en español de Fase 5a** (parser + planilla + navegación).
-   Confirmar con Manolo antes de commitear.
-3. Tras el OK → **Fase 5b** (edición en la planilla o lo que Manolo decida).
-   De momento no se han creado casos de uso de `:domain`: los ViewModels usan
-   los puertos directamente (patrón establecido y testable); decidir con
-   Manolo si crearlos en el futuro.
+1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`. La Fase 5b está
+   **commiteada y verificada** por Manolo (modo edición + variantes en cursiva
+   con llaves + navegación correcta a jugadas de análisis).
+2. **Siguiente trabajo de planilla (decidir con Manolo)**: borrado de jugadas
+   intermedias, deshacer de variante en construcción, o pasar a la **Fase 6
+   (Stockfish)** — `PuertoEvaluacionMotor` + `AdaptadorStockfish` UCI +
+   AnalysisSheet (sólo post-partida, anti-fraude). Ojo: los `.so` ya están en
+   `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito.
+3. Nota arquitectura: aún no se han creado casos de uso de `:domain`; los
+   ViewModels usan los puertos directamente (patrón establecido y testable).
+   Decidir con Manolo si crearlos en el futuro.
 
 ---
 
 ## 📝 Notas de la última sesión
 
-- Fase 4 commiteada (`5eb8193`) tras OK de Manolo.
-- Mejoras Fase 4: coordenadas a 11sp fijo; planilla con jugadas grandes
-  (18sp) y figurín en silueta blanca estándar (nuevo `segmentosDeSan`);
-  **movimiento directo bidireccional** (pieza con un solo destino → se mueve;
-  casilla solo alcanzable por una pieza → se mueve); **deshacer jugadas** ↩.
-- **Fase 5a implementada** (sin verificar aún): parser de movetext PGN con
-  variantes/comentarios/NAGs, planilla estructurada con navegación por toque
-  y revisión de posiciones. Pendiente de checkpoint Manolo y commit.
-- Remoto GitHub sigue vacío (sin push nunca).
+- **Fase 5b COMPLETA y COMMITEADA** tras OK de Manolo ("Perfecto todo").
+  Manolo verifica: modo edición, variantes en cursiva con llaves "{ ... }" y
+  navegación correcta al pulsar jugadas de análisis.
+- **Fase 5b rediseñada e implementada**: la 1ª iteración
+  (edición por pulsación larga + diálogo modal) **no funcionó** (el diálogo no
+  se abría) y Manolo pidió variantes jugables en el tablero → se sustituyó por
+  un **modo edición** activable con botón siempre visible. Se añadió el modelo
+  de **`CaminoPlanilla`/`PasoCamino`** al parser (navegación inequívoca por el
+  árbol de la planilla: principal, variantes y subvariantes sin límite) y el
+  ViewModel/planilla/pantalla se reescribieron en consecuencia. El tablero de
+  edición siempre a tamaño completo (sin `weight`); contenido scrollable para
+  que el teclado no oculte el botón Guardar ni los controles.
+- **Bug NAG corregido**: el NAG no se resaltaba visualmente como asociado a la
+  jugada seleccionada. Se añadió tracking de `caminoJugadaActual` en
+  `ContenidoLista` y resaltado en `primary` para NAGs de la jugada
+  seleccionada. 5 tests de round-trip NAG añadidos.
+- **Variantes: distinción visual + navegación (última sesión)**:
+  - Manolo confirmó que **sí se guardan** las variantes (aparecen en la
+    planilla) y los comentarios también; pidió que el análisis se distinga de
+    la partida real.
+  - **Distinción visual** en `PlanillaPartida.kt`: `VarianteVisual` delimita el
+    bloque con llaves "{ ... }" (`LlaveCursiva`) y muestra las jugadas del
+    análisis **en cursiva** (parámetro `cursiva` en `ContenidoLista` y
+    `JugadaConIcono`; el figurín no se afecta por ser imagen). Las subvariantes
+    se renderizan recursivamente con el mismo estilo.
+  - **Bug de navegación corregido** en `sansDeCamino` (ParseadorMovetext.kt):
+    antes se descartaba el SAN de la jugada "padre" al entrar en una variante,
+    por lo que al pulsar una jugada de análisis el rejuego fallaba (p.ej. `d5`
+    como jugada negra se intentaba aplicar desde la posición inicial con
+    blancas al turno) y el tablero se quedaba en la posición inicial/prevía de
+    la partida real. Ahora se conserva el SAN de la jugada padre y las jugadas
+    de la variante se reproducen después de ella → la posición mostrada es la
+    de la jugada de análisis pulsada (también en subvariantes).
+  - **Tests**: 2 tests de `sansDeCamino` sustituidos por 2 nuevos que reflejan
+    el comportamiento corregido con notación del estilo de la app
+    (`sansDeCamino conserva la jugada padre al entrar en una variante` y
+    `sansDeCamino atraviesa subvariantes anidadas`). Se suman a los tests de
+    round-trip NAG, flujo completo de variantes, `serializarMovetext`,
+    `agregarJugadaAlMovetext`, `eliminarUltimaJugadaDelMovetext`, caminos, etc.
+- **Pendiente para la próxima sesión** (decidir con Manolo): borrado de jugadas
+  intermedias, deshacer de variante en construcción, o **Fase 6 (Stockfish)**.
+- **IMPORTANTE para retomar**: la app compila y la Fase 5b está commiteada.
+  No hay trabajo a medias sin commitear. Remoto GitHub sigue vacío (sin push
+  nunca); autorizar push solo si Manolo lo pide.
