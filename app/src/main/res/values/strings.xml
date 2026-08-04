@@ -1,9 +1,30 @@
 <resources>
     <string name="app_name">Plantilla_ajedrez</string>
     <string name="fase_actual">Fase %1$s</string>
+
+    <!-- Temas -->
     <string name="tema_claro">Claro</string>
     <string name="tema_oscuro">Oscuro</string>
     <string name="tema_dinamico">Dinámico (Material You)</string>
     <string name="tema_madera">Madera</string>
     <string name="tema_marmol">Mármol</string>
+    <string name="tema_titulo">Tema visual</string>
+    <string name="tema_subtitulo">Elige la paleta de la aplicación</string>
+
+    <!-- StartupDialog (al abrir la app) -->
+    <string name="inicio_titulo">¿Qué quieres hacer?</string>
+    <string name="inicio_nuevo">Nuevo torneo, match o partida</string>
+    <string name="inicio_abrir">Abrir uno guardado</string>
+    <string name="inicio_cancelar">Cancelar</string>
+
+    <!-- TopBar / overflow -->
+    <string name="accion_ajustes">Ajustes</string>
+    <string name="accion_mas">Más opciones</string>
+
+    <!-- Pantalla Ajustes -->
+    <string name="ajustes_titulo">Ajustes</string>
+
+    <!-- Pantalla Torneos (placeholder Fase 3c) -->
+    <string name="torneos_titulo">Torneos guardados</string>
+    <string name="torneos_vacio">Aún no hay torneos guardados.</string>
 </resources>
