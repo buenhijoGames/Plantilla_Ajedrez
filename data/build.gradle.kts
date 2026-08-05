@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 // Capa de datos e infraestructura. Implementa los puertos definidos en
 // :domain con tecnología concreta: Room (persistencia), chesslib (lógica de
-// ajedrez), Stockfish (motor UCI) y PdfDocument (plantilla FIDE).
+// ajedrez) y PdfDocument (plantilla FIDE).
 //
 // Aplica Hilt para inyectar bindings (interfaces -> implementaciones) y
 // KSP para generar código de Hilt y Room.

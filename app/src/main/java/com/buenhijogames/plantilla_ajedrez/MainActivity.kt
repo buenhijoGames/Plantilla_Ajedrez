@@ -18,8 +18,8 @@ import javax.inject.Inject
  * la navegación Compose ([NavegacionPlantilla]) envuelta en el tema raíz
  * ([PlantillaAjedrezTheme]), que lee el tema persistido en DataStore.
  *
- * En el futuro, aquí se podrá inicializar el adaptador de Stockfish con
- * un WorkManager/Initializer, pero la lógica de arranque real se va
+ * En el futuro, aquí se podrá inicializar fases de arranque con un
+ * WorkManager/Initializer, pero la lógica de arranque real se va
  * desacoplando hacia ViewModels y el grafo Hilt.
  */
 @AndroidEntryPoint

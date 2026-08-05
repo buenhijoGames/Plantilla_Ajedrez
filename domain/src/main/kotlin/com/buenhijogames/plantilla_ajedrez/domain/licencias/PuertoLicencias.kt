@@ -7,8 +7,8 @@ package com.buenhijogames.plantilla_ajedrez.domain.licencias
  * pantalla Ajustes → Licencias (visibilidad obligatoria para cumplir GPL
  * y Apache).
  *
- * @property nombre        Nombre del componente (p.ej. `Stockfish`).
- * @property licencia      Nombre corto de la licencia (p.ej. `GPLv3`).
+ * @property nombre        Nombre del componente (p.ej. `chesslib`).
+ * @property licencia      Nombre corto de la licencia (p.ej. `Apache 2.0`).
  * @property autor         Autor / maintainer.
  * @property url           Enlace al upstream del componente.
  * @property resumen       Frase corta de descripción de qué se usa y porqué.

@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -83,10 +81,7 @@ fun PlanillaPartida(
         caminoVisible = caminoVisible,
         caminoSeleccion = caminoSeleccion,
         onJugadaPulsada = onJugadaPulsada,
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(max = 140.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = modifier.verticalScroll(rememberScrollState()),
     )
 }
 
@@ -152,7 +147,10 @@ private fun ContenidoLista(
                     if (esLineaPrincipal && jugadasVistas % 2 == 1) {
                         Text(
                             text = "${(jugadasVistas + 1) / 2}.",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 15.sp,
+                                lineHeight = 20.sp,
+                            ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -187,7 +185,8 @@ private fun ContenidoLista(
                 is ElementoMovetext.Comentario -> Text(
                     text = "{${elemento.texto}}",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
                         fontStyle = FontStyle.Italic,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -198,7 +197,9 @@ private fun ContenidoLista(
                     val esSeleccionada = caminoSeleccion == caminoJugadaActual
                     Text(
                         text = simboloNag(elemento.codigo),
-                        style = MaterialTheme.typography.bodyLarge.copy(
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp,
                             fontWeight = FontWeight.Bold,
                             fontStyle = if (cursiva) FontStyle.Italic else FontStyle.Normal,
                         ),
@@ -212,7 +213,11 @@ private fun ContenidoLista(
 
                 is ElementoMovetext.Resultado -> Text(
                     text = elemento.texto,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -276,7 +281,8 @@ private fun LlaveCursiva(texto: String) {
     Text(
         text = texto,
         style = MaterialTheme.typography.bodyMedium.copy(
-            fontSize = 14.sp,
+            fontSize = 13.sp,
+            lineHeight = 20.sp,
             fontStyle = FontStyle.Italic,
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -321,14 +327,15 @@ private fun JugadaConIcono(
             .clip(RoundedCornerShape(6.dp))
             .background(colorFondo)
             .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 1.dp),
+            .padding(horizontal = 4.dp),
     ) {
         for (segmento in segmentos) {
             when (segmento) {
                 is SegmentoSan.Texto -> Text(
                     text = segmento.texto,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
                         fontStyle = if (cursiva) FontStyle.Italic else FontStyle.Normal,
                     ),
                     color = colorTexto,
@@ -337,7 +344,7 @@ private fun JugadaConIcono(
                 is SegmentoSan.Pieza -> Image(
                     painter = painterResource(recursoPieza(segmento.simboloFen)),
                     contentDescription = null,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }

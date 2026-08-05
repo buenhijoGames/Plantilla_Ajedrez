@@ -11,9 +11,9 @@ import dagger.hilt.android.HiltAndroidApp
  * la app (presentación, data e infraestructura).
  *
  * Esta clase se mantiene lo más ligera posible: la lógica de arranque real
- * (cargar Stockfish, aplicar migraciones Room críticas, etc.) se inyecta vía
- * un [androidx.startup.Initializer] o WorkManager cuando se incorporen esas
- * fases. Aquí sólo arrancamos el contenedor Hilt.
+ * (aplicar migraciones Room críticas, inicializadores de fases, etc.) se
+ * inyecta vía un [androidx.startup.Initializer] o WorkManager cuando se
+ * incorporen esas fases. Aquí sólo arrancamos el contenedor Hilt.
  */
 @HiltAndroidApp
 class PlantillaApplication : Application()

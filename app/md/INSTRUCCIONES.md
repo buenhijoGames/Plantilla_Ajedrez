@@ -9,9 +9,10 @@
 ## 🎯 Objetivo de la app
 
 Plantilla de ajedrez electrónica para que Manolo y otros usuarios anoten sus
-partidas mientras las juegan, las guarden en formato PGN interoperable, las
-compartan (PGN + plantilla PDF estilo FIDE con figurín) y las analicen con
-Stockfish **sólo tras haber finalizado** (anti-fraude).
+partidas mientras las juegan, las guarden en formato PGN interoperable y las
+compartan (PGN + plantilla PDF estilo FIDE con figurín). El análisis con
+Stockfish está **retirado temporalmente** (sesión 05-ago-2026); si se retoma,
+iría **sólo post-partida** (anti-fraude) y con binario alineado a 16 KB.
 
 App **gratis, sin publicidad**, sin ánimo de lucro, open-source **GPL-3.0**.
 Repo público: https://github.com/Salmeron52/plantillas_ajedrez
@@ -36,8 +37,9 @@ Repo público: https://github.com/Salmeron52/plantillas_ajedrez
 - **Documentos `.md`** propios del proyecto se guardan en `app\md`.
 - **Diseño responsivo** (orientación y pantallas) y **varios temas seleccionables**.
 - **Belleza extraordinaria**, fluida y estable.
-- **Optimización APK**: recursos pre-build en raíz; Stockfish se descarga
-  on-demand a `app/src/main/jniLibs` via tarea Gradle `descargarStockfish`.
+- **Optimización APK**: recursos pre-build en raíz. La tarea Gradle
+  `descargarStockfish` y la carpeta `app/src/main/jniLibs` fueron **retiradas
+  temporalmente** junto con Stockfish (05-ago-2026).
 - **UI minimalista**: mejor icono de 3 puntos (overflow) que botones sueltos.
 - **Autosave**: torneos/partidas/jugadas se guardan automáticamente.
 - **Anti-fraude**: el botón Motor sólo se habilita si la partida está finalizada.
@@ -49,9 +51,9 @@ Repo público: https://github.com/Salmeron52/plantillas_ajedrez
 Multimódulo Gradle (Clean Architecture + DIP):
 
 ```
-:app    → Presentación (Compose + ViewModels + Hilt + Nav + jniLibs/Stockfish)
+:app    → Presentación (Compose + ViewModels + Hilt + Nav)
 :domain → Entidades, puertos (interfaces), casos de uso (Kotlin puro, sin Android)
-:data   → Room, ChesslibAdapter, StockfishAdapter (UCI), PgnAdapter,
+:data   → Room, ChesslibAdapter (PuertoMotorAjedrez), PgnAdapter,
           PdfAdapter (plantilla FIDE), LicensesProvider, Módulos Hilt
 ```
 
@@ -71,7 +73,8 @@ Multimódulo Gradle (Clean Architecture + DIP):
 ### Licencias
 
 - App: **GPL-3.0** (ver `LICENSE` en raíz del repo).
-- Stockfish: GPLv3. Piezas cburnett (Lichess): GPLv2+.
+- Stockfish (retirado temporalmente; GPLv3 si se reincorpora).
+  Piezas cburnett (Lichess): GPLv2+.
 - chesslib, AndroidX, Hilt, Room: Apache 2.0.
 - Atribuciones en `NOTICE` (raíz). Visibles en app en Settings → Licencias.
 
@@ -399,7 +402,7 @@ guardar→serializar→re-parsear).
 | 3b (resto) | Settings: piezas/licencias + LicensesScreen |
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
 | 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave — **5a visualización ✅ (`b1190d4`), 5b edición ✅ (commit de esta sesión): modo edición con comentarios/NAGs + variantes/subvariantes desde el tablero, análisis en cursiva con llaves, navegación por toque** |
-| 6 | StockfishAdapter UCI → `PuertoEvaluacionMotor` + AnalysisSheet (**sólo post-partida**, anti-fraude). Ojo: los `.so` ya están en `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito. |
+| 6 | ~~StockfishAdapter UCI~~ **RETIRADA temporalmente** (05-ago-2026): se eliminaron los `.so` de `jniLibs`, la tarea `descargarStockfish`, los adaptadores UCI (`ParseadorUci`, `ConvertidorUciSan`, `ProcesoStockfish`, `AdaptadorStockfish`), el puerto `PuertoEvaluacionMotor` y sus tests. Si se retoma hay que partir de cero con binario **alineado a 16 KB** (los builds oficiales de Stockfish vienen a 4 KB y Google Play los rechaza desde nov-2025 para targetSdk 35+; recompilar con NDK r28+ o con `-Wl,-z,max-page-size=16384`) |
 | 7 | Import/Export PGN + PDF plantilla FIDE + overflow menu (3 puntos) |
 | 8 | Tests + lint + typecheck |
 | 9 | Pulido estético (animaciones, microinteracciones) |
@@ -419,9 +422,6 @@ desde un módulo Hilt en `:data` (o `:app`).
 
 # Compilar release (con R8/ProGuard) — requiere signing config
 .\gradlew.bat :app:assembleRelease
-
-# Descargar/verificar binarios Stockfish en jniLibs
-.\gradlew.bat descargarStockfish
 
 # Limpiar
 .\gradlew.bat clean
@@ -465,11 +465,10 @@ desde un módulo Hilt en `:data` (o `:app`).
 1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`. La Fase 5b está
    **commiteada y verificada** por Manolo (modo edición + variantes en cursiva
    con llaves + navegación correcta a jugadas de análisis).
-2. **Siguiente trabajo de planilla (decidir con Manolo)**: borrado de jugadas
-   intermedias, deshacer de variante en construcción, o pasar a la **Fase 6
-   (Stockfish)** — `PuertoEvaluacionMotor` + `AdaptadorStockfish` UCI +
-   AnalysisSheet (sólo post-partida, anti-fraude). Ojo: los `.so` ya están en
-   `app/src/main/jniLibs/` pero NO hay adaptador UCI/JNI escrito.
+2. **Stockfish RETIRADO temporalmente** (05-ago-2026): la app es actualmente
+   **solo planilla** (anotar, guardar PGN, compartir). Siguiente trabajo
+   (decidir con Manolo): borrado de jugadas intermedias, deshacer variante en
+   construcción, o **Fase 7** (Import/Export PGN + PDF plantilla FIDE).
 3. Nota arquitectura: aún no se han creado casos de uso de `:domain`; los
    ViewModels usan los puertos directamente (patrón establecido y testable).
    Decidir con Manolo si crearlos en el futuro.
@@ -518,7 +517,78 @@ desde un módulo Hilt en `:data` (o `:app`).
     round-trip NAG, flujo completo de variantes, `serializarMovetext`,
     `agregarJugadaAlMovetext`, `eliminarUltimaJugadaDelMovetext`, caminos, etc.
 - **Pendiente para la próxima sesión** (decidir con Manolo): borrado de jugadas
-  intermedias, deshacer de variante en construcción, o **Fase 6 (Stockfish)**.
+  intermedias, deshacer de variante en construcción, o **Fase 7 (Import/Export
+  PGN + PDF)**. (Fase 6 Stockfish retirada — ver bloque de la sesión 05-ago-2026.)
 - **IMPORTANTE para retomar**: la app compila y la Fase 5b está commiteada.
   No hay trabajo a medias sin commitear. Remoto GitHub sigue vacío (sin push
   nunca); autorizar push solo si Manolo lo pide.
+
+---
+
+## 🗒️ Sesión 05-ago-2026 — Fase 6 (Stockfish) CREADA y luego RETIRADA
+
+**Contexto**: se arrancó la **Fase 6 (Stockfish)** elegida por Manolo. Se
+implementó toda la Unidad A (capa de datos UCI) y sus tests, pero Manolo
+decidió **eliminar temporalmente el análisis de partidas** para dejar la app
+como **solo planilla**. Todo el trabajo de Stockfish se eliminó **antes de
+commitear** (nunca llegó a git).
+
+### Lo que se creó y luego se eliminó (para no rehacerlo a ciegas)
+- **Domain**: `PuertoEvaluacionMotor.kt` (`Evaluacion(profundidad, scoreCentipepeños, mejorJugada, lineaPrincipal)` + interfaz `arrancar/parar/analizar:Flow<Evaluacion>/mejorJugada`).
+- **Data (paquete `data/.../stockfish/`)**: `ParseadorUci` (regex `info depth… score cp|mate… pv…` + `bestmove`, `PUNTUACION_MATE=100_000`), `ConvertidorUciSan` (UCI→SAN vía chesslib `MoveList(fen)` + `Move` con **argumentos posicionales**, nunca con nombre: es un constructor Java), `InterfazProcesoMotor` + `ProcesoStockfish` (ProcessBuilder, UTF-8), `AdaptadorStockfish` (Mutex + Dispatchers.IO + handshake `uci`/`uciok` e `isready`/`readyok`, factory inyectable para tests).
+- **Hilt**: `data/di/ModuloMotor.kt` (ruta `File(context.applicationInfo.nativeLibraryDir, "libstockfish.so")`, `@RutaBinarioStockfish` qualifier) y binding de `PuertoEvaluacionMotor`.
+- **Tests** (los 3): `ParseadorUciTest`, `ConvertidorUciSanTest`, `AdaptadorStockfishTest` (con `ProcesoMotorFalso`/`FabricaProcesoFalsa`).
+
+### ⚠️ Lección clave: alineación 16 KB (bloqueo Google Play)
+- Los **builds oficiales de Stockfish para Android** (releases GitHub, ej.
+  `stockfish-android-armv8.tar`) vienen con LOAD segments alineados a **4 KB**,
+  incluso Stockfish 18 (`sf_18`, compilado con NDK r27c sin flags 16 KB).
+- Desde el **1-nov-2025**, Google Play exige apps con targetSdk 35+ (nosotros 37)
+  **compatibles con páginas de 16 KB** → un `.so` a 4 KB es **rechazado**.
+- Verificado con Python leyendo `p_align` de `PT_LOAD` (3 segmentos a `0x1000`).
+- **Soluciones si se retoma**: (a) recompilar desde fuente con **NDK r28+**
+  (alinea por defecto) o con `-Wl,-z,max-page-size=16384
+  -Wl,-z,common-page-size=16384`; (b) usar un prebuild 16 KB-aligned de un
+  proyecto de confianza (ej. `ber4444/compose-multiplatform-chess` lo recompiló
+  así). El `armeabi-v7a` (32 bits) NO lo exige.
+
+### Cambios persistentes en el repo (PENDIENTES de commitear tras la sesión)
+- `app/build.gradle.kts`: eliminada la tarea `descargarStockfish`, `binariosStockfish`,
+  el `splits.abi` y sus imports → ahora **un único APK** sin binarios nativos.
+- `app/proguard-rules.pro`: eliminada la sección JNI/Stockfish y su mención en cabecera.
+- `.gitignore`: eliminadas las reglas de `jniLibs/libstockfish.so`.
+- `NOTICE`: eliminada la atribución de Stockfish (nota de retirada temporal).
+- Comentarios KDoc sin Stockfish en `MainActivity.kt`, `PlantillaApplication.kt`,
+  `PuertoLicencias.kt` y cabecera de `data/build.gradle.kts`.
+
+### 🎨 Ajustes de UI de la pantalla de partida (misma sesión, MANOLO: "Perfecto todo")
+Manolo indicó que la **zona de planilla ha de ocupar el resto del espacio libre**
+bajo el tablero, con el texto **un poco más pequeño** y **perfectamente alineado**
+(las jugadas se veían ligeramente inclinadas/desalineadas).
+
+- **`ui/tablero/PlanillaPartida.kt`**:
+  - Eliminado `heightIn(max = 140.dp)` → la planilla ya no tiene tope de altura.
+  - Tipografía uniformada con **`lineHeight = 20.sp`** en todos los elementos
+    (números de jugada 15sp, comentarios 13sp, NAGs 15sp, resultado 15sp, texto
+    de jugada 16sp, llaves 13sp). Eliminada la `copy(...)` con tamaños distintos.
+  - Icono de pieza en el figurín: `Modifier.size(20.dp)` (antes 22dp).
+  - Quitado el `padding(vertical = 1.dp)` del chip de jugada (queda solo el
+    horizontal de 4dp) → las jugadas quedan centradas y alineadas con el texto.
+  - Eliminado el import `fillMaxWidth` (ya no se usa en el archivo).
+- **`ui/tablero/PantallaPartida.kt`** (reestructuración del layout):
+  - Antes: todo dentro de un único `Column(verticalScroll)` → la planilla con
+    `heightIn(140dp)` flotaba al final.
+  - Ahora: la **sección superior** (texto de estado, `TableroAjedrez` y
+    `PanelEdicion`) va en una `Column` interna con `verticalScroll` (ocupa su
+    altura natural); la **zona de planilla** va en una `Column` con
+    `weight(1f)` + `fillMaxWidth()` que ocupa el **resto del espacio libre**
+    (solo si `movetext.isNotBlank()`), con `PlanillaPartida` a `weight(1f)`
+    (scroll interno) y el botón "Volver al final" debajo.
+  - Añadido `imePadding()` a la `Column` raíz (import nuevo) para que el teclado
+    no oculte los controles del panel de edición.
+- Verificado por Manolo en Android Studio: "Perfecto todo. Continuamos".
+
+**Estado al cierre de la sesión**: estos cambios están en el working tree de
+`fase-4-tablero`, **sin commitear** (junto con el borrado de Stockfish). El
+commit extenso en español se hará tras el OK de Manolo. **Push NO** (remoto
+vacío, autorización obligatoria).

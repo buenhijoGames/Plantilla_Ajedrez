@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -152,48 +153,67 @@ fun PantallaPartida(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = textoEstado(estado),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TableroAjedrez(
-                    fen = estado.fenVisible,
-                    casillaSeleccionada = estado.casillaSeleccionada,
-                    destinosLegales = estado.destinosLegales,
-                    onCasillaPulsada = viewModel::onCasillaPulsada,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (estado.modoEdicion) {
-                    PanelEdicion(
-                        caminoSeleccion = estado.caminoSeleccion,
-                        comentario = estado.comentarioEdicion,
-                        nag = estado.nagEdicion,
-                        varianteEnConstruccion = estado.varianteEnConstruccion,
-                        onComentarioCambiado = viewModel::actualizarComentarioEdicion,
-                        onNagCambiado = viewModel::actualizarNagEdicion,
-                        onGuardar = viewModel::guardarEdicion,
-                        onSalir = viewModel::salirModoEdicion,
+                // Sección superior (estado, tablero, panel de edición): ocupa su
+                // altura natural y solo scrollea si no cabe (p. ej. horizontal o
+                // con el teclado abierto).
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = textoEstado(estado),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                }
-                if (estado.movetext.isNotBlank()) {
-                    PlanillaPartida(
-                        movetext = estado.movetext,
-                        caminoVisible = estado.caminoVisible,
-                        caminoSeleccion = estado.caminoSeleccion,
-                        onJugadaPulsada = viewModel::alPulsarJugada,
+                    TableroAjedrez(
+                        fen = estado.fenVisible,
+                        casillaSeleccionada = estado.casillaSeleccionada,
+                        destinosLegales = estado.destinosLegales,
+                        onCasillaPulsada = viewModel::onCasillaPulsada,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    if (estado.caminoVisible != null) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        TextButton(onClick = viewModel::volverAlFinal) {
-                            Text(stringResource(R.string.partida_volver_final))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (estado.modoEdicion) {
+                        PanelEdicion(
+                            caminoSeleccion = estado.caminoSeleccion,
+                            comentario = estado.comentarioEdicion,
+                            nag = estado.nagEdicion,
+                            varianteEnConstruccion = estado.varianteEnConstruccion,
+                            onComentarioCambiado = viewModel::actualizarComentarioEdicion,
+                            onNagCambiado = viewModel::actualizarNagEdicion,
+                            onGuardar = viewModel::guardarEdicion,
+                            onSalir = viewModel::salirModoEdicion,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+                // Zona de planilla: ocupa el resto del espacio libre y scrollea
+                // internamente.
+                if (estado.movetext.isNotBlank()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        PlanillaPartida(
+                            movetext = estado.movetext,
+                            caminoVisible = estado.caminoVisible,
+                            caminoSeleccion = estado.caminoSeleccion,
+                            onJugadaPulsada = viewModel::alPulsarJugada,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        )
+                        if (estado.caminoVisible != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            TextButton(onClick = viewModel::volverAlFinal) {
+                                Text(stringResource(R.string.partida_volver_final))
+                            }
                         }
                     }
                 }

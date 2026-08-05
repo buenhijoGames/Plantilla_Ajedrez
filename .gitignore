@@ -71,14 +71,10 @@ desktop.ini
 hs_err_pid*
 
 # --- Nativo y binarios grandes (>50MB) --------------------------------------
-# Los binarios de Stockfish se descargan e instalan en jniLibs durante la
-# preparación del entorno, no se versionan para no inflar el repo.
-app/src/main/jniLibs/*/libstockfish.so
+# (Stockfish retirado temporalmente: no hay binarios nativos que versionar.)
 *.so.tmp
 *.tar
 *.zip
-# Excepción: librerías .so propias pequeñas sí pueden subirse si las creamos.
-!app/src/main/jniLibs/**/libplantilla_*.so
 
 # --- Reportes y volcados -----------------------------------------------------
 *.hprof
