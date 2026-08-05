@@ -13,8 +13,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,11 +25,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +43,7 @@ import com.buenhijogames.plantilla_ajedrez.R
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
+import com.buenhijogames.plantilla_ajedrez.ui.compartir.CompartirArchivo
 
 /**
  * Pantalla de detalle de un torneo.
@@ -55,6 +64,7 @@ fun PantallaDetalleTorneo(
     viewModel: DetalleTorneoViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -67,6 +77,27 @@ fun PantallaDetalleTorneo(
                             contentDescription = stringResource(R.string.accion_volver),
                         )
                     }
+                },
+                actions = {
+                    OverflowMenuTorneo(
+                        torneoNombre = estado.torneo?.nombre ?: "",
+                        onExportarPdf = {
+                            val bytes = viewModel.generarPdfTorneo()
+                            if (bytes != null) {
+                                val nombre = contexto.getString(
+                                    R.string.pdf_torneo_nombre,
+                                    estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
+                                )
+                                CompartirArchivo.compartir(
+                                    contexto = contexto,
+                                    bytes = bytes,
+                                    nombre = nombre,
+                                    tipoMime = "application/pdf",
+                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                )
+                            }
+                        },
+                    )
                 },
             )
         },
@@ -226,5 +257,40 @@ private fun FilaPartida(
                 },
             )
         }
+    }
+}
+
+/**
+ * Menu overflow (3 puntos) de la pantalla de detalle de un torneo.
+ *
+ * Ofrece "Exportar PDF", que genera un PDF multipagina (una hoja FIDE por
+ * cada partida del torneo) y lo comparte con otras apps.
+ *
+ * @param torneoNombre Nombre del torneo (para el nombre del fichero).
+ * @param onExportarPdf Accion al pulsar "Exportar PDF".
+ */
+@Composable
+private fun OverflowMenuTorneo(
+    torneoNombre: String,
+    onExportarPdf: () -> Unit,
+) {
+    var expandido by remember { mutableStateOf(false) }
+    IconButton(onClick = { expandido = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.accion_mas),
+        )
+    }
+    DropdownMenu(
+        expanded = expandido,
+        onDismissRequest = { expandido = false },
+    ) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_exportar_pdf)) },
+            onClick = {
+                expandido = false
+                onExportarPdf()
+            },
+        )
     }
 }

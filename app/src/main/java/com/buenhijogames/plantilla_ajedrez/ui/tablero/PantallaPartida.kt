@@ -21,11 +21,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -38,8 +41,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.buenhijogames.plantilla_ajedrez.R
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
+import com.buenhijogames.plantilla_ajedrez.ui.compartir.CompartirArchivo
 
 /**
  * Pantalla de partida: tablero interactivo + cabecera de estado.
@@ -72,6 +80,7 @@ fun PantallaPartida(
     viewModel: PartidaViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
 
     // Diálogo de promoción pendiente (fuera del Scaffold para no perder foco).
     val promocion = estado.promocionPendiente
@@ -121,6 +130,25 @@ fun PantallaPartida(
                             contentDescription = stringResource(R.string.accion_deshacer),
                         )
                     }
+                    OverflowMenuPartida(
+                        onExportarPdf = {
+                            val bytes = viewModel.generarPdfPartida()
+                            if (bytes != null) {
+                                val nombre = contexto.getString(
+                                    R.string.pdf_partida_nombre,
+                                    estado.blancas.ifBlank { "blancas" },
+                                    estado.negras.ifBlank { "negras" },
+                                )
+                                CompartirArchivo.compartir(
+                                    contexto = contexto,
+                                    bytes = bytes,
+                                    nombre = nombre,
+                                    tipoMime = "application/pdf",
+                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                )
+                            }
+                        },
+                    )
                 },
             )
         },
@@ -219,6 +247,41 @@ fun PantallaPartida(
                 }
             }
         }
+    }
+}
+
+/**
+ * Menu overflow (3 puntos) de la pantalla de partida.
+ *
+ * Actualmente ofrece "Exportar PDF", que genera la plantilla FIDE de la
+ * partida actual y la comparte con otras apps mediante [CompartirArchivo].
+ * Se abre como un [DropdownMenu] sobre el icono de 3 puntos de la TopAppBar.
+ *
+ * @param onExportarPdf Accion al pulsar "Exportar PDF" (el ViewModel ya ha
+ *                      generado los bytes del PDF).
+ */
+@Composable
+private fun OverflowMenuPartida(
+    onExportarPdf: () -> Unit,
+) {
+    var expandido by remember { mutableStateOf(false) }
+    IconButton(onClick = { expandido = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.accion_mas),
+        )
+    }
+    DropdownMenu(
+        expanded = expandido,
+        onDismissRequest = { expandido = false },
+    ) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_exportar_pdf)) },
+            onClick = {
+                expandido = false
+                onExportarPdf()
+            },
+        )
     }
 }
 

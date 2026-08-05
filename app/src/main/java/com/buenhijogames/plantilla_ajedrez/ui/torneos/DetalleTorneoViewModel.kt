@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
+import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioTorneos
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
@@ -47,12 +48,14 @@ data class EstadoDetalleTorneo(
  * @param savedStateHandle    Aporta el id de torneo del argumento de navegación.
  * @param repositorioTorneos  Repositorio de torneos.
  * @param repositorioPartidas Repositorio de partidas.
+ * @param generadorPdf       Puerto de generación de plantillas PDF (FIDE).
  */
 @HiltViewModel
 class DetalleTorneoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repositorioTorneos: RepositorioTorneos,
     private val repositorioPartidas: RepositorioPartidas,
+    private val generadorPdf: PuertoPdf,
 ) : ViewModel() {
 
     private val torneoId: String = checkNotNull(savedStateHandle[Destinos.ARG_TORNEO_ID])
@@ -113,6 +116,23 @@ class DetalleTorneoViewModel @Inject constructor(
             )
             _estado.update { it.copy(creandoPartida = false) }
             onCreada(id)
+        }
+    }
+
+    /**
+     * Genera un PDF multipagina con la plantilla FIDE de CADA partida del
+     * torneo (una hoja por partida).
+     *
+     * @return Bytes del PDF, o null si el torneo no tiene partidas o el PDF no
+     *         se pudo generar.
+     */
+    fun generarPdfTorneo(): ByteArray? {
+        val partidas = _estado.value.partidas
+        if (partidas.isEmpty()) return null
+        return try {
+            generadorPdf.generarPlantillas(partidas)
+        } catch (e: Exception) {
+            null
         }
     }
 }

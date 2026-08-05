@@ -1,8 +1,10 @@
 package com.buenhijogames.plantilla_ajedrez.data.di
 
 import com.buenhijogames.plantilla_ajedrez.data.ajedrez.AdaptadorChesslib
+import com.buenhijogames.plantilla_ajedrez.data.pdf.AdaptadorPdf
 import com.buenhijogames.plantilla_ajedrez.data.pgn.AdaptadorPgn
 import com.buenhijogames.plantilla_ajedrez.domain.motor.PuertoMotorAjedrez
+import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
 import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
 import dagger.Binds
 import dagger.Module
@@ -11,7 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Modulo Hilt de servicios de dominio (motor de ajedrez y PGN).
+ * Modulo Hilt de servicios de dominio (motor de ajedrez, PGN y PDF).
  *
  * Aqui se "conectan" los puertos de dominio con sus implementaciones
  * concretas en `:data`. Separamos este modulo del [ModuloRepositorios]
@@ -28,4 +30,8 @@ abstract class ModuloServicios {
     @Binds
     @Singleton
     abstract fun bindPuertoPgn(impl: AdaptadorPgn): PuertoPgn
+
+    @Binds
+    @Singleton
+    abstract fun bindPuertoPdf(impl: AdaptadorPdf): PuertoPdf
 }

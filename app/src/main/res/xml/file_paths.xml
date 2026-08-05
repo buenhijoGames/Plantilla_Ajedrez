@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Ficheros temporales de la app (PDF/PGN generados para compartir). -->
+    <cache-path name="compartir" path="compartir/" />
+    <!-- Caché externa por si la interna está llena. -->
+    <external-cache-path name="compartir_externo" path="compartir/" />
+</paths>

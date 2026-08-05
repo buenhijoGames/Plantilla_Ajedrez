@@ -74,4 +74,16 @@
     <string name="edicion_instrucciones">Toca una jugada de la planilla para editar su anotación o añadir una variante.</string>
     <string name="edicion_variante_hint">Juega en el tablero para crear una variante sobre esta jugada.</string>
     <string name="edicion_variante_en_curso">Añadiendo variante. Sigue jugando en el tablero.</string>
+
+    <!-- PDF / PGN -->
+    <string name="accion_exportar_pdf">Exportar PDF</string>
+    <string name="accion_exportar_pgn">Exportar PGN</string>
+    <string name="accion_importar_pgn">Importar PGN</string>
+    <string name="pdf_titulo_compartir">Plantilla PDF</string>
+    <string name="pdf_torneo_nombre">torneo_%1$s.pdf</string>
+    <string name="pdf_partida_nombre">partida_%1$s_%2$s.pdf</string>
+    <string name="compartir_asunto">Plantilla de la partida</string>
+    <string name="compartir_texto">Plantilla generada con Plantilla_ajedrez</string>
+    <string name="snackbar_pdf_generado">PDF generado</string>
+    <string name="snackbar_pdf_error">Error al generar el PDF</string>
 </resources>

@@ -7,6 +7,7 @@ import com.buenhijogames.plantilla_ajedrez.data.ajedrez.JugadaIlegalException
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.motor.PuertoMotorAjedrez
+import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,8 +44,13 @@ data class JugadaPromocion(
  * @property ladoEnTurnoVisible Bando al que le toca en la posición visible.
  * @property blancas           Nombre del jugador de blancas (puede estar vacío).
  * @property negras            Nombre del jugador de negras (puede estar vacío).
- * @property evento            Nombre del evento (torneo) para la cabecera.
- * @property casillaSeleccionada Casilla seleccionada por el usuario (origen).
+  * @property evento            Nombre del evento (torneo) para la cabecera.
+  * @property sitio             Sitio del evento (Tag Site del PGN).
+  * @property fecha             Fecha del evento (Tag Date del PGN).
+  * @property ronda             Ronda de la partida (Tag Round del PGN).
+  * @property eloBlancas        Elo del jugador de blancas (si existe).
+  * @property eloNegras         Elo del jugador de negras (si existe).
+  * @property casillaSeleccionada Casilla seleccionada por el usuario (origen).
  * @property destinosLegales   Casillas destino legales desde [casillaSeleccionada].
  * @property promocionPendiente Jugada esperando a que el usuario elija pieza.
  * @property caminoVisible     Camino hasta la jugada visible al revisar la
@@ -73,6 +79,11 @@ data class EstadoPartida(
     val blancas: String = "",
     val negras: String = "",
     val evento: String = "",
+    val sitio: String = "",
+    val fecha: String = "",
+    val ronda: String = "",
+    val eloBlancas: Int? = null,
+    val eloNegras: Int? = null,
     val casillaSeleccionada: String? = null,
     val destinosLegales: List<String> = emptyList(),
     val promocionPendiente: JugadaPromocion? = null,
@@ -113,12 +124,14 @@ data class EstadoPartida(
  * @param savedStateHandle   Aporta el id de partida del argumento de navegación.
  * @param motor              Puerto del motor de ajedrez (chesslib).
  * @param repositorioPartidas Repositorio de persistencia de partidas.
+ * @param generadorPdf       Puerto de generación de plantillas PDF (FIDE).
  */
 @HiltViewModel
 class PartidaViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val motor: PuertoMotorAjedrez,
     private val repositorioPartidas: RepositorioPartidas,
+    private val generadorPdf: PuertoPdf,
 ) : ViewModel() {
 
     private val partidaId: String = checkNotNull(savedStateHandle[Destinos.ARG_PARTIDA_ID])
@@ -166,6 +179,11 @@ class PartidaViewModel @Inject constructor(
                     blancas = partida.blancas,
                     negras = partida.negras,
                     evento = partida.evento,
+                    sitio = partida.sitio,
+                    fecha = partida.fecha,
+                    ronda = partida.ronda,
+                    eloBlancas = partida.eloBlancas,
+                    eloNegras = partida.eloNegras,
                 )
             }
         }
@@ -770,5 +788,32 @@ class PartidaViewModel @Inject constructor(
             }
         }
         return fen
+    }
+
+    /**
+     * Genera el PDF de la plantilla FIDE de la partida actual.
+     *
+     * Construye una [Partida] con los tags de [partidaBase] (evento, sitio,
+     * fecha, ronda, jugadores y Elos) y el movetext y resultado actuales, y la
+     * pasa al [PuertoPdf]. Se usa para compartir/exportar la planilla. El
+     * resultado se toma del estado visible (para que el PDF refleje la partida
+     * aunque se esté revisando una posición pasada).
+     *
+     * @return Bytes del PDF de una página, o null si la partida no se ha cargado
+     *         todavía o el PDF no se pudo generar.
+     */
+    fun generarPdfPartida(): ByteArray? {
+        val base = partidaBase ?: return null
+        val actual = _estado.value
+        return try {
+            generadorPdf.generarPlantilla(
+                base.copy(
+                    pgn = actual.movetext,
+                    resultado = actual.resultadoVisible,
+                )
+            )
+        } catch (e: Exception) {
+            null
+        }
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Textos de la plantilla FIDE generada por :data (AdaptadorPdf). -->
+    <string name="pdf_titulo">PLANTILLA DE AJEDREZ</string>
+    <string name="pdf_subtitulo">by buenhijoGames</string>
+    <string name="pdf_evento">Evento</string>
+    <string name="pdf_sitio">Sitio</string>
+    <string name="pdf_fecha">Fecha</string>
+    <string name="pdf_ronda">Ronda</string>
+    <string name="pdf_blancas">Blancas</string>
+    <string name="pdf_negras">Negras</string>
+    <string name="pdf_resultado">Resultado</string>
+    <string name="pdf_numero">Nº</string>
+</resources>
