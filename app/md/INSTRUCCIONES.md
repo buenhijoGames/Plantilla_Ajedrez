@@ -403,7 +403,8 @@ guardar→serializar→re-parsear).
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
 | 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave — **5a visualización ✅ (`b1190d4`), 5b edición ✅ (commit de esta sesión): modo edición con comentarios/NAGs + variantes/subvariantes desde el tablero, análisis en cursiva con llaves, navegación por toque** |
 | 6 | ~~StockfishAdapter UCI~~ **RETIRADA temporalmente** (05-ago-2026): se eliminaron los `.so` de `jniLibs`, la tarea `descargarStockfish`, los adaptadores UCI (`ParseadorUci`, `ConvertidorUciSan`, `ProcesoStockfish`, `AdaptadorStockfish`), el puerto `PuertoEvaluacionMotor` y sus tests. Si se retoma hay que partir de cero con binario **alineado a 16 KB** (los builds oficiales de Stockfish vienen a 4 KB y Google Play los rechaza desde nov-2025 para targetSdk 35+; recompilar con NDK r28+ o con `-Wl,-z,max-page-size=16384`) |
-| 7 | Import/Export PGN + PDF plantilla FIDE + overflow menu (3 puntos) |
+| 7 | ~~StockfishAdapter UCI~~ retirado + **PDF plantilla FIDE con figurín ✅ (`7dd4de2`): motor offline en :data (PdfDocument), figurín cburnett, cabecera + tabla 30 filas, compartir vía FileProvider, overflow en partida y torneo** — PENDIENTE: import/export PGN (Unidad C) y pulido estético |
+| 8 | Tests + lint + typecheck |
 | 8 | Tests + lint + typecheck |
 | 9 | Pulido estético (animaciones, microinteracciones) |
 | 10 | Preparación Play Console (splits, sign, versioning) |
@@ -462,16 +463,20 @@ desde un módulo Hilt en `:data` (o `:app`).
 
 ## ➡️ Continuación exacta al retomar
 
-1. Estar en `fase-4-tablero`: `git checkout fase-4-tablero`. La Fase 5b está
-   **commiteada y verificada** por Manolo (modo edición + variantes en cursiva
-   con llaves + navegación correcta a jugadas de análisis).
-2. **Stockfish RETIRADO temporalmente** (05-ago-2026): la app es actualmente
-   **solo planilla** (anotar, guardar PGN, compartir). Siguiente trabajo
-   (decidir con Manolo): borrado de jugadas intermedias, deshacer variante en
-   construcción, o **Fase 7** (Import/Export PGN + PDF plantilla FIDE).
-3. Nota arquitectura: aún no se han creado casos de uso de `:domain`; los
+1. Estar en `fase-7-pgn-pdf`: `git checkout fase-7-pgn-pdf`. La Fase 7 (Unidad A +
+   B) está **commiteada y verificada** (PDF FIDE con figurín, generar y compartir
+   desde partida y torneo).
+2. **Pendiente Fase 7**: **Unidad C** (import/export PGN con SAF — torneo +
+   partida suelta, criterio a elegir por el usuario) y pulido estético del PDF
+   (Manolo: "tenemos que seguir mejorándolo").
+3. Stockfish RETIRADO temporalmente (05-ago-2026): la app es **solo planilla** +
+   PDF. Ver bloque de la sesión 05-ago-2026 en `INSTRUCCIONES.md`.
+4. Nota arquitectura: aún no se han creado casos de uso de `:domain`; los
    ViewModels usan los puertos directamente (patrón establecido y testable).
    Decidir con Manolo si crearlos en el futuro.
+5. Test preexistente roto: `AdaptadorChesslibTest.resultadoActual devuelve
+   GANA_BLANCAS con rey negro en mate` falla también sin mis cambios (confirmado
+   con `git stash`). Ajeno a la Fase 7; revisar aparte.
 
 ---
 
@@ -588,7 +593,58 @@ bajo el tablero, con el texto **un poco más pequeño** y **perfectamente alinea
     no oculte los controles del panel de edición.
 - Verificado por Manolo en Android Studio: "Perfecto todo. Continuamos".
 
-**Estado al cierre de la sesión**: estos cambios están en el working tree de
-`fase-4-tablero`, **sin commitear** (junto con el borrado de Stockfish). El
-commit extenso en español se hará tras el OK de Manolo. **Push NO** (remoto
-vacío, autorización obligatoria).
+**Estado**: commiteado como `1484f59` en `fase-4-tablero`. Push NO (remoto vacío,
+autorización obligatoria).
+
+---
+
+## 🗒️ Fase 7 — PDF FIDE con figurín (parcial: Unidad A + B), rama `fase-7-pgn-pdf`
+
+**Commiteada como `7dd4de2`** (compila, tests de `PlanillaFide` pasando).
+
+### Unidad A — Motor PDF (`:data`, offline)
+- **PuertoPdf** (`domain/pdf/PuertoPdf.kt`): añadido
+  `generarPlantillas(List<Partida>): ByteArray` (una hoja por partida, para
+  exportar un torneo entero); se mantiene `generarPlantilla(partida)`.
+- **12 siluetas cburnett** copiadas a `data/src/main/res/drawable/` (mismos XML que
+  la pantalla) para dibujar el figurín idéntico en el PDF.
+- **PlanillaFide.kt** (puro y testeable en JVM):
+  - Extrae los SAN de la línea principal del movetext (ignora variantes,
+    comentarios, NAGs, números de jugada, tags y resultado).
+  - Agrupa en filas Blancas/Negras y segmenta cada SAN en `SegmentoFigurin`
+    (Texto/Pieza): `Nf3` → [Pieza 'N', Texto "f3"].
+  - Límite de 60 jugadas/hoja = 30 filas.
+- **RecursoPiezaPdf.kt**: mapeo carácter FEN → drawable (silueta blanca/negra).
+- **AdaptadorPdf.kt**: implementa `PuertoPdf` con `android.graphics.pdf.PdfDocument`.
+  Hoja A4 vertical, cabecera con Seven Tag Roster + Elos y tabla de 30 filas con
+  figurín rasterizado (con cache por símbolo). Usa `writeTo(OutputStream)` (no
+  `toByteArray()`, que es API 33+ → compatible minSdk 27).
+- **Binding Hilt** `bindPuertoPdf` en `ModuloServicios` + `@ApplicationContext`.
+- **strings.xml** en `:data`: cadenas localizadas del PDF (título, etiquetas...).
+
+### Unidad B — UI + compartir (`:app`)
+- **CompartirArchivo.kt** (`ui/compartir/`): escribe bytes en caché y lanza
+  `ACTION_SEND` vía `FileProvider` (sin permisos de almacenamiento).
+- **FileProvider** declarado en `AndroidManifest.xml` + `res/xml/file_paths.xml`.
+- **Menú overflow (3 puntos)** con "Exportar PDF" en partida y en detalle de
+  torneo (multipágina).
+- **PartidaViewModel**: inyecta `PuertoPdf`; añade `sitio/fecha/ronda/Elos` al
+  estado; método `generarPdfPartida()`.
+- **DetalleTorneoViewModel**: inyecta `PuertoPdf`; método `generarPdfTorneo()`.
+- **strings.xml** (:app): cadenas de acciones PDF/PGN/compartir.
+
+### Correcciones visuales (feedback de Manolo)
+- Eliminado "Blancas/Negras" repetido de la cabecera de la tabla (solo "Nº").
+- Línea de cabecera de la tabla separada de la primera fila de jugadas.
+- "Resultado" con más separación vertical y mejor alineación.
+- Subtítulo cambiado a "by buenhijoGames".
+
+### Tests
+- **PlanillaFideTest** (6 tests): segmentación SAN→figurín (pieza inicial, peón,
+  promoción, pieza negra) y construcción de la plantilla (línea principal,
+  pares/impares, vacía, límite 60). Pasando.
+
+### Pendiente de Fase 7
+- **Unidad C**: import/export PGN con SAF (torneo + partida suelta), mismo
+  criterio individual/torneo elegido por el usuario. Aún no implementada.
+- Pulido estético futuro del PDF (Manolo: "tenemos que seguir mejorándolo").
