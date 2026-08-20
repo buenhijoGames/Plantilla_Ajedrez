@@ -3,6 +3,8 @@ package com.buenhijogames.plantilla_ajedrez.ui.torneos
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
+import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
+import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioTorneos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,12 +24,16 @@ import javax.inject.Inject
  *                             [TorneosViewModel]). La UI resuelve el texto
  *                             desde `strings.xml` para no hardcodear.
  * @property dialogoNuevo      true si el formulario de nuevo torneo está abierto.
+ * @property importandoPgn     true mientras se está importando un PGN.
+ * @property resultadoImportacion Número de partidas importadas (null si no hay importación reciente).
  */
 data class EstadoTorneos(
     val torneos: List<Torneo> = emptyList(),
     val cargando: Boolean = true,
     val hayErrorCarga: Boolean = false,
     val dialogoNuevo: Boolean = false,
+    val importandoPgn: Boolean = false,
+    val resultadoImportacion: Int? = null,
 )
 
 /**
@@ -48,6 +54,8 @@ data class EstadoTorneos(
 @HiltViewModel
 class TorneosViewModel @Inject constructor(
     private val repositorio: RepositorioTorneos,
+    private val repositorioPartidas: RepositorioPartidas,
+    private val generadorPgn: PuertoPgn,
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(EstadoTorneos(cargando = true))
@@ -118,5 +126,49 @@ class TorneosViewModel @Inject constructor(
         viewModelScope.launch {
             repositorio.eliminarTorneo(id)
         }
+    }
+
+    /**
+     * Importa un texto PGN y guarda las partidas resultantes como partidas
+     * sueltas (sin torneo asociado).
+     *
+     * Cada partida importada se guarda con `torneoId = null`. El estado se
+     * actualiza con el número de partidas importadas para que la UI pueda
+     * mostrar feedback.
+     *
+     * @param textoPgn Contenido del archivo PGN a importar.
+     */
+    fun importarPgn(textoPgn: String) {
+        if (_estado.value.importandoPgn) return
+        viewModelScope.launch {
+            _estado.update { it.copy(importandoPgn = true, resultadoImportacion = null) }
+            try {
+                val partidasImportadas = generadorPgn.importar(textoPgn)
+                if (partidasImportadas.isEmpty()) {
+                    _estado.update { it.copy(importandoPgn = false, resultadoImportacion = 0) }
+                    return@launch
+                }
+                for (partida in partidasImportadas) {
+                    repositorioPartidas.guardarPartida(
+                        partida.copy(torneoId = null)
+                    )
+                }
+                _estado.update {
+                    it.copy(
+                        importandoPgn = false,
+                        resultadoImportacion = partidasImportadas.size,
+                    )
+                }
+            } catch (e: Exception) {
+                _estado.update { it.copy(importandoPgn = false, resultadoImportacion = 0) }
+            }
+        }
+    }
+
+    /**
+     * Limpia el resultado de importación después de mostrar el feedback.
+     */
+    fun limpiarResultadoImportacion() {
+        _estado.update { it.copy(resultadoImportacion = null) }
     }
 }

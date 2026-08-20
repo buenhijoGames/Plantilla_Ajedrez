@@ -8,6 +8,7 @@ import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.motor.PuertoMotorAjedrez
 import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
+import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -125,6 +126,7 @@ data class EstadoPartida(
  * @param motor              Puerto del motor de ajedrez (chesslib).
  * @param repositorioPartidas Repositorio de persistencia de partidas.
  * @param generadorPdf       Puerto de generación de plantillas PDF (FIDE).
+ * @param generadorPgn       Puerto de importación/exportación PGN.
  */
 @HiltViewModel
 class PartidaViewModel @Inject constructor(
@@ -132,6 +134,7 @@ class PartidaViewModel @Inject constructor(
     private val motor: PuertoMotorAjedrez,
     private val repositorioPartidas: RepositorioPartidas,
     private val generadorPdf: PuertoPdf,
+    private val generadorPgn: PuertoPgn,
 ) : ViewModel() {
 
     private val partidaId: String = checkNotNull(savedStateHandle[Destinos.ARG_PARTIDA_ID])
@@ -807,6 +810,30 @@ class PartidaViewModel @Inject constructor(
         val actual = _estado.value
         return try {
             generadorPdf.generarPlantilla(
+                base.copy(
+                    pgn = actual.movetext,
+                    resultado = actual.resultadoVisible,
+                )
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Genera el PGN de la partida actual para compartir/exportar.
+     *
+     * Construye una [Partida] con los tags de [partidaBase] y el movetext y
+     * resultado actuales, y la exporta a formato PGN via [PuertoPgn].
+     *
+     * @return Texto PGN de la partida, o null si la partida no se ha cargado
+     *         todavía o la exportación falló.
+     */
+    fun exportarPgnPartida(): String? {
+        val base = partidaBase ?: return null
+        val actual = _estado.value
+        return try {
+            generadorPgn.exportar(
                 base.copy(
                     pgn = actual.movetext,
                     resultado = actual.resultadoVisible,

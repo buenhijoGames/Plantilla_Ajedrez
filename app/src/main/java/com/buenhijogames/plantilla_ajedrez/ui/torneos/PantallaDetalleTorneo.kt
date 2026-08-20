@@ -1,5 +1,8 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +27,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +71,33 @@ fun PantallaDetalleTorneo(
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Lanzador de SAF para seleccionar archivo PGN.
+    val launcherImportarPgn = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            val contenido = contexto.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.bufferedReader().use { it.readText() }
+            }
+            if (contenido != null) {
+                viewModel.importarPgn(contenido)
+            }
+        }
+    }
+
+    // Feedback de importación via Snackbar.
+    LaunchedEffect(estado.resultadoImportacion) {
+        val resultado = estado.resultadoImportacion ?: return@LaunchedEffect
+        val mensaje = if (resultado > 0) {
+            contexto.getString(R.string.snackbar_pgn_importado_conteo, resultado)
+        } else {
+            contexto.getString(R.string.snackbar_pgn_error_importar)
+        }
+        snackbarHostState.showSnackbar(mensaje)
+        viewModel.limpiarResultadoImportacion()
+    }
 
     Scaffold(
         topBar = {
@@ -97,6 +130,27 @@ fun PantallaDetalleTorneo(
                                 )
                             }
                         },
+                        onExportarPgn = {
+                            val pgn = viewModel.exportarPgnTorneo()
+                            if (pgn != null) {
+                                val nombre = contexto.getString(
+                                    R.string.pgn_torneo_nombre,
+                                    estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
+                                )
+                                CompartirArchivo.compartir(
+                                    contexto = contexto,
+                                    bytes = pgn.toByteArray(Charsets.UTF_8),
+                                    nombre = nombre,
+                                    tipoMime = "application/x-chess-pgn",
+                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                )
+                            }
+                        },
+                        onImportarPgn = {
+                            launcherImportarPgn.launch(
+                                arrayOf("application/x-chess-pgn", "text/plain")
+                            )
+                        },
                     )
                 },
             )
@@ -111,6 +165,7 @@ fun PantallaDetalleTorneo(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
             estado.cargando -> Box(
@@ -263,16 +318,22 @@ private fun FilaPartida(
 /**
  * Menu overflow (3 puntos) de la pantalla de detalle de un torneo.
  *
- * Ofrece "Exportar PDF", que genera un PDF multipagina (una hoja FIDE por
- * cada partida del torneo) y lo comparte con otras apps.
+ * Ofrece "Exportar PDF", "Exportar PGN" e "Importar PGN". El PDF genera un
+ * documento multipágina (una hoja FIDE por cada partida del torneo), el PGN
+ * exporta todas las partidas en un solo archivo, e Importar permite añadir
+ * partidas desde un archivo PGN externo al torneo actual.
  *
  * @param torneoNombre Nombre del torneo (para el nombre del fichero).
  * @param onExportarPdf Accion al pulsar "Exportar PDF".
+ * @param onExportarPgn Accion al pulsar "Exportar PGN".
+ * @param onImportarPgn Accion al pulsar "Importar PGN".
  */
 @Composable
 private fun OverflowMenuTorneo(
     torneoNombre: String,
     onExportarPdf: () -> Unit,
+    onExportarPgn: () -> Unit,
+    onImportarPgn: () -> Unit,
 ) {
     var expandido by remember { mutableStateOf(false) }
     IconButton(onClick = { expandido = true }) {
@@ -290,6 +351,20 @@ private fun OverflowMenuTorneo(
             onClick = {
                 expandido = false
                 onExportarPdf()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_exportar_pgn)) },
+            onClick = {
+                expandido = false
+                onExportarPgn()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_importar_pgn)) },
+            onClick = {
+                expandido = false
+                onImportarPgn()
             },
         )
     }

@@ -403,8 +403,7 @@ guardar→serializar→re-parsear).
 | 4 | BoardComposable Canvas + piezas cburnett + entrada táctil |
 | 5 | ScoresheetPanel (variantes/comentarios/NAGs/figurín) + autosave — **5a visualización ✅ (`b1190d4`), 5b edición ✅ (commit de esta sesión): modo edición con comentarios/NAGs + variantes/subvariantes desde el tablero, análisis en cursiva con llaves, navegación por toque** |
 | 6 | ~~StockfishAdapter UCI~~ **RETIRADA temporalmente** (05-ago-2026): se eliminaron los `.so` de `jniLibs`, la tarea `descargarStockfish`, los adaptadores UCI (`ParseadorUci`, `ConvertidorUciSan`, `ProcesoStockfish`, `AdaptadorStockfish`), el puerto `PuertoEvaluacionMotor` y sus tests. Si se retoma hay que partir de cero con binario **alineado a 16 KB** (los builds oficiales de Stockfish vienen a 4 KB y Google Play los rechaza desde nov-2025 para targetSdk 35+; recompilar con NDK r28+ o con `-Wl,-z,max-page-size=16384`) |
-| 7 | ~~StockfishAdapter UCI~~ retirado + **PDF plantilla FIDE con figurín ✅ (`7dd4de2`): motor offline en :data (PdfDocument), figurín cburnett, cabecera + tabla 30 filas, compartir vía FileProvider, overflow en partida y torneo** — PENDIENTE: import/export PGN (Unidad C) y pulido estético |
-| 8 | Tests + lint + typecheck |
+| 7 | ~~StockfishAdapter UCI~~ retirado + **PDF plantilla FIDE con figurín ✅ (`7dd4de2`)** + **Unidad C PGN import/export ✅ (sin commitear, sesión 12-ago-2026)** + **Pantalla Info ✅ (sin commitear, sesión 12-ago-2026)** — PENDIENTE: pulido estético del PDF (Manolo: "tenemos que seguir mejorándolo") |
 | 8 | Tests + lint + typecheck |
 | 9 | Pulido estético (animaciones, microinteracciones) |
 | 10 | Preparación Play Console (splits, sign, versioning) |
@@ -452,7 +451,9 @@ desde un módulo Hilt en `:data` (o `:app`).
 - `fase-3a-temas-datastore` (Fase 3a completa, commit `9d924c9`)
 - `fase-3b-navegacion-startup-tema` (Fase 3b completa, commit `062075b`)
 - `fase-3c-torneos` (Fase 3c completa, commit `9c3a0cb`)
-- `fase-4-tablero` (Fase 4 `5eb8193` + Fase 5a `b1190d4` + **Fase 5b commiteada esta sesión**; HEAD actual)
+- `fase-4-tablero` (Fase 4 `5eb8193` + Fase 5a `b1190d4` + Fase 5b commiteada)
+- `fase-7-pgn-pdf` (**HEAD actual** — Fase 7 A+B commiteada `7dd4de2` + Unidad C
+  PGN import/export + Pantalla Info **sin commitear**, sesión 12-ago-2026)
 
 ### ⚠️ Remoto
 - El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
@@ -464,19 +465,23 @@ desde un módulo Hilt en `:data` (o `:app`).
 ## ➡️ Continuación exacta al retomar
 
 1. Estar en `fase-7-pgn-pdf`: `git checkout fase-7-pgn-pdf`. La Fase 7 (Unidad A +
-   B) está **commiteada y verificada** (PDF FIDE con figurín, generar y compartir
-   desde partida y torneo).
-2. **Pendiente Fase 7**: **Unidad C** (import/export PGN con SAF — torneo +
-   partida suelta, criterio a elegir por el usuario) y pulido estético del PDF
-   (Manolo: "tenemos que seguir mejorándolo").
-3. Stockfish RETIRADO temporalmente (05-ago-2026): la app es **solo planilla** +
-   PDF. Ver bloque de la sesión 05-ago-2026 en `INSTRUCCIONES.md`.
-4. Nota arquitectura: aún no se han creado casos de uso de `:domain`; los
-   ViewModels usan los puertos directamente (patrón establecido y testable).
-   Decidir con Manolo si crearlos en el futuro.
-5. Test preexistente roto: `AdaptadorChesslibTest.resultadoActual devuelve
-   GANA_BLANCAS con rey negro en mate` falla también sin mis cambios (confirmado
-   con `git stash`). Ajeno a la Fase 7; revisar aparte.
+   B) está **commiteada** (PDF FIDE con figurín). La **Unidad C (PGN import/export)**
+   y la **Pantalla Info** están implementadas pero **SIN COMMITEAR** (pending
+   checkpoint de Manolo).
+2. **Checkpoint pendiente**: Manolo debe compilar desde Android Studio y verificar:
+   - Exportar PGN desde partida y torneo (menú overflow → "Exportar PGN").
+   - Importar PGN desde torneo (menú overflow → "Importar PGN" → selector SAF).
+   - Importar PGN desde lista de torneos (menú overflow → "Importar PGN" →
+     partidas sueltas).
+   - Pantalla Info (menú overflow de inicio → "Información") — **que no crashee**.
+3. Tras OK de Manolo → **commit extenso en español** con todo el trabajo de la
+   sesión 12-ago-2026 (Unidad C + Pantalla Info + correcciones de revisión).
+4. **Pendiente futuro**: pulido estético del PDF (Manolo: "tenemos que seguir
+   mejorándolo"), decidir si añadir `@Keep` a `Partida`/`Torneo` (Regla 3).
+5. Stockfish RETIRADO temporalmente (05-ago-2026): la app es **solo planilla** +
+   PDF + PGN. Ver bloque de la sesión 05-ago-2026.
+6. Test preexistente roto: `AdaptadorChesslibTest.resultadoActual devuelve
+   GANA_BLANCAS con rey negro en mate` — ajeno a esta sesión; revisar aparte.
 
 ---
 
@@ -645,6 +650,152 @@ autorización obligatoria).
   pares/impares, vacía, límite 60). Pasando.
 
 ### Pendiente de Fase 7
-- **Unidad C**: import/export PGN con SAF (torneo + partida suelta), mismo
-  criterio individual/torneo elegido por el usuario. Aún no implementada.
+- **Unidad C**: ~~import/export PGN con SAF (torneo + partida suelta)~~ **HECHA (sesión 12-ago-2026, sin commitear aún)**.
 - Pulido estético futuro del PDF (Manolo: "tenemos que seguir mejorándolo").
+
+---
+
+## 🗒️ Sesión 12-ago-2026 — Fase 7 Unidad C (PGN import/export) + Pantalla Info
+
+**Rama**: `fase-7-pgn-pdf`. **Nada commiteado aún** (pendiente de checkpoint de Manolo).
+
+### Unidad C — Import/Export PGN con SAF (Storage Access Framework)
+
+La capa Domain (`PuertoPgn`) + Data (`AdaptadorPgn`) + DI ya estaban listas
+desde la Fase 2. Esta sesión conectó la **capa de presentación**:
+
+**Exportación PGN (partida suelta + torneo):**
+- **`PartidaViewModel.kt`**: inyecta `PuertoPgn`; nuevo método
+  `exportarPgnPartida(): String?` que construye la `Partida` con tags base +
+  movetext actual y la exporta a PGN.
+- **`DetalleTorneoViewModel.kt`**: inyecta `PuertoPgn`; nuevo método
+  `exportarPgnTorneo(): String?` que concatena el PGN de todas las partidas
+  del torneo separadas por línea en blanco.
+- **`PantallaPartida.kt`**: menú overflow ahora tiene "Exportar PDF" +
+  **"Exportar PGN"** → comparte vía `CompartirArchivo` con MIME
+  `application/x-chess-pgn` y nombre `partida_{blancas}_{negras}.pgn`.
+- **`PantallaDetalleTorneo.kt`**: menú overflow ahora tiene "Exportar PDF" +
+  **"Exportar PGN"** + **"Importar PGN"** → nombre `torneo_{nombre}.pgn`.
+
+**Importación PGN con SAF (OpenDocument):**
+- **`PantallaDetalleTorneo.kt`**: "Importar PGN" usa
+  `rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument())`
+  con MIME `application/x-chess-pgn` + `text/plain`. Lee el archivo via
+  `ContentResolver.openInputStream`, parsea con `PuertoPgn.importar()` y
+  guarda cada partida con `torneoId` del torneo actual. Feedback via Snackbar.
+- **`PantallaTorneos.kt`**: nuevo menú overflow (3 puntos) con
+  **"Importar PGN"** → importa partidas como sueltas (`torneoId = null`).
+  Feedback via Snackbar.
+- **`TorneosViewModel.kt`**: inyecta `PuertoPgn` + `RepositorioPartidas`;
+  nuevo método `importarPgn(textoPgn)` que guarda las partidas importadas
+  como sueltas. Estado: `importandoPgn`, `resultadoImportacion`.
+- **`DetalleTorneoViewModel.kt`**: nuevo método `importarPgn(textoPgn)` que
+  guarda las partidas importadas en el torneo actual. Estado:
+  `importandoPgn`, `resultadoImportacion`. Método
+  `limpiarResultadoImportacion()` para limpiar el feedback tras mostrarlo.
+
+**Strings nuevos (`strings.xml` :app):**
+- `pgn_partida_nombre`, `pgn_torneo_nombre` (nombres de fichero).
+- `snackbar_pgn_exportado`, `snackbar_pgn_importado`,
+  `snackbar_pgn_importado_conteo` (con `%1$d`), `snackbar_pgn_error_exportar`,
+  `snackbar_pgn_error_importar`, `snackbar_pgn_error_vacio`.
+- `pgn_seleccionar_archivo`.
+
+### Pantalla de Información completa
+
+Manolo pidió: "crea una pantalla de info completísima a la que se acceda
+desde la pantalla de inicio".
+
+- **Nuevo archivo**: `ui/info/PantallaInfo.kt` (~430 líneas).
+- **Ruta**: `Destinos.INFO = "info"` + composable en `NavegacionPlantilla.kt`.
+- **Acceso**: menú overflow de `PantallaInicio.kt` → "Información".
+- **`build.gradle.kts`**: añadido `buildConfig = true` para acceder a
+  `BuildConfig.VERSION_NAME` y `BuildConfig.VERSION_CODE`.
+
+**10 secciones de la pantalla:**
+1. **Cabecera**: icono `Icons.Filled.Info` (72dp), nombre app, tagline,
+   versión + código interno.
+2. **Acerca de**: descripción + objetivo de la app.
+3. **Cómo funciona**: 6 pasos numerados.
+4. **Características**: 10 features con viñetas (`\u2022`).
+5. **Autor**: Manuel Salmerón Cerdán / buenhijoGames / correo (en Card).
+6. **Licencia**: GPLv3 con descripción (en Card).
+7. **Código fuente**: URL GitHub cliclable (Card con `onClick` → `Intent.ACTION_VIEW`).
+8. **Componentes de terceros**: 4 tarjetas (cburnett GPLv2+, chesslib Apache 2.0,
+   AndroidX/Compose/Hilt/Room Apache 2.0, Kotlin/Coroutines/KSP Apache 2.0).
+9. **Contacto**: correo + GitHub.
+10. **Agradecimientos**: Lichess, chesslib, comunidad.
+
+**Strings nuevos**: ~40 strings `info_*` en `strings.xml` (:app).
+
+### Crash al abrir PantallaInfo — Causa y corrección
+
+**Síntoma**: al pulsar "Información" en el menú overflow de inicio, la app crasheaba.
+
+**Causa más probable**: `painterResource(R.mipmap.ic_launcher)` — los recursos
+`mipmap` (especialmente adaptive icons XML en `mipmap-anydpi`) no se cargan
+correctamente con `painterResource` en todos los contextos.
+
+**Corrección**: se reescribió `PantallaInfo.kt`:
+1. Reemplazado `painterResource(R.mipmap.ic_launcher)` por `Icons.Filled.Info`.
+2. Eliminada la abstracción `TarjetaInfo` (con lambdas `() -> Unit` vs
+   `ColumnScope.() -> Unit` de `Card`) — ahora cada `Card` está inline.
+3. `TerceroInfo` movida a nivel de archivo (no dentro de una función) con
+   `Int` de recursos (no strings pre-resueltos).
+
+### Revisión de cumplimiento de AGENTS.md (esta sesión)
+
+Tras revisar AGENTS.md se encontraron y corrigieron estos problemas:
+1. **`info_codigo.descripcion`** (punto en nombre de recurso) → corregido a
+   `info_codigo_descripcion` (guion bajo).
+2. **KDoc ausente** en funciones privadas de `PantallaInfo.kt` → añadido KDoc
+   a todas las funciones privadas.
+3. **`@Suppress("ArrayInDataClass")`** innecesario en `TerceroInfo` (no usa
+   arrays) → eliminado (se movió la data class fuera de la función y se
+   limpió la anotación).
+4. **INSTRUCCIONES.md sin actualizar** → esta sección locorrige (Regla 0 y 13).
+
+**Preexistente (no corregido, pendiente de decisión con Manolo):**
+- `@Keep` ausente en data classes de dominio (`Partida`, `Torneo`). Las reglas
+  R8 de `proguard-rules.pro` ya protegen `@Room.Entity` (que son las que R8
+  ofusca), pero AGENTS.md Regla 3 dice "uso obligatorio de @Keep en Data
+  Classes y modelos serializables". Las data classes de dominio no son
+  serializadas por reflexión (Room usa sus propias entities), pero la regla
+  es explícita. Decidir con Manolo si añadir `@Keep` a `Partida`/`Torneo`.
+
+### Compilación y tests
+- `:app:compileDebugKotlin` — BUILD SUCCESSFUL (0 errores, warnings preexistentes).
+- `:data:testDebugUnitTest` — 56 tests, 1 fallo preexistente (`resultadoActual`).
+- `:app:testDebugUnitTest` — 63 tests, 1 fallo preexistente (`UtilidadesTableroTest`).
+- Ningún test nuevo roto por los cambios de esta sesión.
+
+---
+
+### 🎨 Sesión 20-ago-2026: Rediseño Planilla FIDE PDF a 4 Columnas
+
+**Objetivo solicitado por Manolo:**
+- Quitar el título grande superior ("PLANTILLA DE AJEDREZ by buenhijoGames") que restaba espacio útil.
+- Arreglar las líneas que cortaban los textos y figurines de las piezas.
+- Cambiar la estructura de 2 a **4 columnas** (2 bloques de 30 jugadas = 60 jugadas por página) como en las planillas físicas de torneo reales.
+- Añadir sección inferior de firmas (Blancas, Negras, Árbitro).
+
+**Archivos modificados:**
+1. `data/src/main/res/values/strings.xml`:
+   - Eliminados `pdf_titulo` y `pdf_subtitulo`.
+   - Añadidos `pdf_firma_blancas`, `pdf_firma_negras`, `pdf_firma_arbitro`.
+2. `data/src/main/kotlin/.../data/pdf/AdaptadorPdf.kt`:
+   - Rediseño integral de la página A4:
+     - Cabecera compacta y enmarcada con rectángulos limpios: Evento, Ronda, Sitio, Fecha, Blancas, Negras y Resultado.
+     - Tabla en dos bloques de 30 jugadas (Bloque 1: jugadas 1..30; Bloque 2: jugadas 31..60) conformando 4 columnas de jugadas con casillas numeradas e independientes.
+     - Cálculo de altura y posición Y con centrado vertical preciso de texto y figurines (evita que las líneas corten los figurines o las fuentes).
+     - Pie de página con 3 líneas delimitadas para firmas oficiales.
+
+---
+
+### 📋 Hoja de Ruta Consolidada (PLAN_MEJORAS.md)
+Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla_ajedrez/PLAN_MEJORAS.md) (y copia en `app/md/PLAN_MEJORAS.md`) con el análisis exhaustivo de todos los módulos y la planificación en 5 fases (A, B, C, D, E) acordada con Manolo tras la revisión de requisitos.
+
+### Pendiente de commitear
+Todo el trabajo está pendiente de checkpoint de Manolo:
+- "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"
+- Tras OK, commit extenso en español en la rama activa.

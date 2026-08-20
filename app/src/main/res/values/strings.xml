@@ -82,8 +82,96 @@
     <string name="pdf_titulo_compartir">Plantilla PDF</string>
     <string name="pdf_torneo_nombre">torneo_%1$s.pdf</string>
     <string name="pdf_partida_nombre">partida_%1$s_%2$s.pdf</string>
+    <string name="pgn_partida_nombre">partida_%1$s_%2$s.pgn</string>
+    <string name="pgn_torneo_nombre">torneo_%1$s.pgn</string>
     <string name="compartir_asunto">Plantilla de la partida</string>
     <string name="compartir_texto">Plantilla generada con Plantilla_ajedrez</string>
     <string name="snackbar_pdf_generado">PDF generado</string>
     <string name="snackbar_pdf_error">Error al generar el PDF</string>
+    <string name="snackbar_pgn_exportado">PGN exportado</string>
+    <string name="snackbar_pgn_importado">PGN importado correctamente</string>
+    <string name="snackbar_pgn_importado_conteo">PGN importado: %1$d partida(s)</string>
+    <string name="snackbar_pgn_error_exportar">Error al exportar el PGN</string>
+    <string name="snackbar_pgn_error_importar">Error al importar el PGN</string>
+    <string name="snackbar_pgn_error_vacio">El archivo PGN está vacío o no contiene partidas válidas</string>
+    <string name="pgn_seleccionar_archivo">Selecciona un archivo PGN</string>
+
+    <!-- Pantalla Info / Acerca de -->
+    <string name="info_titulo">Información</string>
+    <string name="info_version">Versión %1$s</string>
+    <string name="info_version_code">Versión interna: %1$d</string>
+    <string name="info_tagline">Plantilla de ajedrez electrónica</string>
+
+    <!-- Acerca de -->
+    <string name="info_acerca_titulo">Acerca de la app</string>
+    <string name="info_acerca_descripcion">Plantilla_ajedrez es una aplicación gratuita y sin publicidad diseñada para que los jugadores de ajedrez anoten sus partidas mientras las juegan, las guarden en formato interoperable y las compartan con otros jugadores o plataformas.</string>
+    <string name="info_acerca_objetivo">Su objetivo es ampliar el conocimiento ajedrecístico de los usuarios, facilitando el registro sistemático de partidas en torneos, matches o partidas sueltas.</string>
+
+    <!-- Cómo funciona -->
+    <string name="info_como_titulo">Cómo funciona</string>
+    <string name="info_paso1">1. Al abrir la app, elige crear un nuevo torneo/match o abrir uno guardado.</string>
+    <string name="info_paso2">2. En el torneo, pulsa \"+\" para crear partidas. Entra en cada partida para jugarla.</string>
+    <string name="info_paso3">3. Toca las casillas del tablero para anotar jugadas (origen → destino).</string>
+    <string name="info_paso4">4. La planilla se actualiza automáticamente con la notación PGN estándar.</string>
+    <string name="info_paso5">5. Usa el menú de 3 puntos para exportar PDF (plantilla FIDE) o PGN.</string>
+    <string name="info_paso6">6. En modo edición (botón ✏️), añade comentarios, símbolos de evaluación y variantes jugando en el tablero.</string>
+
+    <!-- Características -->
+    <string name="info_features_titulo">Características</string>
+    <string name="info_feature_tablero">Tablero interactivo con piezas cburnett de Lichess</string>
+    <string name="info_feature_planilla">Planilla electrónica con notación PGN estándar</string>
+    <string name="info_feature_variantes">Soporte completo de variantes, comentarios y símbolos de evaluación (NAGs)</string>
+    <string name="info_feature_pdf">Exportación a plantilla FIDE en PDF con figurín</string>
+    <string name="info_feature_pgn">Importación y exportación en formato PGN interoperable</string>
+    <string name="info_feature_torneos">Gestión de torneos con múltiples partidas</string>
+    <string name="info_feature_temas">5 temas visuales seleccionables (Claro, Oscuro, Dinámico, Madera, Mármol)</string>
+    <string name="info_feature_autosave">Guardado automático de todas las jugadas</string>
+    <string name="info_feature_edicion">Edición de anotaciones y creación de variantes desde el tablero</string>
+    <string name="info_feature_responsive">Diseño responsivo para todas las pantallas y orientaciones</string>
+
+    <!-- Autor -->
+    <string name="info_autor_titulo">Autor</string>
+    <string name="info_autor_nombre">Manuel Salmerón Cerdán</string>
+    <string name="info_autor_alias">buenhijoGames</string>
+    <string name="info_autor_correo">manuelsalmeroncerdan@gmail.com</string>
+
+    <!-- Licencia -->
+    <string name="info_licencia_titulo">Licencia de la app</string>
+    <string name="info_licencia_tipo">GNU General Public License v3.0 (GPLv3)</string>
+    <string name="info_licencia_descripcion">Esta app es software libre. Puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General GNU tal como está publicada por la Free Software Foundation, ya sea la versión 3 de la Licencia, o (a tu elección) cualquier versión posterior.</string>
+    <string name="info_licencia_abierta">Código abierto: todo el código fuente está disponible públicamente.</string>
+
+    <!-- Código fuente -->
+    <string name="info_codigo_titulo">Código fuente</string>
+    <string name="info_codigo_url">https://github.com/Salmeron52/plantillas_ajedrez</string>
+    <string name="info_codigo_descripcion">El código fuente completo de esta aplicación está disponible en GitHub. Puedes clonar, contribuir o reportar problemas.</string>
+
+    <!-- Terceros -->
+    <string name="info_terceros_titulo">Componentes de terceros</string>
+    <string name="info_terceros_piezas">Piezas cburnett (Lichess)</string>
+    <string name="info_terceros_piezas_licencia">GPLv2+</string>
+    <string name="info_terceros_piezas_desc">Renderizado de piezas de ajedrez en el tablero y figurín de la planilla.</string>
+    <string name="info_terceros_chesslib">chesslib</string>
+    <string name="info_terceros_chesslib_licencia">Apache 2.0</string>
+    <string name="info_terceros_chesslib_desc">Validación de jugadas, notación SAN, generación de FEN y parseo de PGN.</string>
+    <string name="info_terceros_androidx">AndroidX / Jetpack Compose / Material 3 / Hilt / Room</string>
+    <string name="info_terceros_androidx_licencia">Apache 2.0</string>
+    <string name="info_terceros_androidx_desc">Framework de desarrollo de apps Android, UI declarativa, inyección de dependencias y persistencia local.</string>
+    <string name="info_terceros_kotlin">Kotlin / Coroutines / KSP</string>
+    <string name="info_terceros_kotlin_licencia">Apache 2.0</string>
+    <string name="info_terceros_kotlin_desc">Lenguaje de programación, concurrencia y procesamiento de anotaciones.</string>
+
+    <!-- Contacto -->
+    <string name="info_contacto_titulo">Contacto</string>
+    <string name="info_contacto_correo">Correo electrónico: manuelsalmeroncerdan@gmail.com</string>
+    <string name="info_contacto_github">GitHub: https://github.com/Salmeron52/plantillas_ajedrez</string>
+
+    <!-- Agradecimientos -->
+    <string name="info_agradecimientos_titulo">Agradecimientos</string>
+    <string name="info_agradecimientos_lichess">A Lichess por las piezas cburnett y por promover el ajedrez abierto.</string>
+    <string name="info_agradecimientos_chesslib">A bhlangonijr y colaboradores por chesslib.</string>
+    <string name="info_agradecimientos_community">A la comunidad de ajedrez que hace posible el software libre.</string>
+
+    <!-- Menú -->
+    <string name="accion_info">Información</string>
 </resources>

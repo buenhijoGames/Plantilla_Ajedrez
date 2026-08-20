@@ -1,5 +1,8 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,20 +16,30 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +73,34 @@ fun PantallaTorneos(
     viewModel: TorneosViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val contexto = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Lanzador de SAF para seleccionar archivo PGN.
+    val launcherImportarPgn = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            val contenido = contexto.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.bufferedReader().use { it.readText() }
+            }
+            if (contenido != null) {
+                viewModel.importarPgn(contenido)
+            }
+        }
+    }
+
+    // Feedback de importación via Snackbar.
+    LaunchedEffect(estado.resultadoImportacion) {
+        val resultado = estado.resultadoImportacion ?: return@LaunchedEffect
+        val mensaje = if (resultado > 0) {
+            contexto.getString(R.string.snackbar_pgn_importado_conteo, resultado)
+        } else {
+            contexto.getString(R.string.snackbar_pgn_error_importar)
+        }
+        snackbarHostState.showSnackbar(mensaje)
+        viewModel.limpiarResultadoImportacion()
+    }
 
     if (estado.dialogoNuevo) {
         DialogoNuevoTorneo(
@@ -70,7 +111,18 @@ fun PantallaTorneos(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.torneos_titulo)) })
+            TopAppBar(
+                title = { Text(stringResource(R.string.torneos_titulo)) },
+                actions = {
+                    OverflowMenuTorneos(
+                        onImportarPgn = {
+                            launcherImportarPgn.launch(
+                                arrayOf("application/x-chess-pgn", "text/plain")
+                            )
+                        },
+                    )
+                },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = viewModel::abrirDialogoNuevo) {
@@ -80,6 +132,7 @@ fun PantallaTorneos(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
             estado.cargando -> Box(
@@ -175,5 +228,38 @@ private fun FilaTorneo(
                 )
             }
         }
+    }
+}
+
+/**
+ * Menu overflow (3 puntos) de la pantalla de torneos.
+ *
+ * Ofrece "Importar PGN" para importar partidas desde un archivo PGN externo
+ * como partidas sueltas (sin torneo asociado).
+ *
+ * @param onImportarPgn Accion al pulsar "Importar PGN".
+ */
+@Composable
+private fun OverflowMenuTorneos(
+    onImportarPgn: () -> Unit,
+) {
+    var expandido by remember { mutableStateOf(false) }
+    IconButton(onClick = { expandido = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(R.string.accion_mas),
+        )
+    }
+    DropdownMenu(
+        expanded = expandido,
+        onDismissRequest = { expandido = false },
+    ) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_importar_pgn)) },
+            onClick = {
+                expandido = false
+                onImportarPgn()
+            },
+        )
     }
 }

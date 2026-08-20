@@ -33,16 +33,13 @@ import com.buenhijogames.plantilla_ajedrez.R
  * nuevo torneo (o match, o partida aislada) o si es uno ya guardado").
  *
  * La TopAppBar sigue el principio minimalista de Manolo: solo un icono
- * de tres puntos (overflow) que despliega "Ajustes". Sin botones sueltos
- * a la vista (regla de Esta_App.md).
+ * de tres puntos (overflow) que despliega "Ajustes" e "Información".
+ * Sin botones sueltos a la vista (regla de Esta_App.md).
  *
  * @param onNuevo    Navega al flujo de nuevo torneo/partida.
  * @param onAbrirGuardado Navega a la lista de torneos guardados.
- * @param onAjustes  Navega a Ajustes. Por defecto lo recibe del caller
- *    para mantener la pantalla testeable; aquí se invoca desde el menú
- *    overflow, así que el NavHost de la Fase 3b ya no lo pasa: la
- *    navegación a Ajustes se hace desde la TopAppBar con el NavController
- *    que esta pantalla sí conoce via callback.
+ * @param onAjustes  Navega a Ajustes.
+ * @param onInfo     Navega a la pantalla de Información.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +47,7 @@ fun PantallaInicio(
     onNuevo: () -> Unit,
     onAbrirGuardado: () -> Unit,
     onAjustes: () -> Unit = {},
+    onInfo: () -> Unit = {},
 ) {
     var mostrarDialogo by remember { mutableStateOf(true) }
     var menuOverflow by remember { mutableStateOf(false) }
@@ -88,6 +86,13 @@ fun PantallaInicio(
                             onClick = {
                                 menuOverflow = false
                                 onAjustes()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.accion_info)) },
+                            onClick = {
+                                menuOverflow = false
+                                onInfo()
                             },
                         )
                     }

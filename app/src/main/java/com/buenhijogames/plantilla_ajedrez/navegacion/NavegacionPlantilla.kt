@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.buenhijogames.plantilla_ajedrez.ui.ajustes.PantallaAjustes
 import com.buenhijogames.plantilla_ajedrez.ui.inicio.PantallaInicio
+import com.buenhijogames.plantilla_ajedrez.ui.info.PantallaInfo
 import com.buenhijogames.plantilla_ajedrez.ui.tablero.PantallaPartida
 import com.buenhijogames.plantilla_ajedrez.ui.torneos.PantallaDetalleTorneo
 import com.buenhijogames.plantilla_ajedrez.ui.torneos.PantallaTorneos
@@ -42,6 +43,7 @@ fun NavegacionPlantilla(
                 onNuevo = { controlador.navigate(Destinos.TORNEOS) },
                 onAbrirGuardado = { controlador.navigate(Destinos.TORNEOS) },
                 onAjustes = { controlador.navigate(Destinos.AJUSTES) },
+                onInfo = { controlador.navigate(Destinos.INFO) },
             )
         }
         composable(Destinos.TORNEOS) {
@@ -76,6 +78,11 @@ fun NavegacionPlantilla(
         }
         composable(Destinos.AJUSTES) {
             PantallaAjustes()
+        }
+        composable(Destinos.INFO) {
+            PantallaInfo(
+                onVolver = { controlador.popBackStack() },
+            )
         }
     }
 }

@@ -25,6 +25,9 @@ object Destinos {
     /** Pantalla de partida (tablero). Argumento: [ARG_PARTIDA_ID]. */
     const val PARTIDA = "partida/{partidaId}"
 
+    /** Pantalla de información de la app (acerca de, licencias, etc.). */
+    const val INFO = "info"
+
     /** Nombre del argumento de id de torneo (clave del SavedStateHandle). */
     const val ARG_TORNEO_ID = "torneoId"
 

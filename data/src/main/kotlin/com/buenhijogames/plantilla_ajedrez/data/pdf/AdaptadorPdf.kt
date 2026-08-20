@@ -20,10 +20,10 @@ import javax.inject.Singleton
 /**
  * Implementacion de [PuertoPdf] con `android.graphics.pdf.PdfDocument`.
  *
- * Dibuja la plantilla FIDE (hoja A4 vertical) con el Seven Tag Roster en la
- * cabecera (Evento, Sitio, Fecha, Ronda, Blancas, Negras, Resultado + Elos)
- * y una tabla de dos columnas (Blancas / Negras) con casillas numeradas,
- * igual que las plantillas fisicas oficiales FIDE.
+ * Dibuja la plantilla FIDE oficial en formato A4 vertical con una cabecera
+ * compacta enmarcada (Evento, Ronda, Sitio, Fecha, Blancas, Negras, Resultado)
+ * y una estructura de 4 columnas (2 bloques de 30 jugadas = 60 jugadas por cara),
+ * incluyendo figurines tipográficos y zona de firmas al pie.
  *
  * Las jugadas se dibujan con **figurin** (silueta cburnett): cada SAN se
  * descompone con [PlanillaFide.segmentar] y los segmentos de pieza se
@@ -32,39 +32,58 @@ import javax.inject.Singleton
  *
  * Para varias partidas ([generarPlantillas]) se crea una pagina por partida.
  *
- * @param contexto Contexto de la aplicacion (para inflar los drawables).
+ * @param contexto Contexto de la aplicacion (para inflar los drawables y strings).
  */
 @Singleton
 class AdaptadorPdf @Inject constructor(
-    @ApplicationContext private val contexto: Context,
+    @param:ApplicationContext private val contexto: Context,
 ) : PuertoPdf {
 
     // --- Constantes de la hoja A4 (en puntos; 1 punto = 1/72 pulgada). ---
     private val ANCHO_HOJA = 595f
     private val ALTO_HOJA = 842f
-    private val MARGEN = 40f
+    private val MARGEN_LATERAL = 28f
+    private val MARGEN_SUPERIOR = 28f
+    private val MARGEN_INFERIOR = 28f
 
     // --- Pinturas reutilizadas (se configuran una vez). ---
     private val pinturaTexto = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        textSize = 11f
+        textSize = 9f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
     }
     private val pinturaTextoNegrita = Paint(pinturaTexto).apply {
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
-    private val pinturaTitulo = Paint(pinturaTextoNegrita).apply { textSize = 16f }
-    private val pinturaSubtitulo = Paint(pinturaTexto).apply {
-        textSize = 9f
-        color = Color.DKGRAY
-    }
-    private val pinturaEtiqueta = Paint(pinturaTextoNegrita).apply { textSize = 9f }
-    private val pinturaLinea = Paint().apply {
+    private val pinturaCabeceraTabla = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        strokeWidth = 0.8f
+        textSize = 8f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+    private val pinturaNumeroJugada = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.DKGRAY
+        textSize = 8.5f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+    private val pinturaResultado = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.BLACK
+        textSize = 11f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+    private val pinturaFondoCabeceraTabla = Paint().apply {
+        color = Color.rgb(238, 238, 238)
+        style = Paint.Style.FILL
+    }
+    private val pinturaLinea = Paint().apply {
+        color = Color.rgb(180, 180, 180)
+        strokeWidth = 0.5f
         style = Paint.Style.STROKE
     }
-    private val pinturaLineaGruesa = Paint(pinturaLinea).apply { strokeWidth = 1.6f }
+    private val pinturaMarco = Paint().apply {
+        color = Color.BLACK
+        strokeWidth = 1.0f
+        style = Paint.Style.STROKE
+    }
 
     override fun generarPlantilla(partida: Partida): ByteArray =
         generarPlantillas(listOf(partida))
@@ -82,8 +101,6 @@ class AdaptadorPdf @Inject constructor(
                 dibujarHoja(pagina.canvas, PlanillaFide.construir(partida))
                 documento.finishPage(pagina)
             }
-            // `toByteArray()` solo existe en API 33+; para minSdk 27 usamos
-            // `writeTo(OutputStream)` y volcamos el resultado a un ByteArray.
             val flujo = java.io.ByteArrayOutputStream()
             documento.writeTo(flujo)
             return flujo.toByteArray()
@@ -99,120 +116,200 @@ class AdaptadorPdf @Inject constructor(
      * @param plantilla Datos de la plantilla (cabecera + filas con figurin).
      */
     private fun dibujarHoja(canvas: Canvas, plantilla: PlanillaFide.Plantilla) {
-        dibujarTitulo(canvas)
-        dibujarCabecera(canvas, plantilla.cabecera)
-        dibujarTabla(canvas, plantilla.filas)
-    }
+        val altoCabecera = 82f
+        val altoPie = 32f
+        val yCabeceraTop = MARGEN_SUPERIOR
+        val yCabeceraBottom = yCabeceraTop + altoCabecera
 
-    /** Dibuja el titulo y subtitulo centrados en la parte superior. */
-    private fun dibujarTitulo(canvas: Canvas) {
-        val titulo = contexto.getString(R.string.pdf_titulo)
-        val subtitulo = contexto.getString(R.string.pdf_subtitulo)
-        val anchoTitulo = pinturaTitulo.measureText(titulo)
-        canvas.drawText(titulo, (ANCHO_HOJA - anchoTitulo) / 2f, MARGEN + 16f, pinturaTitulo)
-        val anchoSub = pinturaSubtitulo.measureText(subtitulo)
-        canvas.drawText(subtitulo, (ANCHO_HOJA - anchoSub) / 2f, MARGEN + 30f, pinturaSubtitulo)
+        val yPieBottom = ALTO_HOJA - MARGEN_INFERIOR
+        val yPieTop = yPieBottom - altoPie
+
+        val yTablaTop = yCabeceraBottom + 10f
+        val yTablaBottom = yPieTop - 10f
+
+        dibujarCabecera(canvas, yCabeceraTop, yCabeceraBottom, plantilla.cabecera)
+        dibujarTabla4Columnas(canvas, yTablaTop, yTablaBottom, plantilla.filas)
+        dibujarPieFirmas(canvas, yPieTop, yPieBottom)
     }
 
     /**
-     * Dibuja la cabecera con los tags de la partida en dos columnas.
-     *
-     * Filas: (Evento | Sitio), (Fecha | Ronda), (Blancas | Negras) y una fila
-     * de resultado centrada. Los nombres de jugador incluyen su Elo si existe.
+     * Dibuja la cabecera enmarcada con los datos del torneo, jugadores y resultado.
      *
      * @param canvas Canvas de la pagina.
-     * @param cabecera Datos de cabecera de la partida.
+     * @param top Posicion Y superior del marco.
+     * @param bottom Posicion Y inferior del marco.
+     * @param cabecera Datos de la cabecera.
      */
-    private fun dibujarCabecera(canvas: Canvas, cabecera: PlanillaFide.Cabecera) {
-        val mitadX = (ANCHO_HOJA - 2 * MARGEN) / 2f
-        var y = MARGEN + 48f
-        val altoFila = 16f
-        val espacioX = 8f
+    private fun dibujarCabecera(canvas: Canvas, top: Float, bottom: Float, cabecera: PlanillaFide.Cabecera) {
+        val izquierda = MARGEN_LATERAL
+        val derecha = ANCHO_HOJA - MARGEN_LATERAL
+        val anchoTotal = derecha - izquierda
 
-        fun dibujarPar(etiqueta1: String, valor1: String, etiqueta2: String, valor2: String) {
-            dibujarEtiquetaValor(canvas, MARGEN, y, etiqueta1, valor1, mitadX - espacioX)
-            dibujarEtiquetaValor(canvas, MARGEN + mitadX + espacioX, y, etiqueta2, valor2, mitadX - espacioX)
-            y += altoFila
+        // Marco exterior
+        canvas.drawRect(izquierda, top, derecha, bottom, pinturaMarco)
+
+        val altoFila = (bottom - top) / 4f
+        val divisionX1 = izquierda + anchoTotal * 0.70f // Para Evento/Ronda y Sitio/Fecha
+        val divisionX2 = izquierda + anchoTotal * 0.68f // Para Blancas/Firma y Negras/Resultado
+
+        // Lineas horizontales divisorias
+        for (i in 1..3) {
+            val y = top + i * altoFila
+            canvas.drawLine(izquierda, y, derecha, y, pinturaLinea)
         }
 
-        dibujarPar(
-            contexto.getString(R.string.pdf_evento), cabecera.evento,
-            contexto.getString(R.string.pdf_sitio), cabecera.sitio,
-        )
-        dibujarPar(
-            contexto.getString(R.string.pdf_fecha), cabecera.fecha,
-            contexto.getString(R.string.pdf_ronda), cabecera.ronda,
-        )
+        // Lineas verticales divisorias
+        canvas.drawLine(divisionX1, top, divisionX1, top + 2 * altoFila, pinturaLinea)
+        canvas.drawLine(divisionX2, top + 2 * altoFila, divisionX2, bottom, pinturaLinea)
 
-        val blanco = nombreConElo(cabecera.blancas, cabecera.eloBlancas)
-        val negro = nombreConElo(cabecera.negras, cabecera.eloNegras)
-        dibujarPar(
-            contexto.getString(R.string.pdf_blancas), blanco,
-            contexto.getString(R.string.pdf_negras), negro,
-        )
+        // Fila 1: Evento | Ronda
+        val yFila1 = top + altoFila * 0.70f
+        dibujarCampoCabecera(canvas, izquierda + 6f, yFila1, contexto.getString(R.string.pdf_evento), cabecera.evento, divisionX1 - izquierda - 12f)
+        dibujarCampoCabecera(canvas, divisionX1 + 6f, yFila1, contexto.getString(R.string.pdf_ronda), cabecera.ronda, derecha - divisionX1 - 12f)
 
-        val resultado = cabecera.resultado.pgn
-        val etiquetaResultado = contexto.getString(R.string.pdf_resultado)
-        val textoResultado = "$etiquetaResultado: $resultado"
-        val anchoResultado = pinturaTextoNegrita.measureText(textoResultado)
-        val yResultado = y + 18f
-        canvas.drawText(
-            textoResultado,
-            (ANCHO_HOJA - anchoResultado) / 2f,
-            yResultado,
-            pinturaTextoNegrita,
-        )
+        // Fila 2: Sitio | Fecha
+        val yFila2 = top + altoFila * 1.70f
+        dibujarCampoCabecera(canvas, izquierda + 6f, yFila2, contexto.getString(R.string.pdf_sitio), cabecera.sitio, divisionX1 - izquierda - 12f)
+        dibujarCampoCabecera(canvas, divisionX1 + 6f, yFila2, contexto.getString(R.string.pdf_fecha), cabecera.fecha, derecha - divisionX1 - 12f)
 
-        // Linea divisoria bajo la cabecera (separada del resultado).
-        canvas.drawLine(MARGEN, yResultado + 10f, ANCHO_HOJA - MARGEN, yResultado + 10f, pinturaLineaGruesa)
+        // Fila 3: Blancas
+        val yFila3 = top + altoFila * 2.70f
+        val nombreBlancas = nombreConElo(cabecera.blancas, cabecera.eloBlancas)
+        dibujarCampoCabecera(canvas, izquierda + 6f, yFila3, contexto.getString(R.string.pdf_blancas), nombreBlancas, divisionX2 - izquierda - 12f)
+
+        // Fila 4: Negras | Resultado
+        val yFila4 = top + altoFila * 3.70f
+        val nombreNegras = nombreConElo(cabecera.negras, cabecera.eloNegras)
+        dibujarCampoCabecera(canvas, izquierda + 6f, yFila4, contexto.getString(R.string.pdf_negras), nombreNegras, divisionX2 - izquierda - 12f)
+
+        // Resultado destacado a la derecha en la fila 4
+        val etiquetaRes = contexto.getString(R.string.pdf_resultado) + ":"
+        canvas.drawText(etiquetaRes, divisionX2 + 6f, yFila4, pinturaTextoNegrita)
+        val anchoEtiquetaRes = pinturaTextoNegrita.measureText(etiquetaRes)
+        val textoResultado = cabecera.resultado.pgn
+        canvas.drawText(textoResultado, divisionX2 + 6f + anchoEtiquetaRes + 8f, yFila4, pinturaResultado)
     }
 
     /**
-     * Dibuja la tabla de jugadas Blancas/Negras con casillas numeradas.
-     *
-     * Cada fila de la tabla es una jugada completa: numero de jugada a la
-     * izquierda y las jugadas de blancas/negras con figurin. Las filas se
-     * rellenan hasta [MAXIMO_FILAS]; si faltan jugadas, quedan casillas en
-     * blanco (para anotar a mano), igual que una plantilla fisica.
+     * Dibuja un campo de la cabecera ("Etiqueta: Valor") asegurando que no sobrepase el ancho.
+     */
+    private fun dibujarCampoCabecera(
+        canvas: Canvas,
+        x: Float,
+        y: Float,
+        etiqueta: String,
+        valor: String,
+        anchoDisponible: Float,
+    ) {
+        val textoEtiqueta = "$etiqueta:"
+        val anchoEtiqueta = pinturaTextoNegrita.measureText(textoEtiqueta)
+        canvas.drawText(textoEtiqueta, x, y, pinturaTextoNegrita)
+
+        val disponibleValor = anchoDisponible - anchoEtiqueta - 4f
+        if (disponibleValor > 0 && valor.isNotBlank()) {
+            val valorRecortado = recortarTexto(valor, disponibleValor, pinturaTexto)
+            canvas.drawText(valorRecortado, x + anchoEtiqueta + 4f, y, pinturaTexto)
+        }
+    }
+
+    /**
+     * Dibuja la tabla de 4 columnas (2 bloques de 30 jugadas cada uno).
      *
      * @param canvas Canvas de la pagina.
-     * @param filas Filas con las jugadas (puede ser vacia).
+     * @param top Posicion Y superior de la tabla.
+     * @param bottom Posicion Y inferior de la tabla.
+     * @param filas Lista de jugadas disponibles.
      */
-    private fun dibujarTabla(canvas: Canvas, filas: List<PlanillaFide.Fila>) {
-        val anchoUtil = ANCHO_HOJA - 2 * MARGEN
-        val anchoNumero = 32f
-        val anchoColumna = (anchoUtil - anchoNumero) / 2f
-        val inicioX = MARGEN
-        val top = MARGEN + 96f
-        val maximoFilas = 30
+    private fun dibujarTabla4Columnas(
+        canvas: Canvas,
+        top: Float,
+        bottom: Float,
+        filas: List<PlanillaFide.Fila>,
+    ) {
+        val izquierda = MARGEN_LATERAL
+        val derecha = ANCHO_HOJA - MARGEN_LATERAL
+        val anchoTotal = derecha - izquierda
+        val separacionBloques = 12f
+        val anchoBloque = (anchoTotal - separacionBloques) / 2f
 
-        // Cabecera de la tabla: solo el numero de jugada (las columnas
-        // Blancas/Negras ya aparecen en la cabecera de arriba, no se repiten).
-        dibujarTextoEn(canvas, inicioX + 4f, top + 10f, contexto.getString(R.string.pdf_numero), pinturaEtiqueta)
-        // Linea de cabecera de la tabla (separada de la primera jugada).
-        val inicioFilasY = top + 20f
-        canvas.drawLine(inicioX, inicioFilasY - 2f, ANCHO_HOJA - MARGEN, inicioFilasY - 2f, pinturaLinea)
+        val xBloque1 = izquierda
+        val xBloque2 = izquierda + anchoBloque + separacionBloques
 
-        val altoFila = (ALTO_HOJA - inicioFilasY - MARGEN) / maximoFilas
+        // Dibujar Bloque 1 (Jugadas 1 a 30)
+        dibujarBloqueJugadas(canvas, xBloque1, top, bottom, anchoBloque, 1, 30, filas)
 
-        for (indiceFila in 0 until maximoFilas) {
-            val yTop = inicioFilasY + indiceFila * altoFila
-            val yCentro = yTop + altoFila / 2f
-            val fila = filas.getOrNull(indiceFila)
+        // Dibujar Bloque 2 (Jugadas 31 a 60)
+        dibujarBloqueJugadas(canvas, xBloque2, top, bottom, anchoBloque, 31, 60, filas)
+    }
 
-            // Numero de jugada.
-            if (fila != null) {
-                val numero = fila.numero.toString()
-                val anchoNum = pinturaTexto.measureText(numero)
-                canvas.drawText(numero, inicioX + anchoNumero - anchoNum - 4f, yCentro + 4f, pinturaTexto)
+    /**
+     * Dibuja un bloque de anotacion de 30 jugadas (Nº, Blancas, Negras).
+     */
+    private fun dibujarBloqueJugadas(
+        canvas: Canvas,
+        x: Float,
+        top: Float,
+        bottom: Float,
+        ancho: Float,
+        jugadaInicio: Int,
+        jugadaFin: Int,
+        filas: List<PlanillaFide.Fila>,
+    ) {
+        val altoCabecera = 16f
+        val numFilas = (jugadaFin - jugadaInicio + 1)
+        val altoFila = (bottom - top - altoCabecera) / numFilas
+
+        val anchoNumero = 20f
+        val anchoColumna = (ancho - anchoNumero) / 2f
+
+        // Fondo y texto cabecera de la tabla
+        canvas.drawRect(x, top, x + ancho, top + altoCabecera, pinturaFondoCabeceraTabla)
+        canvas.drawRect(x, top, x + ancho, bottom, pinturaMarco)
+
+        // Linea divisoria cabecera
+        canvas.drawLine(x, top + altoCabecera, x + ancho, top + altoCabecera, pinturaMarco)
+
+        // Divisores verticales de cabecera
+        canvas.drawLine(x + anchoNumero, top, x + anchoNumero, bottom, pinturaLinea)
+        canvas.drawLine(x + anchoNumero + anchoColumna, top, x + anchoNumero + anchoColumna, bottom, pinturaLinea)
+
+        // Textos cabecera
+        val yTextoCabecera = top + 11.5f
+        val textoNumero = contexto.getString(R.string.pdf_numero)
+        val anchoTxtNum = pinturaCabeceraTabla.measureText(textoNumero)
+        canvas.drawText(textoNumero, x + (anchoNumero - anchoTxtNum) / 2f, yTextoCabecera, pinturaCabeceraTabla)
+
+        val textoBlancas = contexto.getString(R.string.pdf_blancas).uppercase()
+        val anchoTxtBla = pinturaCabeceraTabla.measureText(textoBlancas)
+        canvas.drawText(textoBlancas, x + anchoNumero + (anchoColumna - anchoTxtBla) / 2f, yTextoCabecera, pinturaCabeceraTabla)
+
+        val textoNegras = contexto.getString(R.string.pdf_negras).uppercase()
+        val anchoTxtNeg = pinturaCabeceraTabla.measureText(textoNegras)
+        canvas.drawText(textoNegras, x + anchoNumero + anchoColumna + (anchoColumna - anchoTxtNeg) / 2f, yTextoCabecera, pinturaCabeceraTabla)
+
+        // Dibujar filas de jugadas
+        for (i in 0 until numFilas) {
+            val numJugada = jugadaInicio + i
+            val yFilaTop = top + altoCabecera + i * altoFila
+            val yFilaBottom = yFilaTop + altoFila
+            val yCentro = yFilaTop + altoFila / 2f
+
+            // Linea horizontal de cada fila
+            if (i < numFilas - 1) {
+                canvas.drawLine(x, yFilaBottom, x + ancho, yFilaBottom, pinturaLinea)
             }
 
-            // Columnas Blancas / Negras con figurin.
-            dibujarJugadaEnCelda(canvas, inicioX + anchoNumero, yCentro, anchoColumna, fila?.blancas)
-            dibujarJugadaEnCelda(canvas, inicioX + anchoNumero + anchoColumna, yCentro, anchoColumna, fila?.negras)
+            // Numero de jugada centrado
+            val strNum = numJugada.toString()
+            val anchoN = pinturaNumeroJugada.measureText(strNum)
+            canvas.drawText(strNum, x + (anchoNumero - anchoN) / 2f, yCentro + 3f, pinturaNumeroJugada)
 
-            // Linea separadora de la fila.
-            canvas.drawLine(inicioX, yTop + altoFila, ANCHO_HOJA - MARGEN, yTop + altoFila, pinturaLinea)
+            // Jugadas de la fila (si existen)
+            val fila = filas.firstOrNull { it.numero == numJugada }
+            if (fila != null) {
+                dibujarJugadaEnCelda(canvas, x + anchoNumero, yCentro, anchoColumna, fila.blancas)
+                dibujarJugadaEnCelda(canvas, x + anchoNumero + anchoColumna, yCentro, anchoColumna, fila.negras)
+            }
         }
     }
 
@@ -233,15 +330,15 @@ class AdaptadorPdf @Inject constructor(
         segmentos: List<SegmentoFigurin>?,
     ) {
         if (segmentos.isNullOrEmpty()) return
-        var x = xInicio + 6f
-        val altoIcono = 14f
+        var x = xInicio + 5f
+        val altoIcono = 11f
         for (segmento in segmentos) {
             when (segmento) {
                 is SegmentoFigurin.Texto -> {
                     val texto = segmento.texto
                     val ancho = pinturaTexto.measureText(texto)
-                    if (x + ancho > xInicio + anchoCelda - 4f) break
-                    canvas.drawText(texto, x, yCentro + 4f, pinturaTexto)
+                    if (x + ancho > xInicio + anchoCelda - 2f) break
+                    canvas.drawText(texto, x, yCentro + 3.2f, pinturaTexto)
                     x += ancho
                 }
 
@@ -249,30 +346,40 @@ class AdaptadorPdf @Inject constructor(
                     val icono = obtenerFigurin(segmento.simboloFen) ?: continue
                     val izquierda = x
                     val derecha = izquierda + altoIcono
-                    if (derecha > xInicio + anchoCelda - 4f) break
+                    if (derecha > xInicio + anchoCelda - 2f) break
                     val rect = RectF(izquierda, yCentro - altoIcono / 2f, derecha, yCentro + altoIcono / 2f)
                     canvas.drawBitmap(icono, null, rect, null)
-                    x = derecha
+                    x = derecha + 1f
                 }
             }
         }
     }
 
-    /** Dibuja una etiqueta + valor con "Etiqueta: valor" truncado al ancho. */
-    private fun dibujarEtiquetaValor(
-        canvas: Canvas,
-        x: Float,
-        y: Float,
-        etiqueta: String,
-        valor: String,
-        ancho: Float,
-    ) {
-        val textoEtiqueta = "$etiqueta:"
-        val anchoEtiqueta = pinturaEtiqueta.measureText(textoEtiqueta)
-        canvas.drawText(textoEtiqueta, x, y + 10f, pinturaEtiqueta)
-        val disponible = ancho - anchoEtiqueta - 8f
-        val valorRecortado = recortarTexto(valor, disponible, pinturaTexto)
-        canvas.drawText(valorRecortado, x + anchoEtiqueta + 6f, y + 10f, pinturaTexto)
+    /**
+     * Dibuja el pie de pagina con lineas para las firmas oficiales.
+     */
+    private fun dibujarPieFirmas(canvas: Canvas, top: Float, bottom: Float) {
+        val izquierda = MARGEN_LATERAL
+        val derecha = ANCHO_HOJA - MARGEN_LATERAL
+        val anchoTotal = derecha - izquierda
+        val anchoSeccion = anchoTotal / 3f
+
+        val yLinea = top + 14f
+        val yTexto = yLinea + 11f
+
+        // Firma Blancas
+        canvas.drawLine(izquierda + 5f, yLinea, izquierda + anchoSeccion - 15f, yLinea, pinturaLinea)
+        canvas.drawText(contexto.getString(R.string.pdf_firma_blancas), izquierda + 5f, yTexto, pinturaTexto)
+
+        // Firma Negras
+        val xNegras = izquierda + anchoSeccion
+        canvas.drawLine(xNegras + 5f, yLinea, xNegras + anchoSeccion - 15f, yLinea, pinturaLinea)
+        canvas.drawText(contexto.getString(R.string.pdf_firma_negras), xNegras + 5f, yTexto, pinturaTexto)
+
+        // Firma Arbitro
+        val xArbitro = izquierda + 2 * anchoSeccion
+        canvas.drawLine(xArbitro + 5f, yLinea, xArbitro + anchoSeccion - 5f, yLinea, pinturaLinea)
+        canvas.drawText(contexto.getString(R.string.pdf_firma_arbitro), xArbitro + 5f, yTexto, pinturaTexto)
     }
 
     /**
@@ -320,11 +427,6 @@ class AdaptadorPdf @Inject constructor(
         drawable.draw(lienzo)
         cacheFigurines[simboloFen] = bitmap
         return bitmap
-    }
-
-    /** Dibuja texto en [x],[y] con la pintura dada (helper para una linea). */
-    private fun dibujarTextoEn(canvas: Canvas, x: Float, y: Float, texto: String, pintura: Paint) {
-        canvas.drawText(texto, x, y, pintura)
     }
 
     companion object {

@@ -148,6 +148,23 @@ fun PantallaPartida(
                                 )
                             }
                         },
+                        onExportarPgn = {
+                            val pgn = viewModel.exportarPgnPartida()
+                            if (pgn != null) {
+                                val nombre = contexto.getString(
+                                    R.string.pgn_partida_nombre,
+                                    estado.blancas.ifBlank { "blancas" },
+                                    estado.negras.ifBlank { "negras" },
+                                )
+                                CompartirArchivo.compartir(
+                                    contexto = contexto,
+                                    bytes = pgn.toByteArray(Charsets.UTF_8),
+                                    nombre = nombre,
+                                    tipoMime = "application/x-chess-pgn",
+                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                )
+                            }
+                        },
                     )
                 },
             )
@@ -253,16 +270,18 @@ fun PantallaPartida(
 /**
  * Menu overflow (3 puntos) de la pantalla de partida.
  *
- * Actualmente ofrece "Exportar PDF", que genera la plantilla FIDE de la
- * partida actual y la comparte con otras apps mediante [CompartirArchivo].
- * Se abre como un [DropdownMenu] sobre el icono de 3 puntos de la TopAppBar.
+ * Ofrece "Exportar PDF" y "Exportar PGN", que generan la plantilla FIDE y el
+ * PGN de la partida actual y los comparten con otras apps mediante
+ * [CompartirArchivo]. Se abre como un [DropdownMenu] sobre el icono de 3
+ * puntos de la TopAppBar.
  *
- * @param onExportarPdf Accion al pulsar "Exportar PDF" (el ViewModel ya ha
- *                      generado los bytes del PDF).
+ * @param onExportarPdf Accion al pulsar "Exportar PDF".
+ * @param onExportarPgn Accion al pulsar "Exportar PGN".
  */
 @Composable
 private fun OverflowMenuPartida(
     onExportarPdf: () -> Unit,
+    onExportarPgn: () -> Unit,
 ) {
     var expandido by remember { mutableStateOf(false) }
     IconButton(onClick = { expandido = true }) {
@@ -280,6 +299,13 @@ private fun OverflowMenuPartida(
             onClick = {
                 expandido = false
                 onExportarPdf()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_exportar_pgn)) },
+            onClick = {
+                expandido = false
+                onExportarPgn()
             },
         )
     }

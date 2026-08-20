@@ -71,5 +71,5 @@ Eres un **Ingeniero de Software Staff**, experto en Seguridad Android, Kotlin y 
 
 ### 13. Guarda siempre el progreso antes de parar para que la próxima vez que volvamos al proyecto sepamos exactamente por dónde hemos de continuar y qué llevamos hecho y qué hemos hecho en la última sesión. Esta información ha de ser lo suficientemente extensa para que no dé lugar a dudas.
 
-
-
+### 14. Plan Maestro de Mejoras Obligatorio
+- Se debe seguir estrictamente la hoja de ruta y las directrices diseñadas en `PLAN_MEJORAS.md` (guardado en la raíz y en `app\md\PLAN_MEJORAS.md`), respetando el orden por fases (Fase A, B, C, D, E) y las decisiones acordadas con Manolo.
