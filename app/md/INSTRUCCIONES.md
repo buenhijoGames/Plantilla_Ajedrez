@@ -869,6 +869,13 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ---
 
-### Pendiente de Checkpoint
-- Rama: `fase-e-pulido-temas-playstore`
+### Checkpoint y Estado de Versiones
+- **Rama activa:** `fase-e-pulido-temas-playstore`
+- **Último Commit:** `e01ffc6` — *feat(fase-e): pulido de temas, navegacion en ajustes, icono adaptativo, exportacion pdf torneo completo, modo match entre 2 jugadores y reproductor automatico*
+- **Estado:** Todas las funcionalidades de las 5 Fases (A, B, C, D y E) más las peticiones de Match entre 2 jugadores, exportación de torneos en PDF, auto-rellenado de fechas del sistema, optimización de renderizado FIDE/pantalla y reproductor automático están completadas, verificadas y commiteadas.
+
+---
+
+### Siguiente paso
+- Esperar confirmación de Manolo para continuar o definir el siguiente conjunto de mejoras.
 - "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"
