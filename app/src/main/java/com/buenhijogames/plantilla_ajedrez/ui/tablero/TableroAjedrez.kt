@@ -64,6 +64,7 @@ fun TableroAjedrez(
     destinosLegales: List<String>,
     onCasillaPulsada: (String) -> Unit,
     modifier: Modifier = Modifier,
+    girado: Boolean = false,
 ) {
     val piezas = remember(fen) { piezasDesdeFen(fen) }
     // Caché ampliada: el tablero mide 16 etiquetas de coordenadas por frame.
@@ -98,7 +99,7 @@ fun TableroAjedrez(
 
             // Casilla seleccionada: relleno ámbar translúcido.
             casillaSeleccionada?.let { casilla ->
-                val (fila, columna) = filaYColumnaDeCasilla(casilla)
+                val (fila, columna) = filaYColumnaDeCasilla(casilla, girado)
                 drawRect(
                     color = ColorSeleccion,
                     topLeft = Offset(columna * tamano, fila * tamano),
@@ -108,7 +109,7 @@ fun TableroAjedrez(
 
             // Destinos legales: círculo (vacío) o anillo (captura).
             for (destino in destinosLegales) {
-                val (fila, columna) = filaYColumnaDeCasilla(destino)
+                val (fila, columna) = filaYColumnaDeCasilla(destino, girado)
                 val centro = Offset((columna + 0.5f) * tamano, (fila + 0.5f) * tamano)
                 val hayPieza = piezas.containsKey(destino)
                 if (hayPieza) {
@@ -127,14 +128,13 @@ fun TableroAjedrez(
                 }
             }
 
-            // Coordenadas del borde: letras a-h abajo (rank 1) y números 1-8
-            // a la izquierda (file a), para orientar al jugador. El color se
-            // elige para contrastar con el color de la casilla de fondo.
+            // Coordenadas del borde: letras en el borde inferior y números en el borde izquierdo.
             val padding = 1.dp.toPx()
             for (columna in 0 until CASILLAS_POR_LADO) {
+                val letra = if (girado) ('h' - columna) else ('a' + columna)
                 val casillaClara = (CASILLAS_POR_LADO - 1 + columna) % 2 == 0
                 val estilo = if (casillaClara) estiloCoordenadaClara else estiloCoordenadaOscura
-                val etiqueta = medidorTexto.measure(('a' + columna).toString(), estilo)
+                val etiqueta = medidorTexto.measure(letra.toString(), estilo)
                 drawText(
                     textLayoutResult = etiqueta,
                     topLeft = Offset(
@@ -144,9 +144,10 @@ fun TableroAjedrez(
                 )
             }
             for (fila in 0 until CASILLAS_POR_LADO) {
+                val numero = if (girado) (fila + 1) else (CASILLAS_POR_LADO - fila)
                 val casillaClara = fila % 2 == 0
                 val estilo = if (casillaClara) estiloCoordenadaClara else estiloCoordenadaOscura
-                val etiqueta = medidorTexto.measure((CASILLAS_POR_LADO - fila).toString(), estilo)
+                val etiqueta = medidorTexto.measure(numero.toString(), estilo)
                 drawText(
                     textLayoutResult = etiqueta,
                     topLeft = Offset(x = padding, y = fila * tamano + padding),
@@ -154,10 +155,9 @@ fun TableroAjedrez(
             }
         }
 
-        // Piezas: cada VectorDrawable se pinta sobre su casilla. align(TopStart)
-        // es imprescindible: sin él el offset partiría del centro del tablero.
+        // Piezas: cada VectorDrawable se pinta sobre su casilla calculada con [girado].
         for ((casilla, pieza) in piezas) {
-            val (fila, columna) = filaYColumnaDeCasilla(casilla)
+            val (fila, columna) = filaYColumnaDeCasilla(casilla, girado)
             Image(
                 painter = painterResource(recursoPieza(pieza)),
                 contentDescription = null,
@@ -168,19 +168,16 @@ fun TableroAjedrez(
             )
         }
 
-        // Captura de toques: convierte el offset en casilla y la notifica.
-        // La clave de pointerInput incluye tamanoCasilla para que el mapeo
-        // toque->casilla se recalcule si el tamaño cambia (rotación, etc.).
+        // Captura de toques: convierte el offset en casilla según [girado] y la notifica.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(fen, tamanoCasilla) {
+                .pointerInput(fen, tamanoCasilla, girado) {
                     detectTapGestures { offset ->
-                        // PointerInputScope implementa Density: toPx() es seguro.
                         val tamanoCasillaPx = tamanoCasilla.toPx()
                         val columna = (offset.x / tamanoCasillaPx).toInt().coerceIn(0, CASILLAS_POR_LADO - 1)
                         val fila = (offset.y / tamanoCasillaPx).toInt().coerceIn(0, CASILLAS_POR_LADO - 1)
-                        onCasillaPulsada(casillaDeFilaColumna(fila, columna))
+                        onCasillaPulsada(casillaDeFilaColumna(fila, columna, girado))
                     }
                 },
         )

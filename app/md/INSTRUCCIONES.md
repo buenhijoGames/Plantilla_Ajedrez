@@ -803,20 +803,34 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ---
 
-### 🏠 Fase B: Flujo de Inicio Directo y Partidas Sueltas
+### 🏠 Fase B: Flujo de Inicio Directo y Partidas Sueltas (Completada y Commiteada)
+- Commit: `fd6a6f3` en rama `fase-b-flujo-inicio-partida-suelta`.
+- Arranque directo a la lista de torneos, soporte y creación de partidas sueltas independientes, diálogo de nueva partida y FAB selector.
+
+---
+
+### ♟️ Fase C: Mejoras del Tablero y Partida
 
 **Tareas realizadas en esta unidad lógica:**
-1. **M1 (Arranque directo):**
-   - Modificado [NavegacionPlantilla.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/navegacion/NavegacionPlantilla.kt) para que `startDestination` sea directamente `Destinos.TORNEOS`, eliminando el `StartupDialog` emergente inicial.
-   - El menú overflow de [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt) ahora centraliza **Ajustes**, **Información** e **Importar PGN**.
-2. **M2 (Partidas Sueltas sin Torneo):**
-   - Creado [DialogoNuevaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevaPartida.kt) con campos completos (Blancas, Negras, Evento, Sitio, Fecha, Ronda, Elo Blancas, Elo Negras).
-   - [TorneosViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/TorneosViewModel.kt): actualizado con `combine` reactivo de `observarTorneos()` y `observarPartidasSueltas()`, métodos para crear/eliminar partidas sueltas y navegación automática tras crear partida suelta.
-   - [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): rediseñada con FAB menú desplegable (Nuevo Torneo / Nueva Partida suelta), sección de Torneos, sección de Partidas sueltas y diálogo de confirmación para eliminar partidas sueltas.
-   - [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml): añadidas todas las cadenas para partidas sueltas y diálogos de creación.
+1. **🔄 Giro de Tablero (Perspectiva Negras):**
+   - Actualizadas utilidades matemáticas [UtilidadesTablero.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTablero.kt) (`filaYColumnaDeCasilla` y `casillaDeFilaColumna`) con soporte para inversión de coordenadas `(7 - fila, 7 - columna)`.
+   - Modificado [TableroAjedrez.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/TableroAjedrez.kt) para renderizar casillas, resaltados, piezas, letras (h-a), números (1-8) y gestionar eventos táctiles invertidos de forma precisa según el parámetro `girado`.
+   - Añadido botón con icono `ScreenRotation` en la `TopAppBar` de [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt).
+2. **✏️ Diálogo de Edición de Datos de Cabecera:**
+   - Creado `DialogoEditarCabecera` en `PantallaPartida.kt` accesible desde el menú overflow (3 puntos).
+   - Permite editar: Blancas, Elo Blancas, Negras, Elo Negras, Evento, Sitio, Ronda y Fecha.
+   - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt) persiste los cambios actualizados en Room.
+3. **🏆 Asignación Manual de Resultado:**
+   - Creado `DialogoCambiarResultado` con opciones tipo radio button: `1-0`, `0-1`, `½-½` y `* (En curso)`.
+   - Accesible desde el menú overflow (3 puntos) y persistido directamente en Room.
+4. **📱 Layout Horizontal Responsivo:**
+   - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt) detecta la orientación del dispositivo mediante `LocalConfiguration.current.orientation`.
+   - En horizontal (`LANDSCAPE`): distribuye la pantalla en 2 columnas: mitad izquierda para el tablero con indicador de turno, y mitad derecha para el panel de edición y la planilla de jugadas con scroll independiente.
+5. **Strings:**
+   - Actualizado [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) con todas las nuevas cadenas sin texto hardcodeado.
 
 ---
 
 ### Pendiente de Checkpoint
-- Rama: `fase-b-flujo-inicio-partida-suelta`
+- Rama: `fase-c-tablero-y-partida`
 - "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"

@@ -73,31 +73,39 @@ fun piezasDesdeFen(fen: String): Map<String, Char> {
 /**
  * Devuelve la fila y columna visuales de una casilla.
  *
- * El tablero se pinta con las blancas abajo: la fila 0 es la superior (rank 8)
- * y la columna 0 es la izquierda (file a).
+ * Con [girado] = false (blancas abajo): la fila 0 es la superior (rank 8) y columna 0 la izquierda (file a).
+ * Con [girado] = true (negras abajo): la fila 0 es la superior (rank 1) y columna 0 la izquierda (file h).
  *
  * @param casilla Casilla en notación algebraica ("e2").
+ * @param girado  true si el tablero está visto desde la perspectiva de negras.
  * @return Par (fila, columna) con valores en el rango 0..7. Si la casilla no
  *         es válida devuelve (0, 0).
  */
-fun filaYColumnaDeCasilla(casilla: String): Pair<Int, Int> {
+fun filaYColumnaDeCasilla(casilla: String, girado: Boolean = false): Pair<Int, Int> {
     val file = casilla.getOrNull(0)?.lowercaseChar() ?: return 0 to 0
     val rank = casilla.getOrNull(1)?.digitToIntOrNull() ?: return 0 to 0
-    val columna = (file - 'a').coerceIn(0, 7)
-    val fila = (8 - rank).coerceIn(0, 7)
-    return fila to columna
+    val columnaNormal = (file - 'a').coerceIn(0, 7)
+    val filaNormal = (8 - rank).coerceIn(0, 7)
+    return if (girado) {
+        (7 - filaNormal) to (7 - columnaNormal)
+    } else {
+        filaNormal to columnaNormal
+    }
 }
 
 /**
  * Devuelve la casilla algebraica correspondiente a una fila/columna visuales.
  *
- * @param fila    Fila 0..7 (0 = arriba, rank 8).
- * @param columna Columna 0..7 (0 = izquierda, file a).
+ * @param fila    Fila visual 0..7 (0 = arriba).
+ * @param columna Columna visual 0..7 (0 = izquierda).
+ * @param girado  true si el tablero está visto desde la perspectiva de negras.
  * @return Casilla en notación algebraica ("e2").
  */
-fun casillaDeFilaColumna(fila: Int, columna: Int): String {
-    val file = ('a' + columna.coerceIn(0, 7))
-    val rank = 8 - fila.coerceIn(0, 7)
+fun casillaDeFilaColumna(fila: Int, columna: Int, girado: Boolean = false): String {
+    val f = if (girado) 7 - fila.coerceIn(0, 7) else fila.coerceIn(0, 7)
+    val c = if (girado) 7 - columna.coerceIn(0, 7) else columna.coerceIn(0, 7)
+    val file = ('a' + c)
+    val rank = 8 - f
     return "$file$rank"
 }
 

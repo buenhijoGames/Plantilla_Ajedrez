@@ -95,6 +95,9 @@ data class EstadoPartida(
     val nagEdicion: Int? = null,
     val varianteEnConstruccion: CaminoPlanilla? = null,
     val hayError: Boolean = false,
+    val tableroGirado: Boolean = false,
+    val dialogoEditarCabecera: Boolean = false,
+    val dialogoCambiarResultado: Boolean = false,
 )
 
 /**
@@ -841,6 +844,98 @@ class PartidaViewModel @Inject constructor(
             )
         } catch (e: Exception) {
             null
+        }
+    }
+
+    /**
+     * Alterna la orientación del tablero (blancas abajo / negras abajo).
+     */
+    fun alternarGiroTablero() {
+        _estado.update { it.copy(tableroGirado = !it.tableroGirado) }
+    }
+
+    /** Abre el diálogo de edición de datos de cabecera. */
+    fun abrirDialogoEditarCabecera() {
+        _estado.update { it.copy(dialogoEditarCabecera = true) }
+    }
+
+    /** Cierra el diálogo de edición de cabecera. */
+    fun cerrarDialogoEditarCabecera() {
+        _estado.update { it.copy(dialogoEditarCabecera = false) }
+    }
+
+    /** Abre el diálogo de cambio manual de resultado. */
+    fun abrirDialogoCambiarResultado() {
+        _estado.update { it.copy(dialogoCambiarResultado = true) }
+    }
+
+    /** Cierra el diálogo de cambio de resultado. */
+    fun cerrarDialogoCambiarResultado() {
+        _estado.update { it.copy(dialogoCambiarResultado = false) }
+    }
+
+    /**
+     * Actualiza los datos de cabecera de la partida y los persiste en Room.
+     */
+    fun guardarCabecera(
+        blancas: String,
+        negras: String,
+        evento: String,
+        sitio: String,
+        fecha: String,
+        ronda: String,
+        eloBlancas: Int?,
+        eloNegras: Int?,
+    ) {
+        val base = partidaBase ?: return
+        val partidaActualizada = base.copy(
+            blancas = blancas,
+            negras = negras,
+            evento = evento,
+            sitio = sitio,
+            fecha = fecha,
+            ronda = ronda,
+            eloBlancas = eloBlancas,
+            eloNegras = eloNegras,
+        )
+        partidaBase = partidaActualizada
+        viewModelScope.launch {
+            repositorioPartidas.guardarPartida(partidaActualizada)
+            _estado.update {
+                it.copy(
+                    dialogoEditarCabecera = false,
+                    blancas = blancas,
+                    negras = negras,
+                    evento = evento,
+                    sitio = sitio,
+                    fecha = fecha,
+                    ronda = ronda,
+                    eloBlancas = eloBlancas,
+                    eloNegras = eloNegras,
+                )
+            }
+        }
+    }
+
+    /**
+     * Establece el resultado manual de la partida y lo persiste en Room.
+     */
+    fun establecerResultado(nuevoResultado: ResultadoPartida) {
+        val base = partidaBase ?: return
+        val partidaActualizada = base.copy(
+            resultado = nuevoResultado,
+            pgn = _estado.value.movetext,
+        )
+        partidaBase = partidaActualizada
+        viewModelScope.launch {
+            repositorioPartidas.guardarPartida(partidaActualizada)
+            _estado.update {
+                it.copy(
+                    dialogoCambiarResultado = false,
+                    resultado = nuevoResultado,
+                    resultadoVisible = nuevoResultado,
+                )
+            }
         }
     }
 }

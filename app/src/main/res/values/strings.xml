@@ -79,8 +79,15 @@
     <string name="partida_tablas">Tablas</string>
     <string name="partida_en_curso">En curso</string>
     <string name="partida_volver_final">Volver al final</string>
-    <string name="partida_editar">Editar partida</string>
+    <string name="partida_editar">Editar jugadas</string>
     <string name="partida_salir_edicion">Salir edición</string>
+    <string name="partida_girar_tablero">Girar tablero</string>
+    <string name="partida_editar_datos">Editar datos de partida</string>
+    <string name="partida_establecer_resultado">Establecer resultado</string>
+    <string name="resultado_ganan_blancas">1-0 (Ganan blancas)</string>
+    <string name="resultado_ganan_negras">0-1 (Ganan negras)</string>
+    <string name="resultado_tablas">½-½ (Tablas)</string>
+    <string name="resultado_en_curso">* (Partida en curso)</string>
     <string name="promocion_titulo">Promoción de peón</string>
 
     <!-- Edición de anotaciones y variantes de la planilla -->
