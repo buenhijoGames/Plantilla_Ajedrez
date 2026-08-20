@@ -43,10 +43,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.buenhijogames.plantilla_ajedrez.R
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.ui.compartir.CompartirArchivo
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de partida: tablero interactivo + planilla electrónica.
@@ -83,6 +90,39 @@ fun PantallaPartida(
     val contexto = LocalContext.current
     val configuracion = LocalConfiguration.current
     val esHorizontal = configuracion.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val textoArchivoGuardado = stringResource(R.string.snackbar_archivo_guardar_error)
+    val textoArchivoGuardadoExito = stringResource(R.string.snackbar_archivo_guardado)
+
+    val formatoPdfPartidaNombre = stringResource(R.string.pdf_partida_nombre)
+    val formatoPgnPartidaNombre = stringResource(R.string.pgn_partida_nombre)
+    val asuntoCompartir = stringResource(R.string.compartir_asunto)
+
+    // Datos temporales para escribir en SAF CreateDocument
+    var bytesParaGuardar by remember { mutableStateOf<ByteArray?>(null) }
+
+    val launcherGuardarArchivo = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+    ) { uri: Uri? ->
+        val bytes = bytesParaGuardar
+        if (uri != null && bytes != null) {
+            try {
+                contexto.contentResolver.openOutputStream(uri)?.use { output ->
+                    output.write(bytes)
+                }
+                scope.launch {
+                    snackbarHostState.showSnackbar(textoArchivoGuardadoExito)
+                }
+            } catch (e: Exception) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(textoArchivoGuardado)
+                }
+            }
+        }
+        bytesParaGuardar = null
+    }
 
     // Diálogo de promoción pendiente
     val promocion = estado.promocionPendiente
@@ -120,6 +160,7 @@ fun PantallaPartida(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(estado.evento.ifBlank { stringResource(R.string.partida_titulo) }) },
@@ -172,15 +213,15 @@ fun PantallaPartida(
                         )
                     }
 
-                    // Menú overflow (exportar, editar datos, establecer resultado)
+                    // Menú overflow (compartir, guardar en disco, editar datos, establecer resultado)
                     OverflowMenuPartida(
                         onEditarCabecera = viewModel::abrirDialogoEditarCabecera,
                         onCambiarResultado = viewModel::abrirDialogoCambiarResultado,
-                        onExportarPdf = {
+                        onCompartirPdf = {
                             val bytes = viewModel.generarPdfPartida()
                             if (bytes != null) {
                                 val nombre = String.format(
-                                    contexto.getString(R.string.pdf_partida_nombre),
+                                    formatoPdfPartidaNombre,
                                     estado.blancas.ifBlank { "blancas" },
                                     estado.negras.ifBlank { "negras" },
                                 )
@@ -189,15 +230,27 @@ fun PantallaPartida(
                                     bytes = bytes,
                                     nombre = nombre,
                                     tipoMime = "application/pdf",
-                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                    asunto = asuntoCompartir,
                                 )
                             }
                         },
-                        onExportarPgn = {
+                        onGuardarPdf = {
+                            val bytes = viewModel.generarPdfPartida()
+                            if (bytes != null) {
+                                bytesParaGuardar = bytes
+                                val nombre = String.format(
+                                    formatoPdfPartidaNombre,
+                                    estado.blancas.ifBlank { "blancas" },
+                                    estado.negras.ifBlank { "negras" },
+                                )
+                                launcherGuardarArchivo.launch(nombre)
+                            }
+                        },
+                        onCompartirPgn = {
                             val pgn = viewModel.exportarPgnPartida()
                             if (pgn != null) {
                                 val nombre = String.format(
-                                    contexto.getString(R.string.pgn_partida_nombre),
+                                    formatoPgnPartidaNombre,
                                     estado.blancas.ifBlank { "blancas" },
                                     estado.negras.ifBlank { "negras" },
                                 )
@@ -206,8 +259,20 @@ fun PantallaPartida(
                                     bytes = pgn.toByteArray(Charsets.UTF_8),
                                     nombre = nombre,
                                     tipoMime = "application/x-chess-pgn",
-                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                    asunto = asuntoCompartir,
                                 )
+                            }
+                        },
+                        onGuardarPgn = {
+                            val pgn = viewModel.exportarPgnPartida()
+                            if (pgn != null) {
+                                bytesParaGuardar = pgn.toByteArray(Charsets.UTF_8)
+                                val nombre = String.format(
+                                    formatoPgnPartidaNombre,
+                                    estado.blancas.ifBlank { "blancas" },
+                                    estado.negras.ifBlank { "negras" },
+                                )
+                                launcherGuardarArchivo.launch(nombre)
                             }
                         },
                     )
@@ -578,8 +643,10 @@ private fun OpcionResultado(
 private fun OverflowMenuPartida(
     onEditarCabecera: () -> Unit,
     onCambiarResultado: () -> Unit,
-    onExportarPdf: () -> Unit,
-    onExportarPgn: () -> Unit,
+    onCompartirPdf: () -> Unit,
+    onGuardarPdf: () -> Unit,
+    onCompartirPgn: () -> Unit,
+    onGuardarPgn: () -> Unit,
 ) {
     var expandido by remember { mutableStateOf(false) }
     IconButton(onClick = { expandido = true }) {
@@ -607,17 +674,31 @@ private fun OverflowMenuPartida(
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.accion_exportar_pdf)) },
+            text = { Text(stringResource(R.string.accion_compartir_pdf)) },
             onClick = {
                 expandido = false
-                onExportarPdf()
+                onCompartirPdf()
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.accion_exportar_pgn)) },
+            text = { Text(stringResource(R.string.accion_guardar_pdf)) },
             onClick = {
                 expandido = false
-                onExportarPgn()
+                onGuardarPdf()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_compartir_pgn)) },
+            onClick = {
+                expandido = false
+                onCompartirPgn()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_guardar_pgn)) },
+            onClick = {
+                expandido = false
+                onGuardarPgn()
             },
         )
     }

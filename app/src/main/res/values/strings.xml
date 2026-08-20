@@ -100,7 +100,11 @@
     <string name="edicion_variante_hint">Juega en el tablero para crear una variante sobre esta jugada.</string>
     <string name="edicion_variante_en_curso">Añadiendo variante. Sigue jugando en el tablero.</string>
 
-    <!-- PDF / PGN -->
+    <!-- PDF / PGN / Exportación -->
+    <string name="accion_compartir_pdf">Compartir PDF</string>
+    <string name="accion_compartir_pgn">Compartir PGN</string>
+    <string name="accion_guardar_pdf">Guardar PDF en disco…</string>
+    <string name="accion_guardar_pgn">Guardar PGN en disco…</string>
     <string name="accion_exportar_pdf">Exportar PDF</string>
     <string name="accion_exportar_pgn">Exportar PGN</string>
     <string name="accion_importar_pgn">Importar PGN</string>
@@ -111,6 +115,8 @@
     <string name="pgn_torneo_nombre">torneo_%1$s.pgn</string>
     <string name="compartir_asunto">Plantilla de la partida</string>
     <string name="compartir_texto">Plantilla generada con Plantilla_ajedrez</string>
+    <string name="snackbar_archivo_guardado">Archivo guardado correctamente</string>
+    <string name="snackbar_archivo_guardar_error">Error al guardar el archivo</string>
     <string name="snackbar_pdf_generado">PDF generado</string>
     <string name="snackbar_pdf_error">Error al generar el PDF</string>
     <string name="snackbar_pgn_exportado">PGN exportado</string>
@@ -120,6 +126,12 @@
     <string name="snackbar_pgn_error_importar">Error al importar el PGN</string>
     <string name="snackbar_pgn_error_vacio">El archivo PGN está vacío o no contiene partidas válidas</string>
     <string name="pgn_seleccionar_archivo">Selecciona un archivo PGN</string>
+
+    <!-- Búsqueda y filtrado -->
+    <string name="accion_buscar">Buscar</string>
+    <string name="accion_cerrar_busqueda">Cerrar búsqueda</string>
+    <string name="buscar_placeholder">Buscar torneo, jugador, evento…</string>
+    <string name="buscar_sin_resultados">No se encontraron resultados para \"%1$s\"</string>
 
     <!-- Pantalla Info / Acerca de -->
     <string name="info_titulo">Información</string>

@@ -3,7 +3,6 @@ package com.buenhijogames.plantilla_ajedrez.ui.torneos
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -30,11 +31,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,15 +60,8 @@ import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
 /**
  * Pantalla principal de Torneos y Partidas sueltas.
  *
- * Ofrece la lista unificada de torneos y partidas sueltas guardadas, el
- * FAB '+' para crear torneo o partida suelta, el menú de ajustes/información/importar
- * PGN, y confirmación previa de borrado.
- *
- * @param onAbrirTorneo  Navega al detalle de un torneo con su id.
- * @param onAbrirPartida Navega a una partida concreta (suelta o de torneo).
- * @param onAjustes      Navega a la pantalla de Ajustes.
- * @param onInfo         Navega a la pantalla de Información.
- * @param viewModel      Inyectado por Hilt.
+ * Ofrece la lista unificada con filtrado por búsqueda en tiempo real,
+ * creación de torneos o partidas sueltas, importación/exportación y menú de opciones.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -197,20 +194,62 @@ fun PantallaTorneos(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    OverflowMenuTorneos(
-                        onImportarPgn = {
-                            launcherImportarPgn.launch(
-                                arrayOf("application/x-chess-pgn", "text/plain")
+            if (estado.busquedaActiva) {
+                TopAppBar(
+                    title = {
+                        OutlinedTextField(
+                            value = estado.textoBusqueda,
+                            onValueChange = viewModel::actualizarTextoBusqueda,
+                            placeholder = { Text(stringResource(R.string.buscar_placeholder)) },
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    },
+                    actions = {
+                        if (estado.textoBusqueda.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.actualizarTextoBusqueda("") }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.accion_cerrar_busqueda),
+                                )
+                            }
+                        }
+                        IconButton(onClick = viewModel::cerrarBusqueda) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.accion_cerrar_busqueda),
                             )
-                        },
-                        onAjustes = onAjustes,
-                        onInfo = onInfo,
-                    )
-                },
-            )
+                        }
+                    },
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.app_name)) },
+                    actions = {
+                        IconButton(onClick = viewModel::abrirBusqueda) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = stringResource(R.string.accion_buscar),
+                            )
+                        }
+                        OverflowMenuTorneos(
+                            onImportarPgn = {
+                                launcherImportarPgn.launch(
+                                    arrayOf("application/x-chess-pgn", "text/plain")
+                                )
+                            },
+                            onAjustes = onAjustes,
+                            onInfo = onInfo,
+                        )
+                    },
+                )
+            }
         },
         floatingActionButton = {
             Box {
@@ -239,6 +278,9 @@ fun PantallaTorneos(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        val listaTorneos = if (estado.busquedaActiva) estado.torneosFiltrados else estado.torneos
+        val listaPartidas = if (estado.busquedaActiva) estado.partidasFiltradas else estado.partidasSueltas
+
         when {
             estado.cargando -> Box(
                 modifier = Modifier
@@ -258,6 +300,19 @@ fun PantallaTorneos(
                 Text(
                     text = stringResource(R.string.torneos_error),
                     color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            estado.busquedaActiva && listaTorneos.isEmpty() && listaPartidas.isEmpty() -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.buscar_sin_resultados, estado.textoBusqueda),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -282,7 +337,7 @@ fun PantallaTorneos(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (estado.torneos.isNotEmpty()) {
+                if (listaTorneos.isNotEmpty()) {
                     item {
                         Text(
                             text = stringResource(R.string.seccion_torneos),
@@ -291,7 +346,7 @@ fun PantallaTorneos(
                             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
                         )
                     }
-                    items(estado.torneos, key = { "torneo_${it.id}" }) { torneo ->
+                    items(listaTorneos, key = { "torneo_${it.id}" }) { torneo ->
                         FilaTorneo(
                             torneo = torneo,
                             onAbrir = { onAbrirTorneo(torneo.id) },
@@ -300,7 +355,7 @@ fun PantallaTorneos(
                     }
                 }
 
-                if (estado.partidasSueltas.isNotEmpty()) {
+                if (listaPartidas.isNotEmpty()) {
                     item {
                         Text(
                             text = stringResource(R.string.seccion_partidas_sueltas),
@@ -309,7 +364,7 @@ fun PantallaTorneos(
                             modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                         )
                     }
-                    items(estado.partidasSueltas, key = { "partida_${it.id}" }) { partida ->
+                    items(listaPartidas, key = { "partida_${it.id}" }) { partida ->
                         FilaPartidaSuelta(
                             partida = partida,
                             onAbrir = { onAbrirPartida(partida.id) },

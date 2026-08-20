@@ -22,6 +22,10 @@ import javax.inject.Inject
  *
  * @property torneos              Lista actual de torneos emitida por el repo.
  * @property partidasSueltas      Lista actual de partidas sueltas (sin torneo).
+ * @property torneosFiltrados     Lista de torneos filtrada por [textoBusqueda].
+ * @property partidasFiltradas    Lista de partidas sueltas filtrada por [textoBusqueda].
+ * @property textoBusqueda        Cadena de búsqueda introducida por el usuario.
+ * @property busquedaActiva       true si la barra de búsqueda está visible.
  * @property cargando             true mientras la lista inicial no ha emitido.
  * @property hayErrorCarga        true si el Flow de lectura lanzó.
  * @property dialogoNuevoTorneo   true si el formulario de nuevo torneo está abierto.
@@ -34,6 +38,10 @@ import javax.inject.Inject
 data class EstadoTorneos(
     val torneos: List<Torneo> = emptyList(),
     val partidasSueltas: List<Partida> = emptyList(),
+    val torneosFiltrados: List<Torneo> = emptyList(),
+    val partidasFiltradas: List<Partida> = emptyList(),
+    val textoBusqueda: String = "",
+    val busquedaActiva: Boolean = false,
     val cargando: Boolean = true,
     val hayErrorCarga: Boolean = false,
     val dialogoNuevoTorneo: Boolean = false,
@@ -77,15 +85,80 @@ class TorneosViewModel @Inject constructor(
                 }
                 .collect { (torneos, partidas) ->
                     _estado.update { actual ->
+                        val (torneosFilt, partidasFilt) = filtrarListas(
+                            torneos = torneos,
+                            partidas = partidas,
+                            filtro = actual.textoBusqueda,
+                        )
                         actual.copy(
                             torneos = torneos,
                             partidasSueltas = partidas,
+                            torneosFiltrados = torneosFilt,
+                            partidasFiltradas = partidasFilt,
                             cargando = false,
                             hayErrorCarga = false,
                         )
                     }
                 }
         }
+    }
+
+    /** Abre la barra de búsqueda. */
+    fun abrirBusqueda() {
+        _estado.update { it.copy(busquedaActiva = true) }
+    }
+
+    /** Cierra la barra de búsqueda y limpia el texto de filtro. */
+    fun cerrarBusqueda() {
+        _estado.update { actual ->
+            actual.copy(
+                busquedaActiva = false,
+                textoBusqueda = "",
+                torneosFiltrados = actual.torneos,
+                partidasFiltradas = actual.partidasSueltas,
+            )
+        }
+    }
+
+    /** Actualiza el filtro de búsqueda y recalcula los resultados. */
+    fun actualizarTextoBusqueda(filtro: String) {
+        _estado.update { actual ->
+            val (torneosFilt, partidasFilt) = filtrarListas(
+                torneos = actual.torneos,
+                partidas = actual.partidasSueltas,
+                filtro = filtro,
+            )
+            actual.copy(
+                textoBusqueda = filtro,
+                torneosFiltrados = torneosFilt,
+                partidasFiltradas = partidasFilt,
+            )
+        }
+    }
+
+    private fun filtrarListas(
+        torneos: List<Torneo>,
+        partidas: List<Partida>,
+        filtro: String,
+    ): Pair<List<Torneo>, List<Partida>> {
+        val query = filtro.trim().lowercase()
+        if (query.isEmpty()) return torneos to partidas
+
+        val torneosFilt = torneos.filter {
+            it.nombre.lowercase().contains(query) ||
+                it.sitio.lowercase().contains(query) ||
+                it.fechaInicio.lowercase().contains(query)
+        }
+
+        val partidasFilt = partidas.filter {
+            it.blancas.lowercase().contains(query) ||
+                it.negras.lowercase().contains(query) ||
+                it.evento.lowercase().contains(query) ||
+                it.sitio.lowercase().contains(query) ||
+                it.fecha.lowercase().contains(query)
+        }
+
+        return torneosFilt to partidasFilt
     }
 
     /** Abre el selector de tipo de elemento a crear (+). */

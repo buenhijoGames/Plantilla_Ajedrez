@@ -809,28 +809,29 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ---
 
-### ♟️ Fase C: Mejoras del Tablero y Partida
+### ♟️ Fase C: Mejoras del Tablero y Partida (Completada y Commiteada)
+- Commit: `5d25776` en rama `fase-c-tablero-y-partida`.
+- Giro de tablero a perspectiva de negras, edición completa de datos de cabecera, resultado manual y distribución apaisada de dos columnas en horizontal.
+
+---
+
+### 🔍 Fase D: Búsqueda, Filtrado y Guardado de Archivos en Disco
 
 **Tareas realizadas en esta unidad lógica:**
-1. **🔄 Giro de Tablero (Perspectiva Negras):**
-   - Actualizadas utilidades matemáticas [UtilidadesTablero.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTablero.kt) (`filaYColumnaDeCasilla` y `casillaDeFilaColumna`) con soporte para inversión de coordenadas `(7 - fila, 7 - columna)`.
-   - Modificado [TableroAjedrez.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/TableroAjedrez.kt) para renderizar casillas, resaltados, piezas, letras (h-a), números (1-8) y gestionar eventos táctiles invertidos de forma precisa según el parámetro `girado`.
-   - Añadido botón con icono `ScreenRotation` en la `TopAppBar` de [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt).
-2. **✏️ Diálogo de Edición de Datos de Cabecera:**
-   - Creado `DialogoEditarCabecera` en `PantallaPartida.kt` accesible desde el menú overflow (3 puntos).
-   - Permite editar: Blancas, Elo Blancas, Negras, Elo Negras, Evento, Sitio, Ronda y Fecha.
-   - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt) persiste los cambios actualizados en Room.
-3. **🏆 Asignación Manual de Resultado:**
-   - Creado `DialogoCambiarResultado` con opciones tipo radio button: `1-0`, `0-1`, `½-½` y `* (En curso)`.
-   - Accesible desde el menú overflow (3 puntos) y persistido directamente en Room.
-4. **📱 Layout Horizontal Responsivo:**
-   - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt) detecta la orientación del dispositivo mediante `LocalConfiguration.current.orientation`.
-   - En horizontal (`LANDSCAPE`): distribuye la pantalla en 2 columnas: mitad izquierda para el tablero con indicador de turno, y mitad derecha para el panel de edición y la planilla de jugadas con scroll independiente.
-5. **Strings:**
+1. **🔍 Búsqueda y Filtrado en Tiempo Real:**
+   - [TorneosViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/TorneosViewModel.kt): añadido filtrado en memoria sobre torneos (nombre, sitio, fecha) y partidas sueltas (blancas, negras, evento, sitio, fecha).
+   - [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): botón de búsqueda en la `TopAppBar` que despliega una barra de búsqueda con `TextField` transparente, botón de limpiar texto y vista de "sin resultados".
+2. **💾 Guardado de PDF y PGN en Disco:**
+   - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): integrado `ActivityResultContracts.CreateDocument` (SAF - Storage Access Framework) para permitir al usuario guardar el PDF o PGN en cualquier carpeta de su dispositivo con el nombre por defecto adecuado.
+   - Menú overflow (3 puntos) enriquecido con opciones diferenciadas:
+     - `Compartir PDF` / `Guardar PDF en disco…`
+     - `Compartir PGN` / `Guardar PGN en disco…`
+   - Notificación de feedback mediante `SnackbarHost` indicando éxito o error del guardado.
+3. **Strings:**
    - Actualizado [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) con todas las nuevas cadenas sin texto hardcodeado.
 
 ---
 
 ### Pendiente de Checkpoint
-- Rama: `fase-c-tablero-y-partida`
+- Rama: `fase-d-busqueda-y-guardado-disco`
 - "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"
