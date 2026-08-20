@@ -797,26 +797,26 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ---
 
-### 🧹 Fase A: Correcciones, Limpieza y Estabilidad
+### 🧹 Fase A: Correcciones, Limpieza y Estabilidad (Completada y Commiteada)
+- Commit: `b85328a` en rama `fase-a-correcciones-limpieza`.
+- Tests reparados al 100%, nombre oficial `"Plantilla de Ajedrez"`, diálogo de confirmación de borrado de torneo y limpieza de imports.
 
-**Norma de Oro incorporada:**
-- El asistente **NO compila ni corre tests por terminal** (`gradlew/compile`). La compilación y verificación de estabilidad la realiza **exclusivamente Manolo desde Android Studio**.
+---
+
+### 🏠 Fase B: Flujo de Inicio Directo y Partidas Sueltas
 
 **Tareas realizadas en esta unidad lógica:**
-1. **T1 (Corrección de tests):**
-   - `AdaptadorChesslib.kt`: se mejoró `resultadoActual()` para evaluar `board.legalMoves().isEmpty()` y `board.isKingAttacked`, evitando falsos positivos de material insuficiente en mates.
-   - `AdaptadorChesslibTest.kt`: se sustituyó el FEN de prueba por el Mate del Pastor para testear `GANA_BLANCAS` de forma inequívoca.
-   - `UtilidadesTableroTest.kt`: corregida la aserción de la posición tras `1.e4` (los peones negros se mantienen en `e7`, no `e5`).
-2. **T2 (Renombrado app_name):**
-   - Actualizado `app_name` a `"Plantilla de Ajedrez"` en `app/res/values/strings.xml`.
-3. **T5 (Limpieza de imports y sintaxis):**
-   - Limpiado import calificado innecesario de `Row` en `PantallaAjustes.kt`.
-4. **B5/M8 (Diálogo de confirmación al eliminar torneo):**
-   - Añadido `AlertDialog` en `PantallaTorneos.kt` con advertencia de pérdida permanente de partidas antes de borrar con cascade.
-   - Añadidas cadenas en `strings.xml`: `torneo_eliminar_confirmacion_titulo`, `torneo_eliminar_confirmacion_mensaje`, `accion_eliminar`.
+1. **M1 (Arranque directo):**
+   - Modificado [NavegacionPlantilla.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/navegacion/NavegacionPlantilla.kt) para que `startDestination` sea directamente `Destinos.TORNEOS`, eliminando el `StartupDialog` emergente inicial.
+   - El menú overflow de [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt) ahora centraliza **Ajustes**, **Información** e **Importar PGN**.
+2. **M2 (Partidas Sueltas sin Torneo):**
+   - Creado [DialogoNuevaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevaPartida.kt) con campos completos (Blancas, Negras, Evento, Sitio, Fecha, Ronda, Elo Blancas, Elo Negras).
+   - [TorneosViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/TorneosViewModel.kt): actualizado con `combine` reactivo de `observarTorneos()` y `observarPartidasSueltas()`, métodos para crear/eliminar partidas sueltas y navegación automática tras crear partida suelta.
+   - [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): rediseñada con FAB menú desplegable (Nuevo Torneo / Nueva Partida suelta), sección de Torneos, sección de Partidas sueltas y diálogo de confirmación para eliminar partidas sueltas.
+   - [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml): añadidas todas las cadenas para partidas sueltas y diálogos de creación.
 
 ---
 
 ### Pendiente de Checkpoint
-- Rama: `fase-a-correcciones-limpieza`
-- Tras verificación de Manolo, realizaremos commit detallado en español.
+- Rama: `fase-b-flujo-inicio-partida-suelta`
+- "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"

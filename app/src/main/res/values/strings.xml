@@ -50,10 +50,25 @@
     <string name="torneo_detalle_vacio">Este torneo aún no tiene partidas. Pulsa + para crear una.</string>
     <string name="torneo_detalle_error">No se pudieron cargar los datos del torneo.</string>
 
+    <!-- Partidas sueltas y creación -->
+    <string name="opcion_nuevo_torneo">Nuevo torneo</string>
+    <string name="opcion_nueva_partida">Nueva partida suelta</string>
+    <string name="seccion_torneos">Torneos</string>
+    <string name="seccion_partidas_sueltas">Partidas sueltas</string>
+    <string name="partidas_sueltas_vacio">No hay partidas sueltas guardadas.</string>
+    <string name="partida_suelta_eliminar_confirmacion_titulo">¿Eliminar partida?</string>
+    <string name="partida_suelta_eliminar_confirmacion_mensaje">¿Estás seguro de que quieres eliminar la partida \"%1$s vs %2$s\"?</string>
+
     <!-- Partida -->
     <string name="partida_titulo">Partida</string>
     <string name="partida_error">No se pudo abrir la partida.</string>
     <string name="partida_nueva_titulo">Nueva partida</string>
+    <string name="partida_evento">Evento / Torneo (opcional)</string>
+    <string name="partida_sitio">Sitio / Lugar (opcional)</string>
+    <string name="partida_fecha">Fecha</string>
+    <string name="partida_ronda_label">Ronda (opcional)</string>
+    <string name="partida_elo_blancas">Elo Blancas (opcional)</string>
+    <string name="partida_elo_negras">Elo Negras (opcional)</string>
     <string name="partida_ronda">Ronda %1$s</string>
     <string name="partida_enfrentamiento">%1$s – %2$s</string>
     <string name="partida_jugador_blanco">Blancas</string>

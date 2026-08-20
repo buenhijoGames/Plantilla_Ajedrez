@@ -36,7 +36,7 @@ fun NavegacionPlantilla(
 ) {
     NavHost(
         navController = controlador,
-        startDestination = Destinos.INICIO,
+        startDestination = Destinos.TORNEOS,
     ) {
         composable(Destinos.INICIO) {
             PantallaInicio(
@@ -51,6 +51,11 @@ fun NavegacionPlantilla(
                 onAbrirTorneo = { torneoId ->
                     controlador.navigate(Destinos.rutaDetalleTorneo(torneoId))
                 },
+                onAbrirPartida = { partidaId ->
+                    controlador.navigate(Destinos.rutaPartida(partidaId))
+                },
+                onAjustes = { controlador.navigate(Destinos.AJUSTES) },
+                onInfo = { controlador.navigate(Destinos.INFO) },
             )
         }
         composable(

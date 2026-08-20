@@ -2,6 +2,7 @@ package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
 import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
@@ -11,45 +12,40 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Estado de la pantalla de torneos.
+ * Estado de la pantalla de torneos y partidas sueltas.
  *
- * @property torneos           Lista actual de torneos emitida por el repo.
- * @property cargando          true mientras la lista inicial no ha emitido.
- * @property hayErrorCarga     true si el Flow de lectura lanzó (ver
- *                             [TorneosViewModel]). La UI resuelve el texto
- *                             desde `strings.xml` para no hardcodear.
- * @property dialogoNuevo      true si el formulario de nuevo torneo está abierto.
- * @property importandoPgn     true mientras se está importando un PGN.
+ * @property torneos              Lista actual de torneos emitida por el repo.
+ * @property partidasSueltas      Lista actual de partidas sueltas (sin torneo).
+ * @property cargando             true mientras la lista inicial no ha emitido.
+ * @property hayErrorCarga        true si el Flow de lectura lanzó.
+ * @property dialogoNuevoTorneo   true si el formulario de nuevo torneo está abierto.
+ * @property dialogoNuevaPartida  true si el formulario de nueva partida suelta está abierto.
+ * @property menuCrearAbierto     true si el selector de creación (torneo / partida suelta) está visible.
+ * @property partidaCreadaId      Id de la partida recién creada para navegar (null tras navegar).
+ * @property importandoPgn        true mientras se está importando un PGN.
  * @property resultadoImportacion Número de partidas importadas (null si no hay importación reciente).
  */
 data class EstadoTorneos(
     val torneos: List<Torneo> = emptyList(),
+    val partidasSueltas: List<Partida> = emptyList(),
     val cargando: Boolean = true,
     val hayErrorCarga: Boolean = false,
-    val dialogoNuevo: Boolean = false,
+    val dialogoNuevoTorneo: Boolean = false,
+    val dialogoNuevaPartida: Boolean = false,
+    val menuCrearAbierto: Boolean = false,
+    val partidaCreadaId: String? = null,
     val importandoPgn: Boolean = false,
     val resultadoImportacion: Int? = null,
 )
 
 /**
- * [ViewModel] de la lista de torneos.
- *
- * Un único [MutableStateFlow] actúa como fuente de verdad del estado: el
- * `Flow` de Room lo actualiza en [init] y las acciones de UI ([abrirDialogoNuevo],
- * [crearTorneo], ...) también. Así nunca hay dos estados que diverjan.
- *
- * Errores de lectura se capturan en el [catch] para NO tumbar la app
- * (regla de estabilidad 0% crasheos): el mensaje se expone en
- * [EstadoTorneos.errorCarga] y la lista queda vacía. La escritura
- * ([crearTorneo], [eliminarTorneo]) se lanza en [viewModelScope].
- *
- * Anotado con [HiltViewModel] para recibir [RepositorioTorneos] (binding
- * `@Binds` del ModuloRepositorios de la Fase 1).
+ * [ViewModel] de la pantalla principal (torneos y partidas sueltas).
  */
 @HiltViewModel
 class TorneosViewModel @Inject constructor(
@@ -65,11 +61,13 @@ class TorneosViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repositorio.observarTorneos()
+            combine(
+                repositorio.observarTorneos(),
+                repositorioPartidas.observarPartidasSueltas(),
+            ) { torneos, partidas ->
+                torneos to partidas
+            }
                 .catch {
-                    // No derrumbar la app: marcar el error y continuar.
-                    // No exponemos el mensaje técnico al usuario (texto
-                    // hardcodeado prohibido); la UI muestra un string genérico.
                     _estado.update { actual ->
                         actual.copy(
                             cargando = false,
@@ -77,10 +75,11 @@ class TorneosViewModel @Inject constructor(
                         )
                     }
                 }
-                .collect { lista ->
+                .collect { (torneos, partidas) ->
                     _estado.update { actual ->
                         actual.copy(
-                            torneos = lista,
+                            torneos = torneos,
+                            partidasSueltas = partidas,
                             cargando = false,
                             hayErrorCarga = false,
                         )
@@ -89,22 +88,38 @@ class TorneosViewModel @Inject constructor(
         }
     }
 
+    /** Abre el selector de tipo de elemento a crear (+). */
+    fun abrirMenuCrear() {
+        _estado.update { it.copy(menuCrearAbierto = true) }
+    }
+
+    /** Cierra el selector de tipo de elemento a crear. */
+    fun cerrarMenuCrear() {
+        _estado.update { it.copy(menuCrearAbierto = false) }
+    }
+
     /** Abre el formulario de nuevo torneo. */
-    fun abrirDialogoNuevo() {
-        _estado.update { it.copy(dialogoNuevo = true) }
+    fun abrirDialogoNuevoTorneo() {
+        _estado.update { it.copy(dialogoNuevoTorneo = true, menuCrearAbierto = false) }
     }
 
     /** Cierra el formulario de nuevo torneo sin guardar. */
-    fun cerrarDialogoNuevo() {
-        _estado.update { it.copy(dialogoNuevo = false) }
+    fun cerrarDialogoNuevoTorneo() {
+        _estado.update { it.copy(dialogoNuevoTorneo = false) }
+    }
+
+    /** Abre el formulario de nueva partida suelta. */
+    fun abrirDialogoNuevaPartida() {
+        _estado.update { it.copy(dialogoNuevaPartida = true, menuCrearAbierto = false) }
+    }
+
+    /** Cierra el formulario de nueva partida suelta sin guardar. */
+    fun cerrarDialogoNuevaPartida() {
+        _estado.update { it.copy(dialogoNuevaPartida = false) }
     }
 
     /**
      * Crea un torneo nuevo y lo persiste.
-     *
-     * El id lo asigna el repositorio (via [com.buenhijogames.plantilla_ajedrez.domain.repositorio.GeneradorIds]
-     * si viene vacío). Tras guardar, la lista se actualiza sola vía el
-     * Flow observado en [init]. No crea un torneo si [nombre] queda vacío.
      */
     fun crearTorneo(nombre: String, sitio: String, fechaInicio: String) {
         val nombreLimpio = nombre.trim()
@@ -117,14 +132,48 @@ class TorneosViewModel @Inject constructor(
                     fechaInicio = fechaInicio.trim(),
                 )
             )
-            _estado.update { it.copy(dialogoNuevo = false) }
+            _estado.update { it.copy(dialogoNuevoTorneo = false) }
         }
+    }
+
+    /**
+     * Crea una partida suelta (sin torneo) y la persiste.
+     */
+    fun crearPartidaSuelta(datos: DatosNuevaPartida) {
+        viewModelScope.launch {
+            val id = repositorioPartidas.guardarPartida(
+                Partida(
+                    torneoId = null,
+                    evento = datos.evento.ifBlank { "Partida suelta" },
+                    sitio = datos.sitio,
+                    fecha = datos.fecha,
+                    ronda = datos.ronda,
+                    blancas = datos.blancas,
+                    negras = datos.negras,
+                    eloBlancas = datos.eloBlancas,
+                    eloNegras = datos.eloNegras,
+                )
+            )
+            _estado.update { it.copy(dialogoNuevaPartida = false, partidaCreadaId = id) }
+        }
+    }
+
+    /** Limpia el id de partida creada tras navegar. */
+    fun limpiarPartidaCreadaId() {
+        _estado.update { it.copy(partidaCreadaId = null) }
     }
 
     /** Elimina un torneo por id. */
     fun eliminarTorneo(id: String) {
         viewModelScope.launch {
             repositorio.eliminarTorneo(id)
+        }
+    }
+
+    /** Elimina una partida suelta por id. */
+    fun eliminarPartidaSuelta(id: String) {
+        viewModelScope.launch {
+            repositorioPartidas.eliminarPartida(id)
         }
     }
 

@@ -1,8 +1,9 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,36 +50,41 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.buenhijogames.plantilla_ajedrez.R
+import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
 
 /**
- * Pantalla de Torneos.
+ * Pantalla principal de Torneos y Partidas sueltas.
  *
- * Lista reactiva de torneos guardados observada desde
- * [RepositorioTorneos.observarTorneos]. Un [FloatingActionButton] permite
- * crear un torneo nuevo; el formulario abre [DialogoNuevoTorneo].
+ * Ofrece la lista unificada de torneos y partidas sueltas guardadas, el
+ * FAB '+' para crear torneo o partida suelta, el menú de ajustes/información/importar
+ * PGN, y confirmación previa de borrado.
  *
- * Estados:
- *   - Cargando: [CircularProgressIndicator] (evita mostrar 'vacío' antes
- *     de que Room emita la lista real).
- *   - Error de lectura: mensaje en [EstadoTorneos.errorCarga] sin tumbar
- *     la app (estabilidad 0% crasheos).
- *   - Vacío: texto de estado vacío.
- *   - Con datos: [LazyColumn] de tarjetas con nombre/sitio/fecha y botón
- *     de eliminar.
- *
- * @param viewModel Inyectado por Hilt por defecto; parámetro para tests.
- * @param onAbrirTorneo Navega al detalle de un torneo con su id.
+ * @param onAbrirTorneo  Navega al detalle de un torneo con su id.
+ * @param onAbrirPartida Navega a una partida concreta (suelta o de torneo).
+ * @param onAjustes      Navega a la pantalla de Ajustes.
+ * @param onInfo         Navega a la pantalla de Información.
+ * @param viewModel      Inyectado por Hilt.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PantallaTorneos(
     onAbrirTorneo: (String) -> Unit,
+    onAbrirPartida: (String) -> Unit,
+    onAjustes: () -> Unit = {},
+    onInfo: () -> Unit = {},
     viewModel: TorneosViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Si se creó una partida suelta, navegamos inmediatamente a ella.
+    LaunchedEffect(estado.partidaCreadaId) {
+        val id = estado.partidaCreadaId ?: return@LaunchedEffect
+        viewModel.limpiarPartidaCreadaId()
+        onAbrirPartida(id)
+    }
 
     // Lanzador de SAF para seleccionar archivo PGN.
     val launcherImportarPgn = rememberLauncherForActivityResult(
@@ -108,14 +116,24 @@ fun PantallaTorneos(
     }
 
     var torneoAEliminar by remember { mutableStateOf<Torneo?>(null) }
+    var partidaAEliminar by remember { mutableStateOf<Partida?>(null) }
 
-    if (estado.dialogoNuevo) {
+    // Diálogos de creación
+    if (estado.dialogoNuevoTorneo) {
         DialogoNuevoTorneo(
             onConfirmar = viewModel::crearTorneo,
-            onCancelar = viewModel::cerrarDialogoNuevo,
+            onCancelar = viewModel::cerrarDialogoNuevoTorneo,
         )
     }
 
+    if (estado.dialogoNuevaPartida) {
+        DialogoNuevaPartida(
+            onConfirmar = viewModel::crearPartidaSuelta,
+            onCancelar = viewModel::cerrarDialogoNuevaPartida,
+        )
+    }
+
+    // Diálogo confirmación eliminación de torneo
     torneoAEliminar?.let { torneo ->
         AlertDialog(
             onDismissRequest = { torneoAEliminar = null },
@@ -142,10 +160,45 @@ fun PantallaTorneos(
         )
     }
 
+    // Diálogo confirmación eliminación de partida suelta
+    partidaAEliminar?.let { partida ->
+        AlertDialog(
+            onDismissRequest = { partidaAEliminar = null },
+            title = { Text(stringResource(R.string.partida_suelta_eliminar_confirmacion_titulo)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.partida_suelta_eliminar_confirmacion_mensaje,
+                        partida.blancas,
+                        partida.negras,
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.eliminarPartidaSuelta(partida.id)
+                        partidaAEliminar = null
+                    },
+                ) {
+                    Text(
+                        text = stringResource(R.string.accion_eliminar),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { partidaAEliminar = null }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
+            },
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.torneos_titulo)) },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     OverflowMenuTorneos(
                         onImportarPgn = {
@@ -153,16 +206,35 @@ fun PantallaTorneos(
                                 arrayOf("application/x-chess-pgn", "text/plain")
                             )
                         },
+                        onAjustes = onAjustes,
+                        onInfo = onInfo,
                     )
                 },
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = viewModel::abrirDialogoNuevo) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.torneo_nuevo_titulo),
-                )
+            Box {
+                FloatingActionButton(onClick = viewModel::abrirMenuCrear) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.torneo_nuevo_titulo),
+                    )
+                }
+                DropdownMenu(
+                    expanded = estado.menuCrearAbierto,
+                    onDismissRequest = viewModel::cerrarMenuCrear,
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.opcion_nuevo_torneo)) },
+                        leadingIcon = { Icon(Icons.Filled.EmojiEvents, contentDescription = null) },
+                        onClick = viewModel::abrirDialogoNuevoTorneo,
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.opcion_nueva_partida)) },
+                        leadingIcon = { Icon(Icons.Filled.SportsEsports, contentDescription = null) },
+                        onClick = viewModel::abrirDialogoNuevaPartida,
+                    )
+                }
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -190,7 +262,7 @@ fun PantallaTorneos(
                 )
             }
 
-            estado.torneos.isEmpty() -> Box(
+            estado.torneos.isEmpty() && estado.partidasSueltas.isEmpty() -> Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
@@ -210,12 +282,40 @@ fun PantallaTorneos(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(estado.torneos, key = { it.id }) { torneo ->
-                    FilaTorneo(
-                        torneo = torneo,
-                        onAbrir = { onAbrirTorneo(torneo.id) },
-                        onEliminar = { torneoAEliminar = torneo },
-                    )
+                if (estado.torneos.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.seccion_torneos),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                        )
+                    }
+                    items(estado.torneos, key = { "torneo_${it.id}" }) { torneo ->
+                        FilaTorneo(
+                            torneo = torneo,
+                            onAbrir = { onAbrirTorneo(torneo.id) },
+                            onEliminar = { torneoAEliminar = torneo },
+                        )
+                    }
+                }
+
+                if (estado.partidasSueltas.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.seccion_partidas_sueltas),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                        )
+                    }
+                    items(estado.partidasSueltas, key = { "partida_${it.id}" }) { partida ->
+                        FilaPartidaSuelta(
+                            partida = partida,
+                            onAbrir = { onAbrirPartida(partida.id) },
+                            onEliminar = { partidaAEliminar = partida },
+                        )
+                    }
                 }
             }
         }
@@ -223,9 +323,7 @@ fun PantallaTorneos(
 }
 
 /**
- * Tarjeta de un torneo: nombre (cabecera), sitio y fecha (detalle) y un
- * botón de eliminar. Pulsar la tarjeta navega al detalle del torneo
- * (lista de partidas).
+ * Tarjeta de un torneo guardado.
  */
 @Composable
 private fun FilaTorneo(
@@ -265,16 +363,57 @@ private fun FilaTorneo(
 }
 
 /**
- * Menu overflow (3 puntos) de la pantalla de torneos.
- *
- * Ofrece "Importar PGN" para importar partidas desde un archivo PGN externo
- * como partidas sueltas (sin torneo asociado).
- *
- * @param onImportarPgn Accion al pulsar "Importar PGN".
+ * Tarjeta de una partida suelta (sin torneo).
+ */
+@Composable
+private fun FilaPartidaSuelta(
+    partida: Partida,
+    onAbrir: () -> Unit,
+    onEliminar: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onAbrir,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(
+                        R.string.partida_enfrentamiento,
+                        partida.blancas.ifBlank { stringResource(R.string.partida_jugador_blanco) },
+                        partida.negras.ifBlank { stringResource(R.string.partida_jugador_negro) },
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = "${partida.evento.ifBlank { "—" }} • ${partida.fecha}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onEliminar) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.torneo_eliminar),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Menú overflow de la pantalla de torneos.
  */
 @Composable
 private fun OverflowMenuTorneos(
     onImportarPgn: () -> Unit,
+    onAjustes: () -> Unit,
+    onInfo: () -> Unit,
 ) {
     var expandido by remember { mutableStateOf(false) }
     IconButton(onClick = { expandido = true }) {
@@ -292,6 +431,20 @@ private fun OverflowMenuTorneos(
             onClick = {
                 expandido = false
                 onImportarPgn()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_ajustes)) },
+            onClick = {
+                expandido = false
+                onAjustes()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_info)) },
+            onClick = {
+                expandido = false
+                onInfo()
             },
         )
     }
