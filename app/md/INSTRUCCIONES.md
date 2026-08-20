@@ -883,7 +883,7 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `fase-e-pulido-temas-playstore`
-- **Último Commit:** `(Pendiente de commit de cierre de sesión)`
+- **Último Commit:** `af2f758` — *feat(ui): optimizacion de visualizacion de jugadores, tablero apaisado maximizado y simbolos NAG adheridos a jugada*
 - **Estado:**
   - ✅ **Fase A (Estructura Clean Architecture y Temas)**: 100% completada.
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
