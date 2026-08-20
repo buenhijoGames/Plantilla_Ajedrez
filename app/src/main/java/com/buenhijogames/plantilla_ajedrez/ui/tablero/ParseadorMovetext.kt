@@ -438,10 +438,10 @@ fun actualizarAnotacionDeJugada(movetext: String, ply: Int, comentario: String?,
         elementos.removeAt(indiceJugada + 1)
     }
 
-    // Insertamos las anotaciones nuevas en orden: comentario y NAG.
+    // Insertamos las anotaciones nuevas en orden estándar PGN: primero NAG y luego comentario.
     val nuevas = mutableListOf<ElementoMovetext>()
-    if (comentario != null) nuevas += ElementoMovetext.Comentario(comentario)
     if (nag != null) nuevas += ElementoMovetext.Nag(nag)
+    if (comentario != null) nuevas += ElementoMovetext.Comentario(comentario)
     elementos.addAll(indiceJugada + 1, nuevas)
     return serializarMovetext(elementos)
 }
@@ -818,10 +818,10 @@ fun actualizarAnotacionEnCamino(
     ) {
         lista.removeAt(indice + 1)
     }
-    // Insertamos las anotaciones nuevas en orden: comentario y NAG.
+    // Insertamos las anotaciones nuevas en orden estándar PGN: primero NAG y luego comentario.
     val nuevas = mutableListOf<ElementoMovetext>()
-    if (comentario != null) nuevas += ElementoMovetext.Comentario(comentario)
     if (nag != null) nuevas += ElementoMovetext.Nag(nag)
+    if (comentario != null) nuevas += ElementoMovetext.Comentario(comentario)
     lista.addAll(indice + 1, nuevas)
 }
 

@@ -450,11 +450,13 @@ private fun FilaPartidaSuelta(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                val blancas = partida.blancas.trim().ifBlank { stringResource(R.string.partida_jugador_blanco) }
+                val negras = partida.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
                 Text(
                     text = stringResource(
                         R.string.partida_enfrentamiento,
-                        partida.blancas.ifBlank { stringResource(R.string.partida_jugador_blanco) },
-                        partida.negras.ifBlank { stringResource(R.string.partida_jugador_negro) },
+                        blancas,
+                        negras,
                     ),
                     style = MaterialTheme.typography.titleMedium,
                 )

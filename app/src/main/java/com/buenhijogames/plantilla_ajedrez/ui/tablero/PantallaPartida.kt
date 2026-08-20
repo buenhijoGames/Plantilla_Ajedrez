@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -172,11 +173,27 @@ fun PantallaPartida(
         )
     }
 
+    val tituloBarra = when {
+        estado.blancas.isNotBlank() && estado.negras.isNotBlank() -> stringResource(
+            R.string.partida_enfrentamiento,
+            estado.blancas.trim(),
+            estado.negras.trim()
+        )
+        estado.evento.isNotBlank() -> estado.evento.trim()
+        else -> stringResource(R.string.partida_titulo)
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(estado.evento.ifBlank { stringResource(R.string.partida_titulo) }) },
+                title = {
+                    Text(
+                        text = tituloBarra,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
@@ -317,41 +334,37 @@ fun PantallaPartida(
             }
 
             esHorizontal -> {
-                // Layout apaisado / horizontal: Tablero a la izquierda, Planilla a la derecha
+                // Layout apaisado / horizontal: Tablero a la izquierda maximizado, Planilla y Controles a la derecha
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                         .imePadding(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(
+                    // Columna izquierda: Tablero maximizado a toda la altura disponible
+                    Box(
                         modifier = Modifier
-                            .weight(1.1f)
                             .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                            .aspectRatio(1f),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            text = textoEstado(estado),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
                         TableroAjedrez(
                             fen = estado.fenVisible,
                             casillaSeleccionada = estado.casillaSeleccionada,
                             destinosLegales = estado.destinosLegales,
                             onCasillaPulsada = viewModel::onCasillaPulsada,
                             girado = estado.tableroGirado,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
 
+                    // Columna derecha: Planilla y Controles
                     Column(
                         modifier = Modifier
-                            .weight(0.9f)
+                            .weight(1f)
                             .fillMaxHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -734,20 +747,9 @@ private fun OverflowMenuPartida(
  */
 @Composable
 private fun textoEstado(estado: EstadoPartida): String {
-    val nombreBlancas = estado.blancas.ifBlank { stringResource(R.string.partida_jugador_blanco) }
-    val nombreNegras = estado.negras.ifBlank { stringResource(R.string.partida_jugador_negro) }
-    val resultado = estado.resultadoVisible
-    return if (resultado == ResultadoPartida.EN_CURSO) {
-        val quienToca = if (estado.ladoEnTurnoVisible == 'w') nombreBlancas else nombreNegras
-        stringResource(R.string.partida_turno, quienToca)
-    } else {
-        when (resultado) {
-            ResultadoPartida.GANA_BLANCAS -> stringResource(R.string.partida_ganan_blancas)
-            ResultadoPartida.GANA_NEGRAS -> stringResource(R.string.partida_ganan_negras)
-            ResultadoPartida.TABLAS -> stringResource(R.string.partida_tablas)
-            ResultadoPartida.EN_CURSO -> stringResource(R.string.partida_en_curso)
-        }
-    }
+    val nombreBlancas = estado.blancas.trim().ifBlank { stringResource(R.string.partida_jugador_blanco) }
+    val nombreNegras = estado.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
+    return stringResource(R.string.partida_enfrentamiento, nombreBlancas, nombreNegras)
 }
 
 /**

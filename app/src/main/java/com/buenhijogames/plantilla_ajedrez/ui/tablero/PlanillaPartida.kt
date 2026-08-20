@@ -121,6 +121,7 @@ private fun ContenidoLista(
     cursiva: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val listaElementos = remember(elementos) { elementos.toMutableList() }
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -130,21 +131,35 @@ private fun ContenidoLista(
         // construir los caminos de esta lista y de las variantes pegadas.
         var jugadasVistas = 0
         var caminoUltimaJugada: CaminoPlanilla? = null
-        // Camino de la jugada a la que pertenecen los comentarios/NAGs que
-        // aparecen inmediatamente después. Se usa para resaltar los NAGs de
-        // la jugada seleccionada en modo edición.
         var caminoJugadaActual: CaminoPlanilla? = null
         var indiceVariante = 0
-        for (elemento in elementos) {
+        var indice = 0
+        while (indice < listaElementos.size) {
+            val elemento = listaElementos[indice]
             when (elemento) {
                 is ElementoMovetext.Jugada -> {
                     jugadasVistas++
-                    // Camino de ESTA jugada: se captura en un val inmutable para
-                    // que la lambda onClick no cierre sobre la variable mutable.
                     val caminoJugada = baseCamino + PasoCamino.Lineal(jugadasVistas)
                     caminoUltimaJugada = caminoJugada
                     caminoJugadaActual = caminoJugada
                     indiceVariante = 0
+
+                    // Buscar si hay un símbolo NAG pegado a esta jugada (incluso si en el texto antiguo estaba tras el comentario)
+                    var indiceNag = -1
+                    for (k in indice + 1 until listaElementos.size) {
+                        val sig = listaElementos[k]
+                        if (sig is ElementoMovetext.Jugada || sig is ElementoMovetext.Resultado) break
+                        if (sig is ElementoMovetext.Nag) {
+                            indiceNag = k
+                            break
+                        }
+                    }
+                    val nagPegado = if (indiceNag >= 0) {
+                        listaElementos.removeAt(indiceNag) as ElementoMovetext.Nag
+                    } else {
+                        null
+                    }
+
                     if (esLineaPrincipal && jugadasVistas % 2 == 1) {
                         Text(
                             text = "${(jugadasVistas + 1) / 2}.",
@@ -156,8 +171,10 @@ private fun ContenidoLista(
                             modifier = Modifier.align(Alignment.CenterVertically),
                         )
                     }
+
                     JugadaConIcono(
                         san = elemento.san,
+                        simboloNag = nagPegado?.let { simboloNag(it.codigo) },
                         resaltado = when {
                             caminoSeleccion == caminoJugada -> EstadoResaltadoJugada.SELECCIONADA
                             caminoVisible == caminoJugada -> EstadoResaltadoJugada.VISIBLE
@@ -169,8 +186,6 @@ private fun ContenidoLista(
                 }
 
                 is ElementoMovetext.Variante -> {
-                    // La variante se pega a la jugada anterior: su camino es el
-                    // de esa jugada + el índice entre las variantes pegadas.
                     val caminoVariante = caminoUltimaJugada?.plus(
                         PasoCamino.EntrarVariante(indiceVariante)
                     )
@@ -195,20 +210,15 @@ private fun ContenidoLista(
                 )
 
                 is ElementoMovetext.Nag -> {
-                    val esSeleccionada = caminoSeleccion != null &&
-                        caminoSeleccion == caminoJugadaActual
+                    // Si aparece un NAG suelto que no estaba inmediatamente tras una jugada
                     Text(
                         text = simboloNag(elemento.codigo),
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 14.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             fontStyle = if (cursiva) FontStyle.Italic else FontStyle.Normal,
                         ),
-                        color = if (esSeleccionada) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.tertiary
-                        },
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.align(Alignment.CenterVertically),
                     )
                 }
@@ -223,6 +233,7 @@ private fun ContenidoLista(
                     modifier = Modifier.align(Alignment.CenterVertically),
                 )
             }
+            indice++
         }
     }
 }
@@ -307,6 +318,7 @@ private fun LlaveCursiva(texto: String) {
 @Composable
 private fun JugadaConIcono(
     san: String,
+    simboloNag: String? = null,
     resaltado: EstadoResaltadoJugada,
     cursiva: Boolean = false,
     onClick: () -> Unit,
@@ -350,6 +362,21 @@ private fun JugadaConIcono(
                     color = colorTexto,
                 )
             }
+        }
+        if (simboloNag != null) {
+            Text(
+                text = simboloNag,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = if (cursiva) FontStyle.Italic else FontStyle.Normal,
+                ),
+                color = when (resaltado) {
+                    EstadoResaltadoJugada.SELECCIONADA -> MaterialTheme.colorScheme.primary
+                    EstadoResaltadoJugada.VISIBLE -> MaterialTheme.colorScheme.primary
+                    EstadoResaltadoJugada.NINGUNA -> MaterialTheme.colorScheme.tertiary
+                },
+            )
         }
     }
 }

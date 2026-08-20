@@ -859,23 +859,47 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 10. **▶️ Tarjeta de Controles de Reproducción y Avance Automático con Pausa Configurable:**
     - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): tarjeta inferior con botones de navegación:
-      - ⏮️ **Inicio:** sitúa el tablero en la posición inicial (0 jugadas).
+      - 🔄 **Inicio:** sitúa el tablero en la posición inicial (0 jugadas).
       - ◀️ **Atrás:** retrocede una jugada.
       - ▶️ / ⏸️ **Auto (Play/Pausa):** reproduce la partida automáticamente paso a paso sin tocar la pantalla.
       - ▶️ **Adelante:** avanza una jugada.
-      - ⏭️ **Final:** vuelve a la posición final desbloqueando el tablero.
+      - ↩️ **Final:** vuelve a la posición final desbloqueando el tablero.
       - ⏱️ **Pausa editable (por defecto 3 seg):** botón con icono de temporizador que abre diálogo para que el usuario guarde su tiempo de pausa preferido (1 a 60 segundos).
     - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt): control de corrutinas (`Job`) para el avance automático en segundo plano y cancelación reactiva inmediata si el usuario interactúa manualmente.
+
+11. **📐 Diseño Responsivo y Maximización del Tablero en Modo Horizontal (Apaisado):**
+    - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): en modo horizontal, el tablero aprovecha el **100% de la altura útil de la pantalla** (`fillMaxHeight()`, `aspectRatio(1f)` y paddings mínimos). El enfrentamiento de los jugadores se integra limpiamente en la `TopAppBar` superior, eliminando elementos redundantes y logrando un tamaño de tablero significativamente más grande, nítido y cómodo tanto en móviles como en tablets.
+
+12. **👤 Visualización de Enfrentamiento (Jugador1 – Jugador2) en Tarjetas y Encima del Tablero:**
+    - [PantallaDetalleTorneo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaDetalleTorneo.kt) y [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): las tarjetas de partidas muestran siempre el nombre real de cada jugador (ej. *"Luis – Juan"*), utilizando *"Blancas – Negras"* únicamente cuando los campos estén vacíos.
+    - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): encima del tablero y en la barra superior se muestra siempre el enfrentamiento directo de los dos jugadores (ej. *"Luis – Juan"*), eliminando el rótulo de "Turno de...".
+
+13. **✍️ Símbolos NAG de Edición (!, !!, ?, ?!, etc.) Pegados a la Jugada:**
+    - [PlanillaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PlanillaPartida.kt): en la planilla interactiva de la pantalla de partida, los símbolos NAG se dibujan directamente dentro del mismo contenedor de la jugada, inmediatamente a continuación del texto sin separación de espacio (ej. `e4!`, `Nf3??`), compartiendo el fondo de selección/revisión y manteniendo la cohesión visual editorial de ajedrez.
+
+---
 
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `fase-e-pulido-temas-playstore`
-- **Último Commit:** `e01ffc6` — *feat(fase-e): pulido de temas, navegacion en ajustes, icono adaptativo, exportacion pdf torneo completo, modo match entre 2 jugadores y reproductor automatico*
-- **Estado:** Todas las funcionalidades de las 5 Fases (A, B, C, D y E) más las peticiones de Match entre 2 jugadores, exportación de torneos en PDF, auto-rellenado de fechas del sistema, optimización de renderizado FIDE/pantalla y reproductor automático están completadas, verificadas y commiteadas.
+- **Último Commit:** `(Pendiente de commit de cierre de sesión)`
+- **Estado:**
+  - ✅ **Fase A (Estructura Clean Architecture y Temas)**: 100% completada.
+  - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
+  - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
+  - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches y Auto-Play)**: 100% completada.
+  - ✅ **Mejoras adicionales solicitadas por Manolo**:
+    - Maximización del tablero en modo horizontal (100% altura libre).
+    - Rótulo de enfrentamiento directo (*"Luis – Juan"*) en tarjetas y barra superior.
+    - Símbolos NAG de edición (`!`, `!!`, `?`, etc.) pegados inmediatamente a la jugada y serializados antes del comentario.
 
 ---
 
-### Siguiente paso
-- Esperar confirmación de Manolo para continuar o definir el siguiente conjunto de mejoras.
-- "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"
+### Dónde retomar en la próxima sesión:
+1. **Comprobar estabilidad y feedback de Manolo** tras el uso continuado de la reproducción automática, edición de anotaciones NAG y visualización en horizontal.
+2. **Preparación final para Play Store**:
+   - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
+   - Verificación de metadatos, traducciones y assets para publicación.
+3. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.
