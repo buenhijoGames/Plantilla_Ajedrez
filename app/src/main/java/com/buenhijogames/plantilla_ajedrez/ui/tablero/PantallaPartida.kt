@@ -21,9 +21,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
@@ -156,6 +160,15 @@ fun PantallaPartida(
             resultadoActual = estado.resultadoVisible,
             onSeleccionarResultado = viewModel::establecerResultado,
             onCancelar = viewModel::cerrarDialogoCambiarResultado,
+        )
+    }
+
+    // Diálogo para configurar el tiempo de reproducción automática
+    if (estado.dialogoConfigurarSegundos) {
+        DialogoConfigurarSegundos(
+            segundosActuales = estado.segundosAuto,
+            onConfirmar = viewModel::establecerSegundosAuto,
+            onCancelar = viewModel::cerrarDialogoConfigurarSegundos,
         )
     }
 
@@ -366,12 +379,18 @@ fun PantallaPartida(
                                     .fillMaxWidth()
                                     .weight(1f),
                             )
-                            if (estado.caminoVisible != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                TextButton(onClick = viewModel::volverAlFinal) {
-                                    Text(stringResource(R.string.partida_volver_final))
-                                }
-                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            BarraControlesReproduccion(
+                                reproduciendoAuto = estado.reproduciendoAuto,
+                                segundosAuto = estado.segundosAuto,
+                                onIrAlInicio = viewModel::irAlInicio,
+                                onRetroceder = viewModel::retrocederJugada,
+                                onAlternarAuto = viewModel::alternarReproduccionAuto,
+                                onAvanzar = viewModel::avanzarJugada,
+                                onIrAlFinal = viewModel::volverAlFinal,
+                                onConfigurarSegundos = viewModel::abrirDialogoConfigurarSegundos,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     }
                 }
@@ -437,12 +456,18 @@ fun PantallaPartida(
                                     .fillMaxWidth()
                                     .weight(1f),
                             )
-                            if (estado.caminoVisible != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                TextButton(onClick = viewModel::volverAlFinal) {
-                                    Text(stringResource(R.string.partida_volver_final))
-                                }
-                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            BarraControlesReproduccion(
+                                reproduciendoAuto = estado.reproduciendoAuto,
+                                segundosAuto = estado.segundosAuto,
+                                onIrAlInicio = viewModel::irAlInicio,
+                                onRetroceder = viewModel::retrocederJugada,
+                                onAlternarAuto = viewModel::alternarReproduccionAuto,
+                                onAvanzar = viewModel::avanzarJugada,
+                                onIrAlFinal = viewModel::volverAlFinal,
+                                onConfigurarSegundos = viewModel::abrirDialogoConfigurarSegundos,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     }
                 }
@@ -872,4 +897,137 @@ private fun PanelEdicion(
             }
         }
     }
+}
+
+/**
+ * Barra inferior con tarjeta y botones de navegación de la partida:
+ * Inicio, Atrás, Reproducción automática (Play/Pause), Adelante, Final y Configurar pausa.
+ */
+@Composable
+private fun BarraControlesReproduccion(
+    reproduciendoAuto: Boolean,
+    segundosAuto: Int,
+    onIrAlInicio: () -> Unit,
+    onRetroceder: () -> Unit,
+    onAlternarAuto: () -> Unit,
+    onAvanzar: () -> Unit,
+    onIrAlFinal: () -> Unit,
+    onConfigurarSegundos: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Ir al inicio
+            IconButton(onClick = onIrAlInicio) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = stringResource(R.string.control_ir_inicio),
+                )
+            }
+
+            // Jugada anterior
+            IconButton(onClick = onRetroceder) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.control_anterior),
+                )
+            }
+
+            // Play / Pause automático
+            IconButton(onClick = onAlternarAuto) {
+                Icon(
+                    imageVector = if (reproduciendoAuto) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    contentDescription = stringResource(
+                        if (reproduciendoAuto) R.string.control_pausar
+                        else R.string.control_reproduccion_auto
+                    ),
+                    tint = if (reproduciendoAuto) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+
+            // Jugada siguiente
+            IconButton(onClick = onAvanzar) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(R.string.control_siguiente),
+                )
+            }
+
+            // Ir al final
+            IconButton(onClick = onIrAlFinal) {
+                Icon(
+                    imageVector = Icons.Filled.Undo,
+                    contentDescription = stringResource(R.string.control_ir_final),
+                )
+            }
+
+            // Configurar pausa en segundos
+            TextButton(
+                onClick = onConfigurarSegundos,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp),
+            ) {
+                Text(
+                    text = "⏱ ${stringResource(R.string.control_velocidad, segundosAuto)}",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Diálogo para configurar el tiempo de pausa (segundos) de la reproducción automática.
+ */
+@Composable
+private fun DialogoConfigurarSegundos(
+    segundosActuales: Int,
+    onConfirmar: (Int) -> Unit,
+    onCancelar: () -> Unit,
+) {
+    var textoSegundos by remember { mutableStateOf(segundosActuales.toString()) }
+
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text(stringResource(R.string.control_segundos_dialogo_titulo)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.control_segundos_dialogo_mensaje),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                OutlinedTextField(
+                    value = textoSegundos,
+                    onValueChange = { textoSegundos = it.filter { c -> c.isDigit() } },
+                    label = { Text("Segundos") },
+                    singleLine = true,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val seg = textoSegundos.toIntOrNull() ?: 3
+                    onConfirmar(seg)
+                },
+            ) {
+                Text(stringResource(R.string.edicion_guardar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) {
+                Text(stringResource(R.string.accion_cancelar))
+            }
+        },
+    )
 }

@@ -82,7 +82,9 @@ fun NavegacionPlantilla(
             )
         }
         composable(Destinos.AJUSTES) {
-            PantallaAjustes()
+            PantallaAjustes(
+                onVolver = { controlador.popBackStack() },
+            )
         }
         composable(Destinos.INFO) {
             PantallaInfo(

@@ -6,9 +6,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,52 +28,58 @@ import com.buenhijogames.plantilla_ajedrez.R
 import com.buenhijogames.plantilla_ajedrez.ui.theme.TemaAplicacion
 
 /**
- * Pantalla de Ajustes.
+ * Pantalla de Ajustes con selector de temas y navegación de retorno.
  *
- * Hoy sólo contiene el selector de [TemaAplicacion]. La elección se
- * persiste automáticamente (sin botón Guardar) vía [AjustesViewModel]:
- * cada `RadioButton` invoca `seleccionarTema` y el resto de la app
- * reacciona en tiempo real porque el `PlantillaAjedrezTheme` observa el
- * mismo DataStore.
- *
- * El Modo Dinámico se deshabilita en API < Android 12: si el usuario lo
- * selecciona en una versión incompatible, se aplicará la paleta por
- * defecto (ver [com.buenhijogames.plantilla_ajedrez.ui.theme.PlantillaAjedrezTheme]).
- * Lo dejamos seleccionable para que el usuario vea la opción, y el tema
- * raíz degrada silenciosamente. Una mejora futura podría ocultar la
- * opción si `Build.VERSION.SDK_INT < S`.
- *
- * @param viewModel Inyectado por Hilt. Por defecto se crea con
- *     `hiltViewModel()`; se permite pasar para tests.
+ * @param onVolver  Callback para retroceder en la pila de navegación.
+ * @param viewModel Inyectado por Hilt.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaAjustes(
+    onVolver: () -> Unit = {},
     viewModel: AjustesViewModel = hiltViewModel(),
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.tema_titulo),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = stringResource(R.string.tema_subtitulo),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        TemaAplicacion.entries.forEach { tema ->
-            FilaTema(
-                tema = tema,
-                seleccionado = estado.temaSeleccionado == tema,
-                alSeleccionar = { viewModel.seleccionarTema(tema) },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.ajustes_titulo)) },
+                navigationIcon = {
+                    IconButton(onClick = onVolver) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.accion_volver),
+                        )
+                    }
+                },
             )
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.tema_titulo),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.tema_subtitulo),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            TemaAplicacion.entries.forEach { tema ->
+                FilaTema(
+                    tema = tema,
+                    seleccionado = estado.temaSeleccionado == tema,
+                    alSeleccionar = { viewModel.seleccionarTema(tema) },
+                )
+            }
         }
     }
 }

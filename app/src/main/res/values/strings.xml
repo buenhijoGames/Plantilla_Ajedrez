@@ -50,10 +50,18 @@
     <string name="torneo_detalle_vacio">Este torneo aún no tiene partidas. Pulsa + para crear una.</string>
     <string name="torneo_detalle_error">No se pudieron cargar los datos del torneo.</string>
 
-    <!-- Partidas sueltas y creación -->
+    <!-- Partidas sueltas, Matches y creación -->
     <string name="opcion_nuevo_torneo">Nuevo torneo</string>
+    <string name="opcion_nuevo_match">Nuevo match (2 jugadores)</string>
     <string name="opcion_nueva_partida">Nueva partida suelta</string>
-    <string name="seccion_torneos">Torneos</string>
+    <string name="match_nuevo_titulo">Nuevo Match</string>
+    <string name="match_nombre">Nombre del match / evento</string>
+    <string name="match_jugador_1">Jugador 1 (Blancas 1ª partida)</string>
+    <string name="match_jugador_2">Jugador 2 (Negras 1ª partida)</string>
+    <string name="match_elo_1">Elo Jugador 1 (opcional)</string>
+    <string name="match_elo_2">Elo Jugador 2 (opcional)</string>
+    <string name="match_crear">Crear match</string>
+    <string name="seccion_torneos">Torneos y Matches</string>
     <string name="seccion_partidas_sueltas">Partidas sueltas</string>
     <string name="partidas_sueltas_vacio">No hay partidas sueltas guardadas.</string>
     <string name="partida_suelta_eliminar_confirmacion_titulo">¿Eliminar partida?</string>
@@ -80,6 +88,15 @@
     <string name="partida_en_curso">En curso</string>
     <string name="partida_volver_final">Volver al final</string>
     <string name="partida_editar">Editar jugadas</string>
+    <string name="control_ir_inicio">Ir al inicio</string>
+    <string name="control_anterior">Jugada anterior</string>
+    <string name="control_reproduccion_auto">Reproducción automática</string>
+    <string name="control_pausar">Pausar reproducción</string>
+    <string name="control_siguiente">Jugada siguiente</string>
+    <string name="control_ir_final">Ir al final</string>
+    <string name="control_velocidad">%1$s s</string>
+    <string name="control_segundos_dialogo_titulo">Intervalo de reproducción automática</string>
+    <string name="control_segundos_dialogo_mensaje">Segundos entre cada jugada:</string>
     <string name="partida_salir_edicion">Salir edición</string>
     <string name="partida_girar_tablero">Girar tablero</string>
     <string name="partida_editar_datos">Editar datos de partida</string>
@@ -105,6 +122,10 @@
     <string name="accion_compartir_pgn">Compartir PGN</string>
     <string name="accion_guardar_pdf">Guardar PDF en disco…</string>
     <string name="accion_guardar_pgn">Guardar PGN en disco…</string>
+    <string name="accion_compartir_pdf_torneo">Enviar PDF de todas las partidas</string>
+    <string name="accion_guardar_pdf_torneo">Guardar PDF de todas las partidas en disco…</string>
+    <string name="accion_compartir_pgn_torneo">Enviar PGN del torneo completo</string>
+    <string name="accion_guardar_pgn_torneo">Guardar PGN del torneo en disco…</string>
     <string name="accion_exportar_pdf">Exportar PDF</string>
     <string name="accion_exportar_pgn">Exportar PGN</string>
     <string name="accion_importar_pgn">Importar PGN</string>

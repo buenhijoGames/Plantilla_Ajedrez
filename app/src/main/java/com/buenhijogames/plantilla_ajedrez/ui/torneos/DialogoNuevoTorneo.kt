@@ -13,13 +13,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.buenhijogames.plantilla_ajedrez.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Formulario de creación de un torneo nuevo.
  *
  * Campos mínimos del torneo: nombre (obligatorio), sitio y fecha de
- * inicio (opcionales). El resto de campos (fecha fin, árbitro, notas) se
- * completan en la edición del detalle (Fase posterior).
+ * inicio (por defecto fecha actual del sistema, editable).
  *
  * @param onConfirmar Recibe (nombre, sitio, fechaInicio) cuando el usuario
  *                    pulsa "Crear". El ViewModel valida el nombre no vacío.
@@ -30,9 +32,13 @@ fun DialogoNuevoTorneo(
     onConfirmar: (nombre: String, sitio: String, fechaInicio: String) -> Unit,
     onCancelar: () -> Unit,
 ) {
+    val fechaHoy = remember {
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    }
+
     var nombre by remember { mutableStateOf("") }
     var sitio by remember { mutableStateOf("") }
-    var fechaInicio by remember { mutableStateOf("") }
+    var fechaInicio by remember { mutableStateOf(fechaHoy) }
 
     AlertDialog(
         onDismissRequest = onCancelar,

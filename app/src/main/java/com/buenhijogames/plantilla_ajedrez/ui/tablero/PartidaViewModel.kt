@@ -12,10 +12,13 @@ import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -98,6 +101,9 @@ data class EstadoPartida(
     val tableroGirado: Boolean = false,
     val dialogoEditarCabecera: Boolean = false,
     val dialogoCambiarResultado: Boolean = false,
+    val reproduciendoAuto: Boolean = false,
+    val segundosAuto: Int = 3,
+    val dialogoConfigurarSegundos: Boolean = false,
 )
 
 /**
@@ -565,16 +571,19 @@ class PartidaViewModel @Inject constructor(
         }
     }
 
+    private var trabajoReproduccion: Job? = null
+
     /**
      * Gestiona la pulsación de una jugada de la planilla.
      *
      * En modo edición la jugada se selecciona para editarla (el tablero va a su
      * posición previa para poder añadir variantes); en juego normal navega a
-     * esa posición.
+     * esa posición deteniendo la reproducción automática si estuviera activa.
      *
      * @param camino Camino de la jugada pulsada.
      */
     fun alPulsarJugada(camino: CaminoPlanilla) {
+        detenerReproduccionAuto()
         if (_estado.value.modoEdicion) {
             seleccionarJugada(camino)
         } else {
@@ -584,6 +593,7 @@ class PartidaViewModel @Inject constructor(
 
     /** Vuelve a la posición final (última jugada) y desbloquea el tablero. */
     fun volverAlFinal() {
+        detenerReproduccionAuto()
         val actual = _estado.value
         if (actual.cargando) return
         _estado.update {
@@ -592,6 +602,178 @@ class PartidaViewModel @Inject constructor(
                 fenVisible = actual.fen,
                 resultadoVisible = actual.resultado,
                 ladoEnTurnoVisible = actual.ladoEnTurno,
+            )
+        }
+    }
+
+    /**
+     * Navega hasta la posición inicial de la partida (0 jugadas).
+     */
+    fun irAlInicio() {
+        detenerReproduccionAuto()
+        val actual = _estado.value
+        if (actual.cargando) return
+        _estado.update {
+            it.copy(
+                caminoVisible = CaminoPlanilla.INICIO,
+                fenVisible = fenInicio,
+                resultadoVisible = ResultadoPartida.EN_CURSO,
+                ladoEnTurnoVisible = ladoEnTurno(fenInicio),
+            )
+        }
+    }
+
+    /**
+     * Retrocede una jugada en la partida.
+     */
+    fun retrocederJugada() {
+        detenerReproduccionAuto()
+        val actual = _estado.value
+        if (actual.cargando) return
+        val totalJugadas = actual.jugadasSan.size
+        if (totalJugadas == 0) return
+
+        val caminoActual = actual.caminoVisible
+        if (caminoActual == null) {
+            // Estábamos al final de la partida: retroceder a la penúltima jugada.
+            if (totalJugadas > 1) {
+                mostrarCamino(CaminoPlanilla(listOf(PasoCamino.Lineal(totalJugadas - 1))))
+            } else {
+                irAlInicio()
+            }
+        } else if (caminoActual.pasos.isEmpty()) {
+            // Ya estamos en la posición inicial: no se puede retroceder más.
+            return
+        } else {
+            val ultimoPaso = caminoActual.pasos.last()
+            if (ultimoPaso is PasoCamino.Lineal) {
+                if (ultimoPaso.cantidad > 1) {
+                    val nuevosPasos = caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(ultimoPaso.cantidad - 1)
+                    mostrarCamino(CaminoPlanilla(nuevosPasos))
+                } else {
+                    if (caminoActual.pasos.size > 1) {
+                        mostrarCamino(CaminoPlanilla(caminoActual.pasos.dropLast(1)))
+                    } else {
+                        irAlInicio()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Avanza una jugada en la partida.
+     */
+    fun avanzarJugada() {
+        detenerReproduccionAuto()
+        darPasoSiguiente()
+    }
+
+    /**
+     * Ejecuta el paso siguiente sin detener la corrutina interna si viene del autoplay.
+     */
+    private fun darPasoSiguiente(): Boolean {
+        val actual = _estado.value
+        if (actual.cargando) return false
+        val totalJugadas = actual.jugadasSan.size
+        if (totalJugadas == 0) return false
+
+        val caminoActual = actual.caminoVisible
+        if (caminoActual == null) {
+            // Ya estamos al final: no se puede avanzar más.
+            return false
+        } else if (caminoActual.pasos.isEmpty()) {
+            // Estábamos en el inicio: avanzar a la jugada 1.
+            mostrarCamino(CaminoPlanilla(listOf(PasoCamino.Lineal(1))))
+            return true
+        } else {
+            val ultimoPaso = caminoActual.pasos.last()
+            if (ultimoPaso is PasoCamino.Lineal) {
+                val siguientePly = ultimoPaso.cantidad + 1
+                if (caminoActual.pasos.size == 1) {
+                    if (siguientePly <= totalJugadas) {
+                        if (siguientePly == totalJugadas) {
+                            volverAlFinal()
+                        } else {
+                            mostrarCamino(CaminoPlanilla(listOf(PasoCamino.Lineal(siguientePly))))
+                        }
+                        return true
+                    } else {
+                        volverAlFinal()
+                        return false
+                    }
+                } else {
+                    val nuevosPasos = caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(siguientePly)
+                    mostrarCamino(CaminoPlanilla(nuevosPasos))
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    /**
+     * Alterna entre iniciar o pausar la reproducción automática.
+     */
+    fun alternarReproduccionAuto() {
+        if (_estado.value.reproduciendoAuto) {
+            detenerReproduccionAuto()
+        } else {
+            iniciarReproduccionAuto()
+        }
+    }
+
+    /**
+     * Inicia la reproducción automática de jugadas con la pausa configurada.
+     */
+    private fun iniciarReproduccionAuto() {
+        val actual = _estado.value
+        if (actual.cargando || actual.jugadasSan.isEmpty()) return
+
+        // Si estamos en la última posición, reiniciar desde el principio para ver toda la partida.
+        if (actual.caminoVisible == null) {
+            irAlInicio()
+        }
+
+        _estado.update { it.copy(reproduciendoAuto = true) }
+        trabajoReproduccion?.cancel()
+        trabajoReproduccion = viewModelScope.launch {
+            while (isActive) {
+                val delayMs = (_estado.value.segundosAuto.coerceAtLeast(1)) * 1000L
+                delay(delayMs)
+                val pudoAvanzar = darPasoSiguiente()
+                if (!pudoAvanzar) {
+                    _estado.update { it.copy(reproduciendoAuto = false) }
+                    break
+                }
+            }
+        }
+    }
+
+    /**
+     * Detiene la reproducción automática si está activa.
+     */
+    fun detenerReproduccionAuto() {
+        trabajoReproduccion?.cancel()
+        trabajoReproduccion = null
+        if (_estado.value.reproduciendoAuto) {
+            _estado.update { it.copy(reproduciendoAuto = false) }
+        }
+    }
+
+    fun abrirDialogoConfigurarSegundos() {
+        _estado.update { it.copy(dialogoConfigurarSegundos = true) }
+    }
+
+    fun cerrarDialogoConfigurarSegundos() {
+        _estado.update { it.copy(dialogoConfigurarSegundos = false) }
+    }
+
+    fun establecerSegundosAuto(segundos: Int) {
+        _estado.update {
+            it.copy(
+                segundosAuto = segundos.coerceIn(1, 60),
+                dialogoConfigurarSegundos = false,
             )
         }
     }

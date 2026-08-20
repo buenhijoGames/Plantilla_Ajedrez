@@ -109,16 +109,41 @@ class DetalleTorneoViewModel @Inject constructor(
         if (_estado.value.creandoPartida) return
         viewModelScope.launch {
             _estado.update { it.copy(creandoPartida = true) }
-            val ronda = (_estado.value.partidas.size + 1).toString()
+            val partidasExistentes = _estado.value.partidas
+            val ronda = (partidasExistentes.size + 1).toString()
+            val ultimaPartida = partidasExistentes.lastOrNull()
+
+            // Mantener la fecha de la última partida si existe, o la del torneo, o la fecha actual
+            val fechaPartida = when {
+                ultimaPartida != null && ultimaPartida.fecha.isNotBlank() && ultimaPartida.fecha != "????.??.??" -> ultimaPartida.fecha
+                torneo.fechaInicio.isNotBlank() -> torneo.fechaInicio.trim().replace('-', '.')
+                else -> java.text.SimpleDateFormat("yyyy.MM.dd", java.util.Locale.getDefault()).format(java.util.Date())
+            }
+
+            // Si hay partidas previas y tienen jugadores asignados, alternamos los colores automáticamente
+            val (jugadorBlancas, jugadorNegras, eloBlancas, eloNegras) = if (ultimaPartida != null && ultimaPartida.blancas.isNotBlank() && ultimaPartida.negras.isNotBlank()) {
+                // Alternamos: el que jugó con negras ahora juega con blancas, y viceversa
+                Quadruple(
+                    ultimaPartida.negras,
+                    ultimaPartida.blancas,
+                    ultimaPartida.eloNegras,
+                    ultimaPartida.eloBlancas,
+                )
+            } else {
+                Quadruple("", "", null, null)
+            }
+
             val id = repositorioPartidas.guardarPartida(
                 Partida(
                     torneoId = torneo.id,
                     evento = torneo.nombre,
                     sitio = torneo.sitio,
-                    fecha = torneo.fechaInicio.replace('-', '.'),
+                    fecha = fechaPartida,
                     ronda = ronda,
-                    blancas = "",
-                    negras = "",
+                    blancas = jugadorBlancas,
+                    negras = jugadorNegras,
+                    eloBlancas = eloBlancas,
+                    eloNegras = eloNegras,
                 )
             )
             _estado.update { it.copy(creandoPartida = false) }
@@ -207,3 +232,13 @@ class DetalleTorneoViewModel @Inject constructor(
         _estado.update { it.copy(resultadoImportacion = null) }
     }
 }
+
+/**
+ * Tupla auxiliar inmutable de 4 elementos.
+ */
+private data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+)

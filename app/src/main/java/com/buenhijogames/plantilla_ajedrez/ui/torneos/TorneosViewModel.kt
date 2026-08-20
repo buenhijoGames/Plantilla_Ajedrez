@@ -29,6 +29,7 @@ import javax.inject.Inject
  * @property cargando             true mientras la lista inicial no ha emitido.
  * @property hayErrorCarga        true si el Flow de lectura lanzó.
  * @property dialogoNuevoTorneo   true si el formulario de nuevo torneo está abierto.
+ * @property dialogoNuevoMatch    true si el formulario de nuevo match está abierto.
  * @property dialogoNuevaPartida  true si el formulario de nueva partida suelta está abierto.
  * @property menuCrearAbierto     true si el selector de creación (torneo / partida suelta) está visible.
  * @property partidaCreadaId      Id de la partida recién creada para navegar (null tras navegar).
@@ -45,6 +46,7 @@ data class EstadoTorneos(
     val cargando: Boolean = true,
     val hayErrorCarga: Boolean = false,
     val dialogoNuevoTorneo: Boolean = false,
+    val dialogoNuevoMatch: Boolean = false,
     val dialogoNuevaPartida: Boolean = false,
     val menuCrearAbierto: Boolean = false,
     val partidaCreadaId: String? = null,
@@ -181,6 +183,16 @@ class TorneosViewModel @Inject constructor(
         _estado.update { it.copy(dialogoNuevoTorneo = false) }
     }
 
+    /** Abre el formulario de nuevo match (2 jugadores). */
+    fun abrirDialogoNuevoMatch() {
+        _estado.update { it.copy(dialogoNuevoMatch = true, menuCrearAbierto = false) }
+    }
+
+    /** Cierra el formulario de nuevo match sin guardar. */
+    fun cerrarDialogoNuevoMatch() {
+        _estado.update { it.copy(dialogoNuevoMatch = false) }
+    }
+
     /** Abre el formulario de nueva partida suelta. */
     fun abrirDialogoNuevaPartida() {
         _estado.update { it.copy(dialogoNuevaPartida = true, menuCrearAbierto = false) }
@@ -189,6 +201,47 @@ class TorneosViewModel @Inject constructor(
     /** Cierra el formulario de nueva partida suelta sin guardar. */
     fun cerrarDialogoNuevaPartida() {
         _estado.update { it.copy(dialogoNuevaPartida = false) }
+    }
+
+    /**
+     * Crea un Match (evento de 2 jugadores) y su primera partida con los colores asignados.
+     */
+    fun crearMatch(
+        nombre: String,
+        sitio: String,
+        fecha: String,
+        jugador1: String,
+        jugador2: String,
+        elo1: Int?,
+        elo2: Int?,
+    ) {
+        val nombreLimpio = nombre.trim()
+        if (nombreLimpio.isEmpty()) return
+        viewModelScope.launch {
+            val fechaNormalizada = fecha.trim().replace('-', '.')
+            val torneoId = repositorio.guardarTorneo(
+                Torneo(
+                    nombre = nombreLimpio,
+                    sitio = sitio.trim(),
+                    fechaInicio = fechaNormalizada,
+                )
+            )
+            // Crear automáticamente la 1ª partida del match: Jugador 1 con Blancas, Jugador 2 con Negras
+            repositorioPartidas.guardarPartida(
+                Partida(
+                    torneoId = torneoId,
+                    evento = nombreLimpio,
+                    sitio = sitio.trim(),
+                    fecha = fechaNormalizada,
+                    ronda = "1",
+                    blancas = jugador1.trim(),
+                    negras = jugador2.trim(),
+                    eloBlancas = elo1,
+                    eloNegras = elo2,
+                )
+            )
+            _estado.update { it.copy(dialogoNuevoMatch = false) }
+        }
     }
 
     /**

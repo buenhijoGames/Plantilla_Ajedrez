@@ -121,8 +121,7 @@ object PlanillaFide {
      *
      * Ignora variantes (parentesis), comentarios (llaves y punto y coma),
      * NAGs (`$n`), numeros de jugada, lineas de tag (`[...]`) y el resultado.
-     * Es una version minimalista y autonoma de `sansLineaPrincipal` (que vive
-     * en `:app`) para que `:data` no dependa de la capa de presentacion.
+     * Solo extrae las jugadas reales de la partida para la planilla PDF.
      *
      * @param movetext Movetext/PGN de la partida.
      * @return Lista de SANs de la linea principal en orden de juego.
@@ -134,10 +133,18 @@ object PlanillaFide {
 
         fun cerrarPalabra() {
             if (palabra.isEmpty()) return
-            val token = palabra.toString()
+            val token = palabra.toString().trim()
             palabra.clear()
             if (profundidadVariante > 0) return
-            if (esJugadaSan(token)) resultado += token
+            if (esJugadaSan(token)) {
+                // Despegar números pegados como "1.e4" -> "e4" y quitar NAGs/símbolos pegados "?", "!", etc.
+                val match = PATRON_NUMERO_PEGADO.matchEntire(token)
+                val sanCrudo = match?.groupValues?.getOrNull(3) ?: token
+                val sanLimpio = sanCrudo.trimEnd('!', '?', ' ')
+                if (sanLimpio.isNotBlank() && sanLimpio !in RESULTADOS_PGN) {
+                    resultado += sanLimpio
+                }
+            }
         }
 
         var i = 0
@@ -172,13 +179,16 @@ object PlanillaFide {
                 // Comentario ;resto de linea.
                 c == ';' -> {
                     cerrarPalabra()
-                    i = n
+                    val fin = movetext.indexOf('\n', i)
+                    i = if (fin == -1) n else fin + 1
                 }
 
-                // NAG $n: se ignora.
+                // NAG $n: se ignora el token hasta el siguiente espacio o delimitador.
                 c == '$' -> {
                     cerrarPalabra()
-                    i++
+                    while (i < n && !movetext[i].isWhitespace() && movetext[i] != '(' && movetext[i] != ')') {
+                        i++
+                    }
                 }
 
                 // Tag [ ... ]: se ignora completo.

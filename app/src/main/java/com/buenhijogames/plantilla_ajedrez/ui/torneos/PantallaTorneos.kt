@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.AlertDialog
@@ -120,6 +121,13 @@ fun PantallaTorneos(
         DialogoNuevoTorneo(
             onConfirmar = viewModel::crearTorneo,
             onCancelar = viewModel::cerrarDialogoNuevoTorneo,
+        )
+    }
+
+    if (estado.dialogoNuevoMatch) {
+        DialogoNuevoMatch(
+            onConfirmar = viewModel::crearMatch,
+            onCancelar = viewModel::cerrarDialogoNuevoMatch,
         )
     }
 
@@ -267,6 +275,11 @@ fun PantallaTorneos(
                         text = { Text(stringResource(R.string.opcion_nuevo_torneo)) },
                         leadingIcon = { Icon(Icons.Filled.EmojiEvents, contentDescription = null) },
                         onClick = viewModel::abrirDialogoNuevoTorneo,
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.opcion_nuevo_match)) },
+                        leadingIcon = { Icon(Icons.Filled.People, contentDescription = null) },
+                        onClick = viewModel::abrirDialogoNuevoMatch,
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.opcion_nueva_partida)) },

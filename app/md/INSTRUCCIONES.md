@@ -815,23 +815,60 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 
 ---
 
-### 🔍 Fase D: Búsqueda, Filtrado y Guardado de Archivos en Disco
+### 🔍 Fase D: Búsqueda, Filtrado y Guardado de Archivos en Disco (Completada y Commiteada)
+- Commit: `2c622c0` en rama `fase-d-busqueda-y-guardado-disco`.
+- Barra de búsqueda reactiva en tiempo real sobre torneos y partidas sueltas, y guardado de PDF y PGN en disco mediante SAF.
+
+---
+
+### ✨ Fase E: Pulido Visual, Navegación de Ajustes y Preparación Play Store
 
 **Tareas realizadas en esta unidad lógica:**
-1. **🔍 Búsqueda y Filtrado en Tiempo Real:**
-   - [TorneosViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/TorneosViewModel.kt): añadido filtrado en memoria sobre torneos (nombre, sitio, fecha) y partidas sueltas (blancas, negras, evento, sitio, fecha).
-   - [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): botón de búsqueda en la `TopAppBar` que despliega una barra de búsqueda con `TextField` transparente, botón de limpiar texto y vista de "sin resultados".
-2. **💾 Guardado de PDF y PGN en Disco:**
-   - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): integrado `ActivityResultContracts.CreateDocument` (SAF - Storage Access Framework) para permitir al usuario guardar el PDF o PGN en cualquier carpeta de su dispositivo con el nombre por defecto adecuado.
-   - Menú overflow (3 puntos) enriquecido con opciones diferenciadas:
-     - `Compartir PDF` / `Guardar PDF en disco…`
-     - `Compartir PGN` / `Guardar PGN en disco…`
-   - Notificación de feedback mediante `SnackbarHost` indicando éxito o error del guardado.
-3. **Strings:**
-   - Actualizado [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) con todas las nuevas cadenas sin texto hardcodeado.
+1. **🎨 Pulido Visual y Navegación en Ajustes:**
+   - [PantallaAjustes.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/ajustes/PantallaAjustes.kt): envuelta en un `Scaffold` con `TopAppBar` y botón de retroceso (`Icons.AutoMirrored.Filled.ArrowBack`), unificando el estilo y consistencia de navegación con el resto de pantallas.
+   - [NavegacionPlantilla.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/navegacion/NavegacionPlantilla.kt): conectado el callback de navegación `onVolver` para retroceder desde Ajustes a la pantalla anterior.
+   - Revisión de la integración de temas visuales (Claro, Oscuro, Dinámico, Madera, Mármol).
+4. **📤 Enviar y Guardar PDF/PGN de todas las partidas del torneo:**
+   - [PantallaDetalleTorneo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaDetalleTorneo.kt): menú overflow (3 puntos) actualizado con las opciones:
+     - `Enviar PDF de todas las partidas` (genera un documento multipágina y abre el menú del sistema para compartir).
+     - `Guardar PDF de todas las partidas en disco…` (guarda el documento multipágina en cualquier carpeta con SAF `CreateDocument`).
+     - `Enviar PGN del torneo completo` y `Guardar PGN del torneo en disco…`.
+     - `Importar PGN`.
+   - [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml): añadidas las etiquetas localizadas correspondientes.
+
+5. **♟️ Icono Adaptativo Oficial de la App:**
+   - [ic_launcher_background.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/drawable/ic_launcher_background.xml): fondo en tonos pizarra oscuro / tablero de ajedrez sutil geométrico con marcos definidos.
+   - [ic_launcher_foreground.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/drawable/ic_launcher_foreground.xml): caballo de ajedrez oficial estilizado en acabado marfil premium con sombras de profundidad y delineado nítido para todas las resoluciones y launchers adaptativos.
+
+6. **📋 Filtrado Exclusivo de Jugadas Reales en Planilla PDF:**
+   - [PlanillaFide.kt](file:///c:/android/Plantilla_ajedrez/data/src/main/kotlin/com/buenhijogames/plantilla_ajedrez/data/pdf/PlanillaFide.kt): la extracción de jugadas para la planilla FIDE en PDF procesa y extrae **únicamente las jugadas reales de la línea principal**, ignorando por completo cualquier comentario (`{...}`, `;...`), variantes y subvariantes (`(...)`), símbolos NAG (`$n`, `!`, `?`) y marcadores de resultado.
+
+7. **⚔️ Nuevo Match (entre dos jugadores) con Alternancia Automática de Color:**
+   - [DialogoNuevoMatch.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevoMatch.kt): formulario específico para crear un Match pidiendo Nombre del match, Sitio, Fecha (por defecto hoy, editable), Jugador 1 (Blancas 1ª partida) con su Elo, y Jugador 2 (Negras 1ª partida) con su Elo.
+   - [PantallaTorneos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/PantallaTorneos.kt): opción añadida al menú desplegable del FAB `+` ("Nuevo match (2 jugadores)").
+   - [TorneosViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/TorneosViewModel.kt): `crearMatch` genera el evento y crea automáticamente la Ronda 1 con los colores iniciales.
+   - [DetalleTorneoViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DetalleTorneoViewModel.kt): al pulsar `+` para añadir siguientes partidas dentro del match/evento, **se alternan automáticamente las piezas** (el que jugó con negras ahora juega con blancas y viceversa, manteniendo sus Elos) y **se mantiene la fecha de la partida anterior**, siendo todo 100% editable.
+
+8. **📅 Fecha del Sistema por Defecto en Todos los Formularios:**
+   - [DialogoNuevoTorneo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevoTorneo.kt): la fecha de inicio se precarga automáticamente con la fecha actual del sistema (`YYYY-MM-DD`).
+   - [DialogoNuevaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevaPartida.kt) y [DialogoNuevoMatch.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/torneos/DialogoNuevoMatch.kt): precargados con la fecha actual del sistema (`YYYY.MM.DD`), 100% editables por el usuario.
+
+9. **♟️ Planillas PDF y Pantalla del Tablero Optimizadas:**
+   - **PDF Oficial FIDE ([AdaptadorPdf.kt](file:///c:/android/Plantilla_ajedrez/data/src/main/kotlin/com/buenhijogames/plantilla_ajedrez/data/pdf/AdaptadorPdf.kt)):** texto de jugada a `13f`, números a `12.5f`, figuras a `16f` y centrado horizontal y vertical perfecto en cada celda (`(anchoCelda - anchoTotal) / 2f`).
+   - **Pantalla de Partida ([PlanillaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PlanillaPartida.kt)):** tamaño refinado a `16sp` (números `15sp` e iconos `20dp`), con alineación vertical unificada para que los renglones queden perfectamente horizontales, rectos y legibles bajo el tablero.
+
+10. **▶️ Tarjeta de Controles de Reproducción y Avance Automático con Pausa Configurable:**
+    - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): tarjeta inferior con botones de navegación:
+      - ⏮️ **Inicio:** sitúa el tablero en la posición inicial (0 jugadas).
+      - ◀️ **Atrás:** retrocede una jugada.
+      - ▶️ / ⏸️ **Auto (Play/Pausa):** reproduce la partida automáticamente paso a paso sin tocar la pantalla.
+      - ▶️ **Adelante:** avanza una jugada.
+      - ⏭️ **Final:** vuelve a la posición final desbloqueando el tablero.
+      - ⏱️ **Pausa editable (por defecto 3 seg):** botón con icono de temporizador que abre diálogo para que el usuario guarde su tiempo de pausa preferido (1 a 60 segundos).
+    - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt): control de corrutinas (`Job`) para el avance automático en segundo plano y cancelación reactiva inmediata si el usuario interactúa manualmente.
 
 ---
 
 ### Pendiente de Checkpoint
-- Rama: `fase-d-busqueda-y-guardado-disco`
+- Rama: `fase-e-pulido-temas-playstore`
 - "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"

@@ -1,6 +1,7 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
 import android.app.Activity
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +52,7 @@ import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.ResultadoPartida
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Torneo
 import com.buenhijogames.plantilla_ajedrez.ui.compartir.CompartirArchivo
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle de un torneo.
@@ -72,11 +75,43 @@ fun PantallaDetalleTorneo(
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val contexto = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val formatoPdfTorneoNombre = stringResource(R.string.pdf_torneo_nombre)
+    val formatoPgnTorneoNombre = stringResource(R.string.pgn_torneo_nombre)
+    val asuntoCompartir = stringResource(R.string.compartir_asunto)
+    val textoArchivoGuardadoExito = stringResource(R.string.snackbar_archivo_guardado)
+    val textoArchivoGuardadoError = stringResource(R.string.snackbar_archivo_guardar_error)
+    val textoPgnImportadoConteo = stringResource(R.string.snackbar_pgn_importado_conteo)
+    val textoPgnImportarError = stringResource(R.string.snackbar_pgn_error_importar)
+
+    // Datos temporales para escribir en SAF CreateDocument
+    var bytesParaGuardar by remember { mutableStateOf<ByteArray?>(null) }
+
+    val launcherGuardarArchivo = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+    ) { uri: Uri? ->
+        val bytes = bytesParaGuardar
+        if (uri != null && bytes != null) {
+            try {
+                contexto.contentResolver.openOutputStream(uri)?.use { output ->
+                    output.write(bytes)
+                }
+                scope.launch {
+                    snackbarHostState.showSnackbar(textoArchivoGuardadoExito)
+                }
+            } catch (e: Exception) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(textoArchivoGuardadoError)
+                }
+            }
+        }
+        bytesParaGuardar = null
+    }
 
     // Lanzador de SAF para seleccionar archivo PGN.
     val launcherImportarPgn = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
+    ) { uri: Uri? ->
         if (uri != null) {
             val contenido = contexto.contentResolver.openInputStream(uri)?.use { inputStream ->
                 inputStream.bufferedReader().use { it.readText() }
@@ -91,9 +126,9 @@ fun PantallaDetalleTorneo(
     LaunchedEffect(estado.resultadoImportacion) {
         val resultado = estado.resultadoImportacion ?: return@LaunchedEffect
         val mensaje = if (resultado > 0) {
-            contexto.getString(R.string.snackbar_pgn_importado_conteo, resultado)
+            String.format(textoPgnImportadoConteo, resultado)
         } else {
-            contexto.getString(R.string.snackbar_pgn_error_importar)
+            textoPgnImportarError
         }
         snackbarHostState.showSnackbar(mensaje)
         viewModel.limpiarResultadoImportacion()
@@ -114,11 +149,11 @@ fun PantallaDetalleTorneo(
                 actions = {
                     OverflowMenuTorneo(
                         torneoNombre = estado.torneo?.nombre ?: "",
-                        onExportarPdf = {
+                        onCompartirPdf = {
                             val bytes = viewModel.generarPdfTorneo()
                             if (bytes != null) {
-                                val nombre = contexto.getString(
-                                    R.string.pdf_torneo_nombre,
+                                val nombre = String.format(
+                                    formatoPdfTorneoNombre,
                                     estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
                                 )
                                 CompartirArchivo.compartir(
@@ -126,15 +161,26 @@ fun PantallaDetalleTorneo(
                                     bytes = bytes,
                                     nombre = nombre,
                                     tipoMime = "application/pdf",
-                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                    asunto = asuntoCompartir,
                                 )
                             }
                         },
-                        onExportarPgn = {
+                        onGuardarPdf = {
+                            val bytes = viewModel.generarPdfTorneo()
+                            if (bytes != null) {
+                                bytesParaGuardar = bytes
+                                val nombre = String.format(
+                                    formatoPdfTorneoNombre,
+                                    estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
+                                )
+                                launcherGuardarArchivo.launch(nombre)
+                            }
+                        },
+                        onCompartirPgn = {
                             val pgn = viewModel.exportarPgnTorneo()
                             if (pgn != null) {
-                                val nombre = contexto.getString(
-                                    R.string.pgn_torneo_nombre,
+                                val nombre = String.format(
+                                    formatoPgnTorneoNombre,
                                     estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
                                 )
                                 CompartirArchivo.compartir(
@@ -142,8 +188,19 @@ fun PantallaDetalleTorneo(
                                     bytes = pgn.toByteArray(Charsets.UTF_8),
                                     nombre = nombre,
                                     tipoMime = "application/x-chess-pgn",
-                                    asunto = contexto.getString(R.string.compartir_asunto),
+                                    asunto = asuntoCompartir,
                                 )
+                            }
+                        },
+                        onGuardarPgn = {
+                            val pgn = viewModel.exportarPgnTorneo()
+                            if (pgn != null) {
+                                bytesParaGuardar = pgn.toByteArray(Charsets.UTF_8)
+                                val nombre = String.format(
+                                    formatoPgnTorneoNombre,
+                                    estado.torneo?.nombre?.ifBlank { "torneo" } ?: "torneo",
+                                )
+                                launcherGuardarArchivo.launch(nombre)
                             }
                         },
                         onImportarPgn = {
@@ -316,23 +373,26 @@ private fun FilaPartida(
 }
 
 /**
- * Menu overflow (3 puntos) de la pantalla de detalle de un torneo.
+ * Menú overflow de la pantalla de detalle de torneo.
  *
- * Ofrece "Exportar PDF", "Exportar PGN" e "Importar PGN". El PDF genera un
- * documento multipágina (una hoja FIDE por cada partida del torneo), el PGN
- * exporta todas las partidas en un solo archivo, e Importar permite añadir
- * partidas desde un archivo PGN externo al torneo actual.
+ * Ofrece "Enviar PDF de todas las partidas", "Guardar PDF en disco",
+ * "Enviar PGN del torneo completo", "Guardar PGN del torneo en disco"
+ * e "Importar PGN".
  *
- * @param torneoNombre Nombre del torneo (para el nombre del fichero).
- * @param onExportarPdf Accion al pulsar "Exportar PDF".
- * @param onExportarPgn Accion al pulsar "Exportar PGN".
- * @param onImportarPgn Accion al pulsar "Importar PGN".
+ * @param torneoNombre     Nombre del torneo.
+ * @param onCompartirPdf   Acción al pulsar "Enviar PDF de todas las partidas".
+ * @param onGuardarPdf     Acción al pulsar "Guardar PDF de todas las partidas en disco…".
+ * @param onCompartirPgn   Acción al pulsar "Enviar PGN del torneo completo".
+ * @param onGuardarPgn     Acción al pulsar "Guardar PGN del torneo en disco…".
+ * @param onImportarPgn    Acción al pulsar "Importar PGN".
  */
 @Composable
 private fun OverflowMenuTorneo(
     torneoNombre: String,
-    onExportarPdf: () -> Unit,
-    onExportarPgn: () -> Unit,
+    onCompartirPdf: () -> Unit,
+    onGuardarPdf: () -> Unit,
+    onCompartirPgn: () -> Unit,
+    onGuardarPgn: () -> Unit,
     onImportarPgn: () -> Unit,
 ) {
     var expandido by remember { mutableStateOf(false) }
@@ -347,17 +407,31 @@ private fun OverflowMenuTorneo(
         onDismissRequest = { expandido = false },
     ) {
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.accion_exportar_pdf)) },
+            text = { Text(stringResource(R.string.accion_compartir_pdf_torneo)) },
             onClick = {
                 expandido = false
-                onExportarPdf()
+                onCompartirPdf()
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.accion_exportar_pgn)) },
+            text = { Text(stringResource(R.string.accion_guardar_pdf_torneo)) },
             onClick = {
                 expandido = false
-                onExportarPgn()
+                onGuardarPdf()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_compartir_pgn_torneo)) },
+            onClick = {
+                expandido = false
+                onCompartirPgn()
+            },
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.accion_guardar_pgn_torneo)) },
+            onClick = {
+                expandido = false
+                onGuardarPgn()
             },
         )
         DropdownMenuItem(

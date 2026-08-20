@@ -14,6 +14,10 @@ import com.buenhijogames.plantilla_ajedrez.data.R
 import com.buenhijogames.plantilla_ajedrez.domain.modelo.Partida
 import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,17 +43,15 @@ class AdaptadorPdf @Inject constructor(
     @param:ApplicationContext private val contexto: Context,
 ) : PuertoPdf {
 
-    // --- Constantes de la hoja A4 (en puntos; 1 punto = 1/72 pulgada). ---
     private val ANCHO_HOJA = 595f
     private val ALTO_HOJA = 842f
     private val MARGEN_LATERAL = 28f
     private val MARGEN_SUPERIOR = 28f
     private val MARGEN_INFERIOR = 28f
 
-    // --- Pinturas reutilizadas (se configuran una vez). ---
     private val pinturaTexto = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        textSize = 9f
+        textSize = 13f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
     }
     private val pinturaTextoNegrita = Paint(pinturaTexto).apply {
@@ -57,17 +59,17 @@ class AdaptadorPdf @Inject constructor(
     }
     private val pinturaCabeceraTabla = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        textSize = 8f
+        textSize = 10.5f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
     private val pinturaNumeroJugada = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.DKGRAY
-        textSize = 8.5f
+        textSize = 12.5f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
     private val pinturaResultado = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
-        textSize = 11f
+        textSize = 13.5f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     }
     private val pinturaFondoCabeceraTabla = Paint().apply {
@@ -89,19 +91,20 @@ class AdaptadorPdf @Inject constructor(
         generarPlantillas(listOf(partida))
 
     override fun generarPlantillas(partidas: List<Partida>): ByteArray {
+        if (partidas.isEmpty()) return ByteArray(0)
         val documento = PdfDocument()
         try {
-            for (partida in partidas) {
+            for ((indice, partida) in partidas.withIndex()) {
                 val info = PdfDocument.PageInfo.Builder(
                     ANCHO_HOJA.toInt(),
                     ALTO_HOJA.toInt(),
-                    1,
+                    indice + 1,
                 ).create()
                 val pagina = documento.startPage(info)
-                dibujarHoja(pagina.canvas, PlanillaFide.construir(partida))
+                dibujarHoja(pagina.canvas, PlanillaFide.construir(partida), partida)
                 documento.finishPage(pagina)
             }
-            val flujo = java.io.ByteArrayOutputStream()
+            val flujo = ByteArrayOutputStream()
             documento.writeTo(flujo)
             return flujo.toByteArray()
         } finally {
@@ -109,70 +112,51 @@ class AdaptadorPdf @Inject constructor(
         }
     }
 
-    /**
-     * Dibuja la plantilla FIDE completa en el [canvas] de una pagina.
-     *
-     * @param canvas Canvas de la pagina PDF.
-     * @param plantilla Datos de la plantilla (cabecera + filas con figurin).
-     */
-    private fun dibujarHoja(canvas: Canvas, plantilla: PlanillaFide.Plantilla) {
+    private fun dibujarHoja(canvas: Canvas, plantilla: PlanillaFide.Plantilla, partida: Partida) {
         val altoCabecera = 82f
         val altoPie = 32f
         val yCabeceraTop = MARGEN_SUPERIOR
         val yCabeceraBottom = yCabeceraTop + altoCabecera
-
         val yPieBottom = ALTO_HOJA - MARGEN_INFERIOR
         val yPieTop = yPieBottom - altoPie
-
         val yTablaTop = yCabeceraBottom + 10f
         val yTablaBottom = yPieTop - 10f
 
-        dibujarCabecera(canvas, yCabeceraTop, yCabeceraBottom, plantilla.cabecera)
+        dibujarCabecera(canvas, yCabeceraTop, yCabeceraBottom, partida)
         dibujarTabla4Columnas(canvas, yTablaTop, yTablaBottom, plantilla.filas)
         dibujarPieFirmas(canvas, yPieTop, yPieBottom)
     }
 
-    /**
-     * Dibuja la cabecera enmarcada con los datos del torneo, jugadores y resultado.
-     *
-     * @param canvas Canvas de la pagina.
-     * @param top Posicion Y superior del marco.
-     * @param bottom Posicion Y inferior del marco.
-     * @param cabecera Datos de la cabecera.
-     */
-    private fun dibujarCabecera(canvas: Canvas, top: Float, bottom: Float, cabecera: PlanillaFide.Cabecera) {
+    private fun dibujarCabecera(canvas: Canvas, top: Float, bottom: Float, cabecera: Partida) {
         val izquierda = MARGEN_LATERAL
         val derecha = ANCHO_HOJA - MARGEN_LATERAL
         val anchoTotal = derecha - izquierda
-
-        // Marco exterior
         canvas.drawRect(izquierda, top, derecha, bottom, pinturaMarco)
-
         val altoFila = (bottom - top) / 4f
-        val divisionX1 = izquierda + anchoTotal * 0.70f // Para Evento/Ronda y Sitio/Fecha
-        val divisionX2 = izquierda + anchoTotal * 0.68f // Para Blancas/Firma y Negras/Resultado
+        val divisionX1 = izquierda + anchoTotal * 0.70f
+        val divisionX2 = izquierda + anchoTotal * 0.68f
 
-        // Lineas horizontales divisorias
         for (i in 1..3) {
             val y = top + i * altoFila
             canvas.drawLine(izquierda, y, derecha, y, pinturaLinea)
         }
-
-        // Lineas verticales divisorias
         canvas.drawLine(divisionX1, top, divisionX1, top + 2 * altoFila, pinturaLinea)
         canvas.drawLine(divisionX2, top + 2 * altoFila, divisionX2, bottom, pinturaLinea)
 
-        // Fila 1: Evento | Ronda
+        val fechaMostrada = if (cabecera.fecha.isNotBlank() && cabecera.fecha != "????.??.??") {
+            cabecera.fecha
+        } else {
+            SimpleDateFormat("yyyy.MM.dd", Locale.getDefault()).format(Date())
+        }
+
         val yFila1 = top + altoFila * 0.70f
         dibujarCampoCabecera(canvas, izquierda + 6f, yFila1, contexto.getString(R.string.pdf_evento), cabecera.evento, divisionX1 - izquierda - 12f)
         dibujarCampoCabecera(canvas, divisionX1 + 6f, yFila1, contexto.getString(R.string.pdf_ronda), cabecera.ronda, derecha - divisionX1 - 12f)
 
-        // Fila 2: Sitio | Fecha
         val yFila2 = top + altoFila * 1.70f
         dibujarCampoCabecera(canvas, izquierda + 6f, yFila2, contexto.getString(R.string.pdf_sitio), cabecera.sitio, divisionX1 - izquierda - 12f)
-        dibujarCampoCabecera(canvas, divisionX1 + 6f, yFila2, contexto.getString(R.string.pdf_fecha), cabecera.fecha, derecha - divisionX1 - 12f)
+        dibujarCampoCabecera(canvas, divisionX1 + 6f, yFila2, contexto.getString(R.string.pdf_fecha), fechaMostrada, derecha - divisionX1 - 12f)
 
-        // Fila 3: Blancas
         val yFila3 = top + altoFila * 2.70f
         val nombreBlancas = nombreConElo(cabecera.blancas, cabecera.eloBlancas)
         dibujarCampoCabecera(canvas, izquierda + 6f, yFila3, contexto.getString(R.string.pdf_blancas), nombreBlancas, divisionX2 - izquierda - 12f)
@@ -330,26 +314,44 @@ class AdaptadorPdf @Inject constructor(
         segmentos: List<SegmentoFigurin>?,
     ) {
         if (segmentos.isNullOrEmpty()) return
-        var x = xInicio + 5f
-        val altoIcono = 11f
+
+        val altoIcono = 16f
+
+        // 1. Calcular el ancho total del bloque (figura + texto) para centrarlo horizontalmente en la celda.
+        var anchoTotal = 0f
         for (segmento in segmentos) {
             when (segmento) {
-                is SegmentoFigurin.Texto -> {
-                    val texto = segmento.texto
-                    val ancho = pinturaTexto.measureText(texto)
-                    if (x + ancho > xInicio + anchoCelda - 2f) break
-                    canvas.drawText(texto, x, yCentro + 3.2f, pinturaTexto)
-                    x += ancho
-                }
+                is SegmentoFigurin.Pieza -> anchoTotal += altoIcono
+                is SegmentoFigurin.Texto -> anchoTotal += pinturaTexto.measureText(segmento.texto)
+            }
+        }
 
+        // Si cabe, se centra horizontalmente; si es muy largo, se empieza desde un margen de 2f.
+        var x = if (anchoTotal < anchoCelda) {
+            xInicio + (anchoCelda - anchoTotal) / 2f
+        } else {
+            xInicio + 2f
+        }
+
+        // 2. Dibujar figura y texto perfectamente centrados vertical y horizontalmente.
+        for (segmento in segmentos) {
+            when (segmento) {
                 is SegmentoFigurin.Pieza -> {
                     val icono = obtenerFigurin(segmento.simboloFen) ?: continue
                     val izquierda = x
                     val derecha = izquierda + altoIcono
-                    if (derecha > xInicio + anchoCelda - 2f) break
+                    if (derecha > xInicio + anchoCelda - 1f) break
                     val rect = RectF(izquierda, yCentro - altoIcono / 2f, derecha, yCentro + altoIcono / 2f)
                     canvas.drawBitmap(icono, null, rect, null)
-                    x = derecha + 1f
+                    x = derecha
+                }
+
+                is SegmentoFigurin.Texto -> {
+                    val texto = segmento.texto
+                    val ancho = pinturaTexto.measureText(texto)
+                    if (x + ancho > xInicio + anchoCelda - 1f) break
+                    canvas.drawText(texto, x, yCentro + 4.2f, pinturaTexto)
+                    x += ancho
                 }
             }
         }
