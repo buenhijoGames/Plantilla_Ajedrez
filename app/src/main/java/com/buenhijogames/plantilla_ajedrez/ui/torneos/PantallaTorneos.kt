@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -30,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,22 +92,53 @@ fun PantallaTorneos(
         }
     }
 
+    val textoImportadoExito = stringResource(R.string.snackbar_pgn_importado_conteo)
+    val textoImportadoError = stringResource(R.string.snackbar_pgn_error_importar)
+
     // Feedback de importación via Snackbar.
     LaunchedEffect(estado.resultadoImportacion) {
         val resultado = estado.resultadoImportacion ?: return@LaunchedEffect
         val mensaje = if (resultado > 0) {
-            contexto.getString(R.string.snackbar_pgn_importado_conteo, resultado)
+            String.format(textoImportadoExito, resultado)
         } else {
-            contexto.getString(R.string.snackbar_pgn_error_importar)
+            textoImportadoError
         }
         snackbarHostState.showSnackbar(mensaje)
         viewModel.limpiarResultadoImportacion()
     }
 
+    var torneoAEliminar by remember { mutableStateOf<Torneo?>(null) }
+
     if (estado.dialogoNuevo) {
         DialogoNuevoTorneo(
             onConfirmar = viewModel::crearTorneo,
             onCancelar = viewModel::cerrarDialogoNuevo,
+        )
+    }
+
+    torneoAEliminar?.let { torneo ->
+        AlertDialog(
+            onDismissRequest = { torneoAEliminar = null },
+            title = { Text(stringResource(R.string.torneo_eliminar_confirmacion_titulo)) },
+            text = { Text(stringResource(R.string.torneo_eliminar_confirmacion_mensaje, torneo.nombre)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.eliminarTorneo(torneo.id)
+                        torneoAEliminar = null
+                    },
+                ) {
+                    Text(
+                        text = stringResource(R.string.accion_eliminar),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { torneoAEliminar = null }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
+            },
         )
     }
 
@@ -181,7 +214,7 @@ fun PantallaTorneos(
                     FilaTorneo(
                         torneo = torneo,
                         onAbrir = { onAbrirTorneo(torneo.id) },
-                        onEliminar = { viewModel.eliminarTorneo(torneo.id) },
+                        onEliminar = { torneoAEliminar = torneo },
                     )
                 }
             }

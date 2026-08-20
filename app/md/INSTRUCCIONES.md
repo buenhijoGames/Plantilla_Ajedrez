@@ -795,7 +795,28 @@ Tras revisar AGENTS.md se encontraron y corrigieron estos problemas:
 ### 📋 Hoja de Ruta Consolidada (PLAN_MEJORAS.md)
 Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla_ajedrez/PLAN_MEJORAS.md) (y copia en `app/md/PLAN_MEJORAS.md`) con el análisis exhaustivo de todos los módulos y la planificación en 5 fases (A, B, C, D, E) acordada con Manolo tras la revisión de requisitos.
 
-### Pendiente de commitear
-Todo el trabajo está pendiente de checkpoint de Manolo:
-- "MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"
-- Tras OK, commit extenso en español en la rama activa.
+---
+
+### 🧹 Fase A: Correcciones, Limpieza y Estabilidad
+
+**Norma de Oro incorporada:**
+- El asistente **NO compila ni corre tests por terminal** (`gradlew/compile`). La compilación y verificación de estabilidad la realiza **exclusivamente Manolo desde Android Studio**.
+
+**Tareas realizadas en esta unidad lógica:**
+1. **T1 (Corrección de tests):**
+   - `AdaptadorChesslib.kt`: se mejoró `resultadoActual()` para evaluar `board.legalMoves().isEmpty()` y `board.isKingAttacked`, evitando falsos positivos de material insuficiente en mates.
+   - `AdaptadorChesslibTest.kt`: se sustituyó el FEN de prueba por el Mate del Pastor para testear `GANA_BLANCAS` de forma inequívoca.
+   - `UtilidadesTableroTest.kt`: corregida la aserción de la posición tras `1.e4` (los peones negros se mantienen en `e7`, no `e5`).
+2. **T2 (Renombrado app_name):**
+   - Actualizado `app_name` a `"Plantilla de Ajedrez"` en `app/res/values/strings.xml`.
+3. **T5 (Limpieza de imports y sintaxis):**
+   - Limpiado import calificado innecesario de `Row` en `PantallaAjustes.kt`.
+4. **B5/M8 (Diálogo de confirmación al eliminar torneo):**
+   - Añadido `AlertDialog` en `PantallaTorneos.kt` con advertencia de pérdida permanente de partidas antes de borrar con cascade.
+   - Añadidas cadenas en `strings.xml`: `torneo_eliminar_confirmacion_titulo`, `torneo_eliminar_confirmacion_mensaje`, `accion_eliminar`.
+
+---
+
+### Pendiente de Checkpoint
+- Rama: `fase-a-correcciones-limpieza`
+- Tras verificación de Manolo, realizaremos commit detallado en español.

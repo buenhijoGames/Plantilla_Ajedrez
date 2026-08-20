@@ -89,7 +89,7 @@ private fun FilaTema(
         TemaAplicacion.MADERA -> R.string.tema_madera
         TemaAplicacion.MARMOL -> R.string.tema_marmol
     }
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

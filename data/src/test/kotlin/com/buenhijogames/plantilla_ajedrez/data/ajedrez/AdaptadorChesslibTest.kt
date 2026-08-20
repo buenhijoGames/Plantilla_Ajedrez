@@ -130,8 +130,8 @@ class AdaptadorChesslibTest {
 
     @Test
     fun `resultadoActual devuelve GANA_BLANCAS con rey negro en mate`() {
-        // Mate de dama y rey: le toca a negras y estan en mate.
-        val fenMate = "6k1/8/8/8/8/8/5Q2/6K1 b - - 0 1"
+        // Mate del pastor: 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7#. Le toca a negras y estan en mate.
+        val fenMate = "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4"
         assertEquals(ResultadoPartida.GANA_BLANCAS, motor.resultadoActual(fenMate))
     }
 

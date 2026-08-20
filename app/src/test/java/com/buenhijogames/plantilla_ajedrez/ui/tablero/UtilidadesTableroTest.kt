@@ -26,11 +26,11 @@ class UtilidadesTableroTest {
 
     @Test
     fun `piezasDesdeFen con filas intermedias vacias respeta el salto`() {
-        // Posicion tras 1.e4: peon blanco en e4, el resto de la fila 4 vacia.
+        // Posicion tras 1.e4: peon blanco en e4, el resto de la fila 4 vacia. Los peones negros siguen en la fila 7 (e7).
         val piezas = piezasDesdeFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1")
         assertEquals('P', piezas["e4"])
         assertFalse(piezas.containsKey("d4"))
-        assertEquals('p', piezas["e5"])
+        assertEquals('p', piezas["e7"])
     }
 
     @Test

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Plantilla_ajedrez</string>
+    <string name="app_name">Plantilla de Ajedrez</string>
     <string name="fase_actual">Fase %1$s</string>
 
     <!-- Temas -->
@@ -36,6 +36,9 @@
     <string name="torneo_fecha_formato">YYYY-MM-DD</string>
     <string name="torneo_crear">Crear</string>
     <string name="torneo_eliminar">Eliminar torneo</string>
+    <string name="torneo_eliminar_confirmacion_titulo">¿Eliminar torneo?</string>
+    <string name="torneo_eliminar_confirmacion_mensaje">¿Estás seguro de que quieres eliminar el torneo \"%1$s\"? Se eliminarán todas sus partidas de forma permanente.</string>
+    <string name="accion_eliminar">Eliminar</string>
 
     <!-- Acciones comunes -->
     <string name="accion_volver">Volver</string>

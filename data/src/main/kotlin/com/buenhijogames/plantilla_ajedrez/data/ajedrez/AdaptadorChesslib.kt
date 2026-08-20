@@ -148,11 +148,12 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
      */
     override fun resultadoActual(fen: String): ResultadoPartida {
         val board = Board().cargar(fen)
+        val sinJugadasLegales = board.legalMoves().isEmpty()
         return when {
-            board.isMated ->
+            sinJugadasLegales && board.isKingAttacked ->
                 if (board.getSideToMove() == Side.WHITE) ResultadoPartida.GANA_NEGRAS
                 else ResultadoPartida.GANA_BLANCAS
-            board.isStaleMate || board.isDraw || board.isInsufficientMaterial || board.isRepetition() ->
+            sinJugadasLegales || board.isDraw || board.isInsufficientMaterial || board.isRepetition() ->
                 ResultadoPartida.TABLAS
             else -> ResultadoPartida.EN_CURSO
         }

@@ -44,7 +44,7 @@ Eres un **Ingeniero de Software Staff**, experto en Seguridad Android, Kotlin y 
 3. **Testing:** Implementar pruebas unitarias y de interfaz en cada funcionalidad.
 4. **Punto de Control:** Tras cada unidad lógica, detenerse y solicitar: **"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"**. No avanzar sin confirmación.
 5. **Texto** No puede haber texto hardcodeado. 
-6. **Compilación:** Haremos pequeños cambios y Manolo compilará desde Android Studio para verificar que no hay errores.
+6. **Compilación Exclusiva por Manolo:** El asistente tiene **prohibido ejecutar comandos de compilación o tests por terminal (gradlew/compile)**. Haremos pequeños cambios y cuando haya que compilar, el asistente se detendrá y le pedirá a Manolo que lo haga desde Android Studio para verificar que no hay errores.
 7. **Automatización:** Cuando sea recomendable usaremos scripts de Python.
 8. **Git y Control de Versiones:** 
    - Después de que Manolo apruebe un cambio, se realizará un **commit extenso en español** detallando minuciosamente todo lo realizado y modificado.
