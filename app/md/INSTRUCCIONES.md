@@ -718,12 +718,12 @@ desde la pantalla de inicio".
 2. **Acerca de**: descripción + objetivo de la app.
 3. **Cómo funciona**: 6 pasos numerados.
 4. **Características**: 10 features con viñetas (`\u2022`).
-5. **Autor**: Manuel Salmerón Cerdán / buenhijoGames / correo (en Card).
+5. **Autor**: Manuel Salmerón Cerdán / buenhijoGames / buenhijogames@gmail.com (en Card).
 6. **Licencia**: GPLv3 con descripción (en Card).
 7. **Código fuente**: URL GitHub cliclable (Card con `onClick` → `Intent.ACTION_VIEW`).
 8. **Componentes de terceros**: 4 tarjetas (cburnett GPLv2+, chesslib Apache 2.0,
    AndroidX/Compose/Hilt/Room Apache 2.0, Kotlin/Coroutines/KSP Apache 2.0).
-9. **Contacto**: correo + GitHub.
+9. **Contacto**: buenhijogames@gmail.com + GitHub.
 10. **Agradecimientos**: Lichess, chesslib, comunidad.
 
 **Strings nuevos**: ~40 strings `info_*` en `strings.xml` (:app).
@@ -887,7 +887,7 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
     - **Clasificación según SAN ([UtilidadesTablero.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTablero.kt)):** función `clasificarSonidoDeSan(san)` que detecta automáticamente si la jugada es jaque (`+`, `#`), captura (`x`), enroque/promoción (`O-O`, `=`) o movimiento estándar.
     - **Persistencia en DataStore ([PreferenciasUsuario.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/preferencias/PreferenciasUsuario.kt)):** `sonido_habilitado` (booleano, por defecto `true`).
     - **Pantalla de Ajustes ([PantallaAjustes.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/ajustes/PantallaAjustes.kt) y [AjustesViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/ajustes/AjustesViewModel.kt)):** interruptor `Switch` de Material 3 para activar/desactivar los efectos de sonido.
-    - **Integración con el ViewModel ([PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt)):** reproduce el sonido correspondiente al realizar movimientos normales, de edición o en autoplay.
+    - **Integración con el ViewModel ([PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt)):** reproduce el sonido correspondiente al realizar movimientos normales, de edición, en autoplay/reproducción automática paso a paso, al avanzar jugadas manualmente (`mostrarCamino`) y al volver al final de la partida.
     - **Tests unitarios ([UtilidadesTableroTest.kt](file:///c:/android/Plantilla_ajedrez/app/src/test/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTableroTest.kt)):** tests de clasificación de tipos de sonido para todas las notaciones.
     - **Licencias y Atribución:** registrado en `NOTICE`, `strings.xml` y [PantallaInfo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/info/PantallaInfo.kt).
 

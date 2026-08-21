@@ -599,6 +599,10 @@ class PartidaViewModel @Inject constructor(
                 ladoEnTurnoVisible = ladoEnTurno(fenVisible),
             )
         }
+        val ultimaJugada = sans.lastOrNull()
+        if (!ultimaJugada.isNullOrBlank()) {
+            reproducirSonidoSiCorresponde(ultimaJugada)
+        }
     }
 
     private var trabajoReproduccion: Job? = null
@@ -633,6 +637,10 @@ class PartidaViewModel @Inject constructor(
                 resultadoVisible = actual.resultado,
                 ladoEnTurnoVisible = actual.ladoEnTurno,
             )
+        }
+        val ultimaJugada = actual.jugadasSan.lastOrNull()
+        if (!ultimaJugada.isNullOrBlank()) {
+            reproducirSonidoSiCorresponde(ultimaJugada)
         }
     }
 

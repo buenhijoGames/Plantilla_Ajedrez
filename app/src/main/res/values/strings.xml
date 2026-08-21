@@ -200,7 +200,7 @@
     <string name="info_autor_titulo">Autor</string>
     <string name="info_autor_nombre">Manuel Salmerón Cerdán</string>
     <string name="info_autor_alias">buenhijoGames</string>
-    <string name="info_autor_correo">manuelsalmeroncerdan@gmail.com</string>
+    <string name="info_autor_correo">buenhijogames@gmail.com</string>
 
     <!-- Licencia -->
     <string name="info_licencia_titulo">Licencia de la app</string>
@@ -230,7 +230,7 @@
 
     <!-- Contacto -->
     <string name="info_contacto_titulo">Contacto</string>
-    <string name="info_contacto_correo">Correo electrónico: manuelsalmeroncerdan@gmail.com</string>
+    <string name="info_contacto_correo">Correo electrónico: buenhijogames@gmail.com</string>
     <string name="info_contacto_github">GitHub: https://github.com/Salmeron52/plantillas_ajedrez</string>
 
     <!-- Agradecimientos -->
