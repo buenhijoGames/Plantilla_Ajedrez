@@ -22,11 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Undo
@@ -51,6 +52,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -173,6 +175,15 @@ fun PantallaPartida(
         )
     }
 
+    // Diálogo de confirmación para eliminar jugada y posteriores
+    if (estado.caminoAEliminar != null) {
+        DialogoConfirmacionEliminarJugada(
+            san = estado.sanAEliminar,
+            onConfirmar = viewModel::confirmarEliminacionJugada,
+            onCancelar = viewModel::cancelarEliminacionJugada,
+        )
+    }
+
     val tituloBarra = when {
         estado.blancas.isNotBlank() && estado.negras.isNotBlank() -> stringResource(
             R.string.partida_enfrentamiento,
@@ -241,6 +252,20 @@ fun PantallaPartida(
                             imageVector = Icons.Filled.Undo,
                             contentDescription = stringResource(R.string.accion_deshacer),
                         )
+                    }
+
+                    // Botón para rehacer / restaurar eliminación si se borró por error
+                    if (estado.puedeRehacer) {
+                        IconButton(
+                            onClick = viewModel::rehacerEliminacion,
+                            enabled = !estado.cargando,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Redo,
+                                contentDescription = stringResource(R.string.accion_rehacer),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
 
                     // Menú overflow (compartir, guardar en disco, editar datos, establecer resultado)
@@ -377,6 +402,9 @@ fun PantallaPartida(
                                 onComentarioCambiado = viewModel::actualizarComentarioEdicion,
                                 onNagCambiado = viewModel::actualizarNagEdicion,
                                 onGuardar = viewModel::guardarEdicion,
+                                onEliminarJugada = {
+                                    estado.caminoSeleccion?.let { viewModel.solicitarEliminacionJugada(it) }
+                                },
                                 onSalir = viewModel::salirModoEdicion,
                             )
                             Spacer(modifier = Modifier.height(6.dp))
@@ -447,6 +475,9 @@ fun PantallaPartida(
                                 onComentarioCambiado = viewModel::actualizarComentarioEdicion,
                                 onNagCambiado = viewModel::actualizarNagEdicion,
                                 onGuardar = viewModel::guardarEdicion,
+                                onEliminarJugada = {
+                                    estado.caminoSeleccion?.let { viewModel.solicitarEliminacionJugada(it) }
+                                },
                                 onSalir = viewModel::salirModoEdicion,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -812,6 +843,7 @@ private fun PanelEdicion(
     onComentarioCambiado: (String) -> Unit,
     onNagCambiado: (Int?) -> Unit,
     onGuardar: () -> Unit,
+    onEliminarJugada: () -> Unit,
     onSalir: () -> Unit,
 ) {
     Card(
@@ -831,8 +863,19 @@ private fun PanelEdicion(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                TextButton(onClick = onSalir) {
-                    Text(stringResource(R.string.partida_salir_edicion))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (caminoSeleccion != null) {
+                        IconButton(onClick = onEliminarJugada) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.partida_eliminar_jugada),
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                    TextButton(onClick = onSalir) {
+                        Text(stringResource(R.string.partida_salir_edicion))
+                    }
                 }
             }
             if (caminoSeleccion == null) {
@@ -899,6 +942,40 @@ private fun PanelEdicion(
             }
         }
     }
+}
+
+/**
+ * Diálogo de confirmación para eliminar una jugada errónea y todas las posteriores.
+ */
+@Composable
+private fun DialogoConfirmacionEliminarJugada(
+    san: String,
+    onConfirmar: () -> Unit,
+    onCancelar: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text(stringResource(R.string.partida_eliminar_confirmacion_titulo)) },
+        text = {
+            Text(
+                text = stringResource(R.string.partida_eliminar_confirmacion_mensaje, san),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirmar) {
+                Text(
+                    text = stringResource(R.string.partida_eliminar_jugada),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) {
+                Text(stringResource(R.string.accion_cancelar))
+            }
+        },
+    )
 }
 
 /**

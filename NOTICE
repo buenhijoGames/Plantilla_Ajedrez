@@ -14,12 +14,14 @@
   atribución GPLv3 se reincorporará si se vuelve a empaquetar.)
 
 -------------------------------------------------------------------------------
- 1. Piezas cburnett (renderizado de tablero y figurín de planilla)
+ 1. Piezas cburnett y efectos de sonido (Lichess)
 -------------------------------------------------------------------------------
- Licencia: GNU General Public License v2.0 or any later version (GPLv2+)
+ Licencia: GNU General Public License v2.0 or any later version (GPLv2+) / CC0
  upstream : https://github.com/lichess-org/lila/tree/main/public/piece/cburnett
- autor    : Colin Burnette (cburnett), distribuido vía Lichess.
- uso      : SVG convertidas a ImageVector de Compose para el set por defecto.
+            https://github.com/lichess-org/lila/tree/main/public/sound
+ autor    : Colin Burnette (cburnett) y equipo de Lichess.
+ uso      : SVG convertidas a ImageVector de Compose para el set por defecto
+            y efectos de audio de jugadas (Move, Capture, Check, GenericNotify).
 
 -------------------------------------------------------------------------------
  2. chesslib (validación de jugadas, SAN, FEN, PGN)

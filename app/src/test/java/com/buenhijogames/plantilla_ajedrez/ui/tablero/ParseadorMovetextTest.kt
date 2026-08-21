@@ -493,4 +493,28 @@ class ParseadorMovetextTest {
         movetext = insertarVarianteEnCamino(movetext, caminoE4, listOf("c5"))
         assertEquals("Dos variantes acumuladas", "1. e4 ( d5 ) ( c5 ) e5", movetext)
     }
+
+    @Test
+    fun `eliminarDesdeCamino elimina la jugada seleccionada y las posteriores en linea principal`() {
+        val movetext = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 1-0"
+        val caminoNf3 = CaminoPlanilla.INICIO + PasoCamino.Lineal(3)
+        val resultado = eliminarDesdeCamino(movetext, caminoNf3)
+        assertEquals("1. e4 e5 1-0", resultado)
+    }
+
+    @Test
+    fun `eliminarDesdeCamino elimina desde la primera jugada dejando solo el resultado`() {
+        val movetext = "1. e4 e5 2. Nf3 1-0"
+        val caminoE4 = CaminoPlanilla.INICIO + PasoCamino.Lineal(1)
+        val resultado = eliminarDesdeCamino(movetext, caminoE4)
+        assertEquals("1-0", resultado)
+    }
+
+    @Test
+    fun `eliminarDesdeCamino dentro de una variante trunca solo la variante`() {
+        val movetext = "1. e4 ( d5 Nf3 Nc6 ) e5"
+        val caminoNf3EnVariante = CaminoPlanilla.INICIO + PasoCamino.Lineal(1) + PasoCamino.EntrarVariante(0) + PasoCamino.Lineal(2)
+        val resultado = eliminarDesdeCamino(movetext, caminoNf3EnVariante)
+        assertEquals("1. e4 ( d5 ) e5", resultado)
+    }
 }

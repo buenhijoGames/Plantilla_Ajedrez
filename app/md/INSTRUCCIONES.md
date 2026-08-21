@@ -877,28 +877,51 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 13. **✍️ Símbolos NAG de Edición (!, !!, ?, ?!, etc.) Pegados a la Jugada:**
     - [PlanillaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PlanillaPartida.kt): en la planilla interactiva de la pantalla de partida, los símbolos NAG se dibujan directamente dentro del mismo contenedor de la jugada, inmediatamente a continuación del texto sin separación de espacio (ej. `e4!`, `Nf3??`), compartiendo el fondo de selección/revisión y manteniendo la cohesión visual editorial de ajedrez.
 
----
+14. **🔊 Efectos de Sonido al Mover las Piezas e Interruptor en Ajustes:**
+    - **Archivos de audio de Lichess (`res/raw/`):**
+      - `sonido_movimiento.mp3`: movimiento estándar a casilla vacía (Lichess standard Move).
+      - `sonido_captura.mp3`: captura de pieza enemiga (Lichess standard Capture).
+      - `sonido_jaque.mp3`: jaque o jaque mate (Lichess sfx Check).
+      - `sonido_especial.mp3`: enroque o promoción de peón (Lichess standard GenericNotify).
+    - **Gestor de audio de baja latencia ([ReproductorSonidos.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/audio/ReproductorSonidos.kt)):** implementado con `SoundPool` para reproducción instantánea sin retardos.
+    - **Clasificación según SAN ([UtilidadesTablero.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTablero.kt)):** función `clasificarSonidoDeSan(san)` que detecta automáticamente si la jugada es jaque (`+`, `#`), captura (`x`), enroque/promoción (`O-O`, `=`) o movimiento estándar.
+    - **Persistencia en DataStore ([PreferenciasUsuario.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/preferencias/PreferenciasUsuario.kt)):** `sonido_habilitado` (booleano, por defecto `true`).
+    - **Pantalla de Ajustes ([PantallaAjustes.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/ajustes/PantallaAjustes.kt) y [AjustesViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/ajustes/AjustesViewModel.kt)):** interruptor `Switch` de Material 3 para activar/desactivar los efectos de sonido.
+    - **Integración con el ViewModel ([PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt)):** reproduce el sonido correspondiente al realizar movimientos normales, de edición o en autoplay.
+    - **Tests unitarios ([UtilidadesTableroTest.kt](file:///c:/android/Plantilla_ajedrez/app/src/test/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/UtilidadesTableroTest.kt)):** tests de clasificación de tipos de sonido para todas las notaciones.
+    - **Licencias y Atribución:** registrado en `NOTICE`, `strings.xml` y [PantallaInfo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/info/PantallaInfo.kt).
+
+15. **🗑️ Rectificación y Eliminación de Jugadas Erróneas en Cadena con Opción Deshacer/Rehacer:**
+    - **Función Pura de Truncado ([ParseadorMovetext.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/ParseadorMovetext.kt)):** `eliminarDesdeCamino(movetext, camino)` que localiza cualquier jugada seleccionada (en la línea principal o dentro de cualquier variante) y descarta esa jugada y todas las posteriores dentro de su nivel de árbol PGN, conservando comentarios o jugadas previas intactas.
+    - **Tests unitarios ([ParseadorMovetextTest.kt](file:///c:/android/Plantilla_ajedrez/app/src/test/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/ParseadorMovetextTest.kt)):** tests para truncado de jugadas intermedias, vaciado completo y truncado de variantes anidadas.
+    - **Gestión en ViewModel ([PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt)):**
+      - `solicitarEliminacionJugada(camino)` / `cancelarEliminacionJugada()` / `confirmarEliminacionJugada()`.
+      - Pila de historial para restaurar / rehacer (`pilaRehacer` y `rehacerEliminacion()`).
+      - **Limpieza de historial:** en el momento en que se vuelven a introducir nuevas jugadas en el tablero (en modo normal o edición), la pila de rehacer se limpia y el botón de rehacer desaparece automáticamente.
+      - Actualización inmediata del tablero y persistencia automática en Room.
+    - **UI y Experiencia de Usuario ([PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt)):**
+      - Botón de papelera en la barra de edición (`PanelEdicion`) al seleccionar cualquier jugada.
+      - Diálogo modal de confirmación (`DialogoConfirmacionEliminarJugada`) mostrando la jugada afectada.
+      - Botón de Rehacer (`Icons.Filled.Redo`) reactivo en la barra superior (`TopAppBar`) que aparece en cuanto se borra alguna jugada para poder restaurarla al instante si se eliminó por error, y desaparece en cuanto se introduce una jugada nueva.
+      - Soporte para seguir eliminando iterativamente (10, 20 o las que sean necesarias) pulsando el botón de nuevo.
 
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `fase-e-pulido-temas-playstore`
-- **Último Commit:** `af2f758` — *feat(ui): optimizacion de visualizacion de jugadores, tablero apaisado maximizado y simbolos NAG adheridos a jugada*
 - **Estado:**
+  - ✅ **Rectificación y eliminación de jugadas con deshacer/rehacer**: Implementado al 100%.
+  - ✅ **Efectos de sonido y switch en Ajustes**: Implementado al 100%.
   - ✅ **Fase A (Estructura Clean Architecture y Temas)**: 100% completada.
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches y Auto-Play)**: 100% completada.
-  - ✅ **Mejoras adicionales solicitadas por Manolo**:
-    - Maximización del tablero en modo horizontal (100% altura libre).
-    - Rótulo de enfrentamiento directo (*"Luis – Juan"*) en tarjetas y barra superior.
-    - Símbolos NAG de edición (`!`, `!!`, `?`, etc.) pegados inmediatamente a la jugada y serializados antes del comentario.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play y Sonidos)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
-1. **Comprobar estabilidad y feedback de Manolo** tras el uso continuado de la reproducción automática, edición de anotaciones NAG y visualización en horizontal.
+1. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena y el botón Rehacer.
 2. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.

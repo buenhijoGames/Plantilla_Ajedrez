@@ -233,3 +233,29 @@ fun segmentosDeSan(san: String, esBlanca: Boolean): List<SegmentoSan> {
     }
     return listOf(SegmentoSan.Texto(san))
 }
+
+/**
+ * Determina el [TipoSonidoJugada] correspondiente según la notación SAN de la jugada.
+ *
+ * Prioridades:
+ *   1. Jaque o Jaque Mate ('+' o '#').
+ *   2. Captura ('x').
+ *   3. Enroque ('O-O', 'O-O-O') o Promoción ('=').
+ *   4. Movimiento estándar en cualquier otro caso.
+ *
+ * @param san Jugada en notación SAN ("e4", "Nxd4", "Qh5#", "O-O", "e8=Q").
+ * @return [com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada] correspondiente.
+ */
+fun clasificarSonidoDeSan(san: String): com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada {
+    val limpio = san.trim()
+    return when {
+        limpio.contains('+') || limpio.contains('#') ->
+            com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.JAQUE
+        limpio.contains('x') || limpio.contains('X') ->
+            com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.CAPTURA
+        limpio.startsWith("O-O", ignoreCase = true) || limpio.startsWith("0-0") || limpio.contains('=') ->
+            com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.ENROQUE_O_PROMOCION
+        else ->
+            com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.MOVIMIENTO
+    }
+}

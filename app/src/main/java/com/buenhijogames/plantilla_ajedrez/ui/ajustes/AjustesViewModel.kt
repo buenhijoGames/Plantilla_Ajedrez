@@ -7,7 +7,7 @@ import com.buenhijogames.plantilla_ajedrez.ui.theme.TemaAplicacion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,21 +15,18 @@ import javax.inject.Inject
 /**
  * Estado de UI de la pantalla de ajustes.
  *
- * Hoy sólo transporta el [temaSeleccionado]. Se modela como data class
- * para poder añadir más campos (tipo de pieza, idioma, etc.) sin cambiar
- * la firma del `StateFlow` ni los puntos de recolección en la UI.
+ * Transporta el [temaSeleccionado] y si los efectos de sonido están habilitados.
  */
 data class EstadoAjustes(
     val temaSeleccionado: TemaAplicacion = TemaAplicacion.CLARO,
+    val sonidoHabilitado: Boolean = true,
 )
 
 /**
  * [ViewModel] de la pantalla de Ajustes.
  *
- * Lee el tema desde [PreferenciasUsuario] reactivamente y lo expone como
- * [StateFlow] para que la UI recomponga al cambiar. Expone [seleccionarTema]
- * para persistir la nueva elección: la escritura se lanza en
- * [viewModelScope] y no bloquea la UI.
+ * Lee el tema y el sonido desde [PreferenciasUsuario] reactivamente y los expone como
+ * [StateFlow] para que la UI recomponga al cambiar.
  *
  * Anotado con [HiltViewModel] para recibir [PreferenciasUsuario] por
  * constructor injection. La grapa con la Activity la hace
@@ -42,16 +39,21 @@ class AjustesViewModel @Inject constructor(
 
     /**
      * Estado reactivo de la pantalla. Se arranca con [EstadoAjustes] por
-     * defecto (tema CLARO) y se actualiza en cuanto DataStore emite el
-     * primer valor (casi siempre inmediato).
+     * defecto (tema CLARO y sonido activo) y se actualiza en cuanto DataStore emite.
      */
-    val estado: StateFlow<EstadoAjustes> = preferencias.tema
-        .map { EstadoAjustes(temaSeleccionado = it) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = EstadoAjustes(),
+    val estado: StateFlow<EstadoAjustes> = combine(
+        preferencias.tema,
+        preferencias.sonidoHabilitado,
+    ) { tema, sonido ->
+        EstadoAjustes(
+            temaSeleccionado = tema,
+            sonidoHabilitado = sonido,
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = EstadoAjustes(),
+    )
 
     /**
      * Persiste el tema elegido por el usuario.
@@ -59,6 +61,15 @@ class AjustesViewModel @Inject constructor(
     fun seleccionarTema(tema: TemaAplicacion) {
         viewModelScope.launch {
             preferencias.guardarTema(tema)
+        }
+    }
+
+    /**
+     * Persiste si los efectos de sonido están habilitados.
+     */
+    fun alternarSonido(habilitado: Boolean) {
+        viewModelScope.launch {
+            preferencias.guardarSonidoHabilitado(habilitado)
         }
     }
 }

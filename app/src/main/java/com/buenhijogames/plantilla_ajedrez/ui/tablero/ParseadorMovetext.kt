@@ -892,3 +892,27 @@ fun numeroDeVariantesPegadas(movetext: String, camino: CaminoPlanilla): Int {
     }
     return contador
 }
+
+/**
+ * Elimina la jugada apuntada por [camino] y todas las jugadas/variantes posteriores
+ * en su misma rama o nivel.
+ *
+ * Si [camino] apunta a la línea principal, elimina esa jugada y todo lo que le sigue
+ * (conservando el resultado si existía).
+ * Si [camino] apunta dentro de una variante, trunca la variante a partir de esa jugada.
+ *
+ * @param movetext Movetext PGN a modificar.
+ * @param camino   Camino hasta la primera jugada que se desea eliminar.
+ * @return El movetext actualizado sin esa jugada ni las posteriores.
+ */
+fun eliminarDesdeCamino(movetext: String, camino: CaminoPlanilla): String =
+    localizarYOperar(movetext, camino) { lista, indice ->
+        val resultado = lista.lastOrNull() as? ElementoMovetext.Resultado
+        while (lista.size > indice) {
+            lista.removeAt(indice)
+        }
+        if (resultado != null) {
+            lista.add(resultado)
+        }
+    }
+

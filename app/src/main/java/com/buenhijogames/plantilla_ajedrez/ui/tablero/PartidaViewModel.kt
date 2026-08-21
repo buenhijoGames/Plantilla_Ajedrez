@@ -11,6 +11,9 @@ import com.buenhijogames.plantilla_ajedrez.domain.pdf.PuertoPdf
 import com.buenhijogames.plantilla_ajedrez.domain.pgn.PuertoPgn
 import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartidas
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
+import com.buenhijogames.plantilla_ajedrez.preferencias.PreferenciasUsuario
+import com.buenhijogames.plantilla_ajedrez.ui.audio.ReproductorSonidos
+import com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,13 +51,13 @@ data class JugadaPromocion(
  * @property ladoEnTurnoVisible Bando al que le toca en la posición visible.
  * @property blancas           Nombre del jugador de blancas (puede estar vacío).
  * @property negras            Nombre del jugador de negras (puede estar vacío).
-  * @property evento            Nombre del evento (torneo) para la cabecera.
-  * @property sitio             Sitio del evento (Tag Site del PGN).
-  * @property fecha             Fecha del evento (Tag Date del PGN).
-  * @property ronda             Ronda de la partida (Tag Round del PGN).
-  * @property eloBlancas        Elo del jugador de blancas (si existe).
-  * @property eloNegras         Elo del jugador de negras (si existe).
-  * @property casillaSeleccionada Casilla seleccionada por el usuario (origen).
+ * @property evento            Nombre del evento (torneo) para la cabecera.
+ * @property sitio             Sitio del evento (Tag Site del PGN).
+ * @property fecha             Fecha del evento (Tag Date del PGN).
+ * @property ronda             Ronda de la partida (Tag Round del PGN).
+ * @property eloBlancas        Elo del jugador de blancas (si existe).
+ * @property eloNegras         Elo del jugador de negras (si existe).
+ * @property casillaSeleccionada Casilla seleccionada por el usuario (origen).
  * @property destinosLegales   Casillas destino legales desde [casillaSeleccionada].
  * @property promocionPendiente Jugada esperando a que el usuario elija pieza.
  * @property caminoVisible     Camino hasta la jugada visible al revisar la
@@ -69,6 +72,9 @@ data class JugadaPromocion(
  *                                  modo edición (null si aún no se ha jugado).
  * @property hayError          true si la partida no se pudo cargar o hubo un
  *                             movimiento ilegal (la UI resuelve el texto).
+ * @property caminoAEliminar   Camino de la jugada que se desea eliminar (para confirmación).
+ * @property sanAEliminar      SAN de la jugada que se desea eliminar.
+ * @property puedeRehacer      true si hay un movetext en el historial para rehacer/deshacer eliminación.
  */
 data class EstadoPartida(
     val cargando: Boolean = true,
@@ -104,6 +110,9 @@ data class EstadoPartida(
     val reproduciendoAuto: Boolean = false,
     val segundosAuto: Int = 3,
     val dialogoConfigurarSegundos: Boolean = false,
+    val caminoAEliminar: CaminoPlanilla? = null,
+    val sanAEliminar: String = "",
+    val puedeRehacer: Boolean = false,
 )
 
 /**
@@ -124,18 +133,20 @@ data class EstadoPartida(
  *  - Modo edición (botón "Editar"): seleccionar una jugada y editar su
  *     comentario y NAG, y añadir variantes/subvariantes jugando en el tablero
  *     (se acumulan sin límite de profundidad).
+ *  - Rectificación y eliminación: eliminar jugadas erróneas y posteriores con
+ *     confirmación, con soporte para seguir eliminando iterativamente y
+ *     botón para rehacer / restaurar si se borra por error.
  *  - Persistir automáticamente el movetext y el resultado tras cada cambio
  *     (jugadas nuevas, deshacer, anotaciones o variantes).
+ *  - Reproducir efectos de sonido al mover piezas según la preferencia configurada.
  *
- * La fuente de verdad es un único [MutableStateFlow]. Las jugadas ilegales
- * ([JugadaIlegalException]) no tumbar la app: se marcan como error de
- * validación en el estado.
- *
- * @param savedStateHandle   Aporta el id de partida del argumento de navegación.
- * @param motor              Puerto del motor de ajedrez (chesslib).
+ * @param savedStateHandle    Aporta el id de partida del argumento de navegación.
+ * @param motor               Puerto del motor de ajedrez (chesslib).
  * @param repositorioPartidas Repositorio de persistencia de partidas.
- * @param generadorPdf       Puerto de generación de plantillas PDF (FIDE).
- * @param generadorPgn       Puerto de importación/exportación PGN.
+ * @param generadorPdf        Puerto de generación de plantillas PDF (FIDE).
+ * @param generadorPgn        Puerto de importación/exportación PGN.
+ * @param preferencias        Repositorio de preferencias para sonido y ajustes.
+ * @param reproductorSonidos  Gestor de audio SoundPool para efectos de sonido.
  */
 @HiltViewModel
 class PartidaViewModel @Inject constructor(
@@ -144,6 +155,8 @@ class PartidaViewModel @Inject constructor(
     private val repositorioPartidas: RepositorioPartidas,
     private val generadorPdf: PuertoPdf,
     private val generadorPgn: PuertoPgn,
+    private val preferencias: PreferenciasUsuario,
+    private val reproductorSonidos: ReproductorSonidos,
 ) : ViewModel() {
 
     private val partidaId: String = checkNotNull(savedStateHandle[Destinos.ARG_PARTIDA_ID])
@@ -154,12 +167,23 @@ class PartidaViewModel @Inject constructor(
     /** FEN de la posición inicial de la partida (para rejugar/deshacer). */
     private var fenInicio: String = motor.fenInicial()
 
+    /** Bandera local para saber si el usuario tiene activos los efectos de sonido. */
+    private var sonidoHabilitado: Boolean = true
+
+    /** Pila de movetexts previos para poder rehacer/restaurar si se borran jugadas por error. */
+    private val pilaRehacer = mutableListOf<String>()
+
     private val _estado = MutableStateFlow(EstadoPartida(cargando = true))
 
     /** Estado reactivo expuesto a la UI. */
     val estado: StateFlow<EstadoPartida> = _estado.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            preferencias.sonidoHabilitado.collect { habilitado ->
+                sonidoHabilitado = habilitado
+            }
+        }
         viewModelScope.launch {
             val partida = repositorioPartidas.obtenerPartida(partidaId)
             if (partida == null) {
@@ -423,6 +447,7 @@ class PartidaViewModel @Inject constructor(
         // Se conserva el movetext anotado (comentarios, NAGs y variantes)
         // añadiendo la jugada nueva al final en lugar de regenerarlo desde cero.
         val nuevoMovetext = agregarJugadaAlMovetext(actual.movetext, san)
+        pilaRehacer.clear()
         _estado.update {
             it.copy(
                 fen = nuevoFen,
@@ -441,8 +466,10 @@ class PartidaViewModel @Inject constructor(
                 varianteEnConstruccion = null,
                 modoEdicion = false,
                 hayError = false,
+                puedeRehacer = false,
             )
         }
+        reproducirSonidoSiCorresponde(san)
         guardarPartida(nuevoMovetext, resultado)
     }
 
@@ -487,6 +514,7 @@ class PartidaViewModel @Inject constructor(
             )
             extendido to actual.varianteEnConstruccion
         }
+        pilaRehacer.clear()
         _estado.update {
             it.copy(
                 fenVisible = nuevoFen,
@@ -499,8 +527,10 @@ class PartidaViewModel @Inject constructor(
                 promocionPendiente = null,
                 varianteEnConstruccion = nuevaVariante,
                 hayError = false,
+                puedeRehacer = false,
             )
         }
+        reproducirSonidoSiCorresponde(san)
         guardarPartida(nuevoMovetext, actual.resultado)
     }
 
@@ -1120,4 +1150,119 @@ class PartidaViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Solicita la eliminación de la jugada apuntada por [camino] y todas las posteriores.
+     * Abre el diálogo de confirmación.
+     */
+    fun solicitarEliminacionJugada(camino: CaminoPlanilla) {
+        val actual = _estado.value
+        val sans = sansDeCamino(actual.movetext, camino)
+        val san = sans.lastOrNull().orEmpty()
+        _estado.update {
+            it.copy(
+                caminoAEliminar = camino,
+                sanAEliminar = san,
+            )
+        }
+    }
+
+    /**
+     * Cancela el diálogo de confirmación de eliminación.
+     */
+    fun cancelarEliminacionJugada() {
+        _estado.update {
+            it.copy(
+                caminoAEliminar = null,
+                sanAEliminar = "",
+            )
+        }
+    }
+
+    /**
+     * Confirma y ejecuta la eliminación de la jugada y todas las posteriores.
+     * Guarda el estado previo en la pila de rehacer por si se borra por error.
+     */
+    fun confirmarEliminacionJugada() {
+        val actual = _estado.value
+        val camino = actual.caminoAEliminar ?: return
+        pilaRehacer.add(actual.movetext)
+
+        val nuevoMovetext = eliminarDesdeCamino(actual.movetext, camino)
+        val sans = sansLineaPrincipal(nuevoMovetext)
+        val fen = rejugarMovetext(fenInicio, sans)
+        val resultado = motor.resultadoActual(fen)
+
+        _estado.update {
+            it.copy(
+                fen = fen,
+                fenVisible = fen,
+                movetext = nuevoMovetext,
+                jugadasSan = sans,
+                resultado = resultado,
+                resultadoVisible = resultado,
+                ladoEnTurno = ladoEnTurno(fen),
+                ladoEnTurnoVisible = ladoEnTurno(fen),
+                caminoVisible = null,
+                caminoSeleccion = null,
+                varianteEnConstruccion = null,
+                modoEdicion = false,
+                caminoAEliminar = null,
+                sanAEliminar = "",
+                puedeRehacer = true,
+                casillaSeleccionada = null,
+                destinosLegales = emptyList(),
+                promocionPendiente = null,
+                hayError = false,
+            )
+        }
+        guardarPartida(nuevoMovetext, resultado)
+    }
+
+    /**
+     * Rehace/restaura el movetext previo si se eliminó una jugada por error.
+     */
+    fun rehacerEliminacion() {
+        if (pilaRehacer.isEmpty()) return
+        val movetextPrevio = pilaRehacer.removeAt(pilaRehacer.lastIndex)
+        val sans = sansLineaPrincipal(movetextPrevio)
+        val fen = rejugarMovetext(fenInicio, sans)
+        val resultado = motor.resultadoActual(fen)
+
+        _estado.update {
+            it.copy(
+                fen = fen,
+                fenVisible = fen,
+                movetext = movetextPrevio,
+                jugadasSan = sans,
+                resultado = resultado,
+                resultadoVisible = resultado,
+                ladoEnTurno = ladoEnTurno(fen),
+                ladoEnTurnoVisible = ladoEnTurno(fen),
+                caminoVisible = null,
+                caminoSeleccion = null,
+                varianteEnConstruccion = null,
+                modoEdicion = false,
+                caminoAEliminar = null,
+                sanAEliminar = "",
+                puedeRehacer = pilaRehacer.isNotEmpty(),
+                casillaSeleccionada = null,
+                destinosLegales = emptyList(),
+                promocionPendiente = null,
+                hayError = false,
+            )
+        }
+        guardarPartida(movetextPrevio, resultado)
+    }
+
+    /**
+     * Reproduce el sonido de la jugada [san] si los sonidos están habilitados.
+     */
+    private fun reproducirSonidoSiCorresponde(san: String) {
+        if (sonidoHabilitado) {
+            val tipo = clasificarSonidoDeSan(san)
+            reproductorSonidos.reproducir(tipo)
+        }
+    }
 }
+

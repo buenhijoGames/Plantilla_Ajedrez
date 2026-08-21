@@ -19,6 +19,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Switch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,7 +32,7 @@ import com.buenhijogames.plantilla_ajedrez.R
 import com.buenhijogames.plantilla_ajedrez.ui.theme.TemaAplicacion
 
 /**
- * Pantalla de Ajustes con selector de temas y navegación de retorno.
+ * Pantalla de Ajustes con selector de temas, efectos de sonido y navegación de retorno.
  *
  * @param onVolver  Callback para retroceder en la pila de navegación.
  * @param viewModel Inyectado por Hilt.
@@ -78,6 +82,35 @@ fun PantallaAjustes(
                     tema = tema,
                     seleccionado = estado.temaSeleccionado == tema,
                     alSeleccionar = { viewModel.seleccionarTema(tema) },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Sección de Efectos de Sonido
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.ajustes_sonido_titulo),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResource(R.string.ajustes_sonido_subtitulo),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = estado.sonidoHabilitado,
+                    onCheckedChange = { viewModel.alternarSonido(it) },
                 )
             }
         }

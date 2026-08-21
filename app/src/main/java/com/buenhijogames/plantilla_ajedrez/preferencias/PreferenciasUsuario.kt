@@ -3,6 +3,7 @@ package com.buenhijogames.plantilla_ajedrez.preferencias
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -30,15 +31,11 @@ private val Context.dataStorePreferencias: DataStore<Preferences> by preferences
 /**
  * Repositorio de preferencias del usuario respaldado por DataStore.
  *
- * Cada clave se define como [stringPreferencesKey] resistente a renombres
+ * Cada clave se define como [stringPreferencesKey] o [booleanPreferencesKey] resistente a renombres
  * (el nombre de la clave es el contrato con el fichero de disco, no se
  * debe tocar sin añadir migración explícita de preferencias). El value
  * null/missing se traduce a valor por defecto siempre: la lectura nunca
  * debe hacer caer la app.
- *
- * Actualmente sólo persiste el [TemaAplicacion], pero la clase se deja
- * abierta para futuras preferencias (tipo de pieza, FEN inicial por
- * defecto, etc.).
  */
 @Singleton
 class PreferenciasUsuario @Inject constructor(
@@ -54,6 +51,13 @@ class PreferenciasUsuario @Inject constructor(
     }
 
     /**
+     * Emite si los efectos de sonido de jugadas están habilitados (por defecto true).
+     */
+    val sonidoHabilitado: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[CLAVE_SONIDO_HABILITADO] ?: true
+    }
+
+    /**
      * Persiste el [tema] elegido por el usuario.
      *
      * Suspended porque DataStore escribe en disco fuera del hilo de UI.
@@ -62,9 +66,19 @@ class PreferenciasUsuario @Inject constructor(
         dataStore.edit { it[CLAVE_TEMA] = tema.name }
     }
 
+    /**
+     * Persiste la preferencia de efectos de sonido.
+     */
+    suspend fun guardarSonidoHabilitado(habilitado: Boolean) {
+        dataStore.edit { it[CLAVE_SONIDO_HABILITADO] = habilitado }
+    }
+
     companion object {
         /** Clave estable en disco para el tema. NO renombrar sin migrar. */
         private val CLAVE_TEMA = stringPreferencesKey("tema")
+
+        /** Clave estable en disco para el sonido. NO renombrar sin migrar. */
+        private val CLAVE_SONIDO_HABILITADO = booleanPreferencesKey("sonido_habilitado")
     }
 }
 

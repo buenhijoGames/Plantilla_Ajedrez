@@ -149,4 +149,27 @@ class UtilidadesTableroTest {
         assertEquals(listOf(SegmentoSan.Texto("O-O")), segmentosDeSan("O-O", esBlanca = true))
         assertEquals(listOf(SegmentoSan.Texto("O-O-O")), segmentosDeSan("O-O-O", esBlanca = false))
     }
+
+    @Test
+    fun `clasificarSonidoDeSan clasifica correctamente cada tipo de jugada`() {
+        // Movimiento estándar
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.MOVIMIENTO, clasificarSonidoDeSan("e4"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.MOVIMIENTO, clasificarSonidoDeSan("Nf3"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.MOVIMIENTO, clasificarSonidoDeSan("Be7"))
+
+        // Captura
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.CAPTURA, clasificarSonidoDeSan("Nxd4"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.CAPTURA, clasificarSonidoDeSan("exd5"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.CAPTURA, clasificarSonidoDeSan("Bxf7"))
+
+        // Jaque y Jaque mate
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.JAQUE, clasificarSonidoDeSan("Qh5#"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.JAQUE, clasificarSonidoDeSan("Bb5+"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.JAQUE, clasificarSonidoDeSan("Nxd4+"))
+
+        // Enroque y Promoción
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.ENROQUE_O_PROMOCION, clasificarSonidoDeSan("O-O"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.ENROQUE_O_PROMOCION, clasificarSonidoDeSan("O-O-O"))
+        assertEquals(com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada.ENROQUE_O_PROMOCION, clasificarSonidoDeSan("e8=Q"))
+    }
 }
