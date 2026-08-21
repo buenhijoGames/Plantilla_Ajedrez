@@ -1,7 +1,7 @@
 package com.buenhijogames.plantilla_ajedrez.data.bd.migraciones
 
 import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import com.buenhijogames.plantilla_ajedrez.data.bd.migraciones.MigracionesPlantilla.TODAS
 
 /**
  * Catálogo centralizado de migraciones de la base de datos.

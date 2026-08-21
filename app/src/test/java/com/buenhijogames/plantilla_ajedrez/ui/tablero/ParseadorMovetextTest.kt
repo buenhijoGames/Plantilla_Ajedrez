@@ -254,7 +254,7 @@ class ParseadorMovetextTest {
     @Test
     fun `actualizarAnotacionDeJugada reemplaza las anotaciones existentes`() {
         assertEquals(
-            "1. e4 {nuevo} \$1 e5",
+            "1. e4 \$1 {nuevo} e5",
             actualizarAnotacionDeJugada("1. e4 {viejo} \$2 e5", 1, "nuevo", 1),
         )
     }
@@ -328,7 +328,7 @@ class ParseadorMovetextTest {
     @Test
     fun `actualizarAnotacionEnCamino edita jugadas de linea principal`() {
         assertEquals(
-            "1. e4 {nuevo} \$1 e5",
+            "1. e4 \$1 {nuevo} e5",
             actualizarAnotacionEnCamino("1. e4 {viejo} \$2 e5", caminoE4, "nuevo", 1),
         )
     }
@@ -388,7 +388,7 @@ class ParseadorMovetextTest {
     fun `round trip NAG en linea principal`() {
         // 1. Guardar NAG en e4
         val conNag = actualizarAnotacionEnCamino("1. e4 e5", caminoE4, null, 1)
-        assertEquals("1. e4 $1 e5", conNag)
+        assertEquals("1. e4 \$1 e5", conNag)
         // 2. Re-parsear y verificar posición del NAG
         val elementos = parsearMovetext(conNag)
         val nagIndex = elementos.indexOfFirst { it is ElementoMovetext.Nag }
@@ -398,18 +398,18 @@ class ParseadorMovetextTest {
 
     @Test
     fun `round trip NAG con comentario existente`() {
-        // Guardar NAG cuando ya hay comentario
+        // Guardar NAG cuando ya hay comentario (el estándar PGN ubica el NAG antes del comentario)
         val resultado = actualizarAnotacionEnCamino(
             "1. e4 {buen avance} e5", caminoE4, "nuevo", 1
         )
-        assertEquals("1. e4 {nuevo} $1 e5", resultado)
-        // Verificar que el NAG está después del comentario y antes de la siguiente jugada
+        assertEquals("1. e4 \$1 {nuevo} e5", resultado)
+        // Verificar que el NAG está antes del comentario y después de la jugada
         val elementos = parsearMovetext(resultado)
         val nagIndex = elementos.indexOfFirst { it is ElementoMovetext.Nag }
         val comentarioIndex = elementos.indexOfFirst { it is ElementoMovetext.Comentario }
         val jugadasCount = elementos.count { it is ElementoMovetext.Jugada }
-        assertEquals("Comentario antes del NAG", true, comentarioIndex < nagIndex)
-        assertEquals("NAG antes de la siguiente jugada", true, nagIndex < elementos.size - 1)
+        assertEquals("NAG antes del comentario", true, nagIndex < comentarioIndex)
+        assertEquals("Comentario antes de la siguiente jugada", true, comentarioIndex < elementos.size - 1)
         assertEquals("Solo 2 jugadas en línea principal", 2, jugadasCount)
     }
 

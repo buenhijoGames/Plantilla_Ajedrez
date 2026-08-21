@@ -19,7 +19,7 @@ import com.buenhijogames.plantilla_ajedrez.ui.torneos.PantallaTorneos
  * El [NavHostController] se inyecta desde [com.buenhijogames.plantilla_ajedrez.MainActivity]
  * para poder observar el back stack fuera del composable (por ejemplo, para
  * los Tests de UI). El startDestination es [Destinos.INICIO] porque el flujo
- * inicial de la app de Manolo arranca preguntando al usuario si quiere
+ * inicial de la app arranca preguntando al usuario si quiere
  * crear nuevo o abrir uno guardado (ver [PantallaInicio]).
  *
  * El grafo completo de Fase 4 es:

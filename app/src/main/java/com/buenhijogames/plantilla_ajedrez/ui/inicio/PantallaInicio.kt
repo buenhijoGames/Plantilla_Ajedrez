@@ -32,7 +32,7 @@ import com.buenhijogames.plantilla_ajedrez.R
  * (requisito de `Esta_App.md`: "Al abrir la app se le preguntará si es un
  * nuevo torneo (o match, o partida aislada) o si es uno ya guardado").
  *
- * La TopAppBar sigue el principio minimalista de Manolo: solo un icono
+ * La TopAppBar sigue el principio de diseño minimalista: solo un icono
  * de tres puntos (overflow) que despliega "Ajustes" e "Información".
  * Sin botones sueltos a la vista (regla de Esta_App.md).
  *

@@ -905,6 +905,18 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
       - Botón de Rehacer (`Icons.Filled.Redo`) reactivo en la barra superior (`TopAppBar`) que aparece en cuanto se borra alguna jugada para poder restaurarla al instante si se eliminó por error, y desaparece en cuanto se introduce una jugada nueva.
       - Soporte para seguir eliminando iterativamente (10, 20 o las que sean necesarias) pulsando el botón de nuevo.
 
+16. **♟️ Suite de Pruebas de Promoción y Coronación de Peones:**
+    - **Motor FIDE ([AdaptadorChesslibTest.kt](file:///c:/android/Plantilla_ajedrez/data/src/test/kotlin/com/buenhijogames/plantilla_ajedrez/data/ajedrez/AdaptadorChesslibTest.kt)):**
+      - Validación de notación SAN para las 4 piezas (`e8=Q`, `e8=R`, `e8=B`, `e8=N`).
+      - Coronación con captura y jaque (`dxe8=Q+`).
+      - Coronación de peones negros en fila 1 (`e1=Q`, `e1=N`).
+      - Aplicación sobre el FEN del tablero (`4Q3/...`).
+    - **Flujo de ViewModel y Diálogo ([PromocionPeonViewModelTest.kt](file:///c:/android/Plantilla_ajedrez/app/src/test/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PromocionPeonViewModelTest.kt)):**
+      - Activación de `promocionPendiente` (diálogo de selección) al tocar casilla destino en 8ª/1ª fila en vez de mover automáticamente.
+      - Confirmación de Dama y guardado en Room.
+      - Confirmación de Caballo (`e8=N`).
+      - Cancelación del diálogo con limpieza de selección y estado.
+
 ---
 
 ### Checkpoint y Estado de Versiones

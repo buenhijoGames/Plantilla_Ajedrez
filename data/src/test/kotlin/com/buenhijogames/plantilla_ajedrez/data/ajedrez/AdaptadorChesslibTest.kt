@@ -108,12 +108,47 @@ class AdaptadorChesslibTest {
     }
 
     @Test
-    fun `jugadaASan maneja promocion de peon`() {
-        // Posicion con peon blanco a punto de coronar en e7-e8
+    fun `jugadaASan maneja promocion de peon blanco a las cuatro piezas posibles`() {
+        // Posición con peón blanco en e7 a punto de coronar en e8 (sin jaque directo)
         val fenPromocion = "8/4P3/8/8/8/8/8/4k2K w - - 0 1"
-        val san = motor.jugadaASan(fenPromocion, "e7", "e8", 'Q')
-        // Puede ser e8=Q o e8=Q+ segun la posicion del rey negro
-        assertTrue("SAN de promocion debe empezar por e8=Q", san.startsWith("e8=Q"))
+        
+        val sanDama = motor.jugadaASan(fenPromocion, "e7", "e8", 'Q')
+        val sanTorre = motor.jugadaASan(fenPromocion, "e7", "e8", 'R')
+        val sanAlfil = motor.jugadaASan(fenPromocion, "e7", "e8", 'B')
+        val sanCaballo = motor.jugadaASan(fenPromocion, "e7", "e8", 'N')
+
+        assertTrue("Promoción a Dama empieza por e8=Q", sanDama.startsWith("e8=Q"))
+        assertTrue("Promoción a Torre empieza por e8=R", sanTorre.startsWith("e8=R"))
+        assertTrue("Promoción a Alfil empieza por e8=B", sanAlfil.startsWith("e8=B"))
+        assertTrue("Promoción a Caballo empieza por e8=N", sanCaballo.startsWith("e8=N"))
+    }
+
+    @Test
+    fun `jugadaASan maneja promocion con captura y jaque`() {
+        // Peón blanco en d7 captura torre negra en e8 y da jaque al rey en f8
+        val fenCapturaPromocion = "4rk2/3P4/8/8/8/8/8/7K w - - 0 1"
+        val san = motor.jugadaASan(fenCapturaPromocion, "d7", "e8", 'Q')
+        assertEquals("dxe8=Q+", san)
+    }
+
+    @Test
+    fun `jugadaASan maneja promocion de peon negro a dama y caballo`() {
+        // Peón negro en e2 a punto de coronar en e1
+        val fenPromocionNegras = "7k/8/8/8/8/8/4p3/K7 b - - 0 1"
+        val sanDama = motor.jugadaASan(fenPromocionNegras, "e2", "e1", 'Q')
+        val sanCaballo = motor.jugadaASan(fenPromocionNegras, "e2", "e1", 'N')
+
+        assertTrue("Promoción de negras a Dama empieza por e1=Q", sanDama.startsWith("e1=Q"))
+        assertTrue("Promoción de negras a Caballo empieza por e1=N", sanCaballo.startsWith("e1=N"))
+    }
+
+    @Test
+    fun `aplicarJugada ejecuta correctamente la promocion en el tablero FEN`() {
+        val fenPromocion = "8/4P3/8/8/8/8/8/4k2K w - - 0 1"
+        val nuevoFen = motor.aplicarJugada(fenPromocion, "e8=Q")
+        
+        assertTrue("El nuevo FEN debe contener la Dama blanca 'Q' en la fila 8", nuevoFen.startsWith("4Q3/8/8/8/8/8/8/4k2K"))
+        assertTrue("Turno de las negras tras coronar", nuevoFen.contains(" b "))
     }
 
     @Test
