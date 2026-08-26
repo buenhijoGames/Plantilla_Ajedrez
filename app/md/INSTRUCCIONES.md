@@ -864,8 +864,8 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
       - ▶️ / ⏸️ **Auto (Play/Pausa):** reproduce la partida automáticamente paso a paso sin tocar la pantalla.
       - ▶️ **Adelante:** avanza una jugada.
       - ↩️ **Final:** vuelve a la posición final desbloqueando el tablero.
-      - ⏱️ **Pausa editable (por defecto 3 seg):** botón con icono de temporizador que abre diálogo para que el usuario guarde su tiempo de pausa preferido (1 a 60 segundos).
-    - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt): control de corrutinas (`Job`) para el avance automático en segundo plano y cancelación reactiva inmediata si el usuario interactúa manualmente.
+      - ⏱️ **Pausa editable (por defecto 3 seg):** botón con icono de temporizador que abre diálogo con teclado numérico exclusivo (`KeyboardType.Number`) y filtrado de dígitos para que el usuario guarde su tiempo de pausa preferido (1 a 60 segundos). **Se persiste en DataStore (`segundos_auto`)** para que se conserve entre sesiones y para todas las partidas que se abran.
+    - [PartidaViewModel.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PartidaViewModel.kt): observación reactiva de `PreferenciasUsuario.segundosAuto`, control de corrutinas (`Job`) para el avance automático en segundo plano y cancelación reactiva inmediata si el usuario interactúa manualmente.
 
 11. **📐 Diseño Responsivo y Maximización del Tablero en Modo Horizontal (Apaisado):**
     - [PantallaPartida.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/tablero/PantallaPartida.kt): en modo horizontal, el tablero aprovecha el **100% de la altura útil de la pantalla** (`fillMaxHeight()`, `aspectRatio(1f)` y paddings mínimos). El enfrentamiento de los jugadores se integra limpiamente en la `TopAppBar` superior, eliminando elementos redundantes y logrando un tamaño de tablero significativamente más grande, nítido y cómodo tanto en móviles como en tablets.

@@ -99,6 +99,7 @@
     <string name="control_velocidad">%1$s s</string>
     <string name="control_segundos_dialogo_titulo">Intervalo de reproducción automática</string>
     <string name="control_segundos_dialogo_mensaje">Segundos entre cada jugada:</string>
+    <string name="control_segundos_etiqueta">Segundos</string>
     <string name="partida_salir_edicion">Salir edición</string>
     <string name="partida_girar_tablero">Girar tablero</string>
     <string name="partida_editar_datos">Editar datos de partida</string>

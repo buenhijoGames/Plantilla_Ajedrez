@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.buenhijogames.plantilla_ajedrez.ui.theme.TemaAplicacion
@@ -58,6 +59,13 @@ class PreferenciasUsuario @Inject constructor(
     }
 
     /**
+     * Emite los segundos de pausa para la reproducción automática (por defecto 3 segundos, rango 1..60).
+     */
+    val segundosAuto: Flow<Int> = dataStore.data.map { prefs ->
+        prefs[CLAVE_SEGUNDOS_AUTO] ?: 3
+    }
+
+    /**
      * Persiste el [tema] elegido por el usuario.
      *
      * Suspended porque DataStore escribe en disco fuera del hilo de UI.
@@ -73,12 +81,22 @@ class PreferenciasUsuario @Inject constructor(
         dataStore.edit { it[CLAVE_SONIDO_HABILITADO] = habilitado }
     }
 
+    /**
+     * Persiste la preferencia de segundos de reproducción automática.
+     */
+    suspend fun guardarSegundosAuto(segundos: Int) {
+        dataStore.edit { it[CLAVE_SEGUNDOS_AUTO] = segundos.coerceIn(1, 60) }
+    }
+
     companion object {
         /** Clave estable en disco para el tema. NO renombrar sin migrar. */
         private val CLAVE_TEMA = stringPreferencesKey("tema")
 
         /** Clave estable en disco para el sonido. NO renombrar sin migrar. */
         private val CLAVE_SONIDO_HABILITADO = booleanPreferencesKey("sonido_habilitado")
+
+        /** Clave estable en disco para los segundos de reproducción automática. NO renombrar sin migrar. */
+        private val CLAVE_SEGUNDOS_AUTO = intPreferencesKey("segundos_auto")
     }
 }
 

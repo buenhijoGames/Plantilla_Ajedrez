@@ -185,6 +185,11 @@ class PartidaViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            preferencias.segundosAuto.collect { segundos ->
+                _estado.update { it.copy(segundosAuto = segundos) }
+            }
+        }
+        viewModelScope.launch {
             val partida = repositorioPartidas.obtenerPartida(partidaId)
             if (partida == null) {
                 // No existe la partida (borrada o id inválido): error sin crash.
@@ -807,12 +812,22 @@ class PartidaViewModel @Inject constructor(
         _estado.update { it.copy(dialogoConfigurarSegundos = false) }
     }
 
+    /**
+     * Establece los segundos de pausa para la reproducción automática y los
+     * persiste en DataStore para que queden guardados por defecto.
+     *
+     * @param segundos Tiempo de espera en segundos (1..60).
+     */
     fun establecerSegundosAuto(segundos: Int) {
+        val ajustados = segundos.coerceIn(1, 60)
         _estado.update {
             it.copy(
-                segundosAuto = segundos.coerceIn(1, 60),
+                segundosAuto = ajustados,
                 dialogoConfigurarSegundos = false,
             )
+        }
+        viewModelScope.launch {
+            preferencias.guardarSegundosAuto(ajustados)
         }
     }
 

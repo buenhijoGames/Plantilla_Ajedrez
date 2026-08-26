@@ -65,6 +65,7 @@ class PromocionPeonViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { preferencias.sonidoHabilitado } returns flowOf(false)
+        every { preferencias.segundosAuto } returns flowOf(3)
         coEvery { repositorioPartidas.obtenerPartida(partidaIdPrueba) } returns partidaPrueba
     }
 
@@ -167,5 +168,17 @@ class PromocionPeonViewModelTest {
         assertNull(viewModel.estado.value.casillaSeleccionada)
         assertTrue(viewModel.estado.value.destinosLegales.isEmpty())
         assertTrue(viewModel.estado.value.jugadasSan.isEmpty())
+    }
+
+    @Test
+    fun `establecerSegundosAuto persiste el valor configurado en DataStore`() = runTest(testDispatcher) {
+        val viewModel = crearViewModel()
+        advanceUntilIdle()
+
+        viewModel.establecerSegundosAuto(5)
+        advanceUntilIdle()
+
+        assertEquals(5, viewModel.estado.value.segundosAuto)
+        coVerify { preferencias.guardarSegundosAuto(5) }
     }
 }
