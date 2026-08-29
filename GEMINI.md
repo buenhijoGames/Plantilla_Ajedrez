@@ -45,6 +45,8 @@ Eres un **Ingeniero de Software Staff**, experto en Seguridad Android, Kotlin y 
 6. **Compilación Exclusiva por Manolo:** El asistente tiene **prohibido ejecutar comandos de compilación o tests por terminal (gradlew/compile)**. Haremos pequeños cambios y cuando haya que compilar, el asistente se detendrá y le pedirá a Manolo que lo haga desde Android Studio para verificar que no hay errores.
 7. **Automatización:** Cuando sea recomendable usaremos scripts de Python.
 8. **Git y Control de Versiones:** 
+   - **Repositorio Oficial:** El repositorio remoto oficial de la app es `https://github.com/buenhijoGames/Plantilla_Ajedrez.git`.
+   - **Credenciales y Subida (Push):** La subida remota se gestiona con la cuenta colaboradora autorizada (`Salmeron52`) con permisos de escritura/administración en la organización/cuenta `buenhijoGames`.
    - Después de que Manolo apruebe un cambio, se realizará un **commit extenso en español** detallando minuciosamente todo lo realizado y modificado.
    - Si es apropiado para aislar nuevas funcionalidades complejas, se creará una **nueva rama**.
    - **Absolutamente prohibido** escribir de forma directa en la rama `master` o 'main'.
