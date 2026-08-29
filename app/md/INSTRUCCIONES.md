@@ -930,11 +930,17 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
     - Se instaló el set vectorial **Meridian** de Martin Sedlak (licencia **CC0 1.0 Universal / Dominio Público**), convertido a VectorDrawable XML en `:app` y `:data`.
     - [herramientas/descargar_piezas.py](file:///c:/android/Plantilla_ajedrez/herramientas/descargar_piezas.py), [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE), [README.md](file:///c:/android/Plantilla_ajedrez/README.md) y [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) actualizados.
 
+20. **🔊 Síntesis Acústica Original de Efectos de Sonido (buenhijoGames):**
+    - Los 4 sonidos anteriores de Lichess se respaldaron en `sonidos_antiguos_lichess/`.
+    - Se creó [herramientas/generar_sonidos.py](file:///c:/android/Plantilla_ajedrez/herramientas/generar_sonidos.py) para sintetizar matemáticamente mediante física acústica (resonancia de madera + impacto percusivo) los 4 efectos de audio: movimiento suave, doble captura, jaque resonante y enroque/especial.
+    - Los nuevos archivos de audio son **100% propiedad intelectual original de buenhijoGames** (sin dependencias ni licencias de terceros).
+
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `main` (y `fase-e-pulido-temas-playstore`)
 - **Estado:**
+  - ✅ **Efectos de Audio 100% Propios y Originales**: Sintetizados e instalados en `app/res/raw/`.
   - ✅ **Piezas Meridian CC0 (Dominio Público)**: Instaladas y respaldadas las anteriores en raíz.
   - ✅ **README.md oficial y profesional**: Creado y commiteado.
   - ✅ **Rectificación y eliminación de jugadas con deshacer/rehacer**: Implementado al 100%.
@@ -944,13 +950,13 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos, Eliminación de Jugadas y Piezas CC0)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos Propios, Eliminación de Jugadas y Piezas CC0)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
 1. **Subida a GitHub (Push)** de la rama `main` tras validar credenciales de `buenhijoGames`.
-2. **Comprobar estabilidad y feedback de Manolo** tras probar las nuevas piezas en el tablero y el PDF.
+2. **Comprobar estabilidad y feedback de Manolo** tras probar los nuevos sonidos propios y las piezas en el tablero y el PDF.
 3. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.

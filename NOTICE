@@ -14,14 +14,13 @@
   atribución GPLv3 se reincorporará si se vuelve a empaquetar.)
 
 -------------------------------------------------------------------------------
- 1. Piezas Meridian (Dominio Público / CC0) y efectos de sonido
+ 1. Piezas Meridian (Dominio Público / CC0) y efectos de sonido originales
 -------------------------------------------------------------------------------
- Licencia: CC0 1.0 Universal (Public Domain) / CC0
+ Licencia: CC0 1.0 Universal (Public Domain) / Original buenhijoGames
  upstream : https://github.com/kmar/chess_svg_piece_sets (Meridian set)
-            https://github.com/lichess-org/lila/tree/main/public/sound
- autor    : Martin Sedlak (kmar) / Lichess audio.
+ autor    : Martin Sedlak (kmar) / Síntesis de audio original buenhijoGames.
  uso      : SVG convertidas a VectorDrawable XML de Compose/Canvas para el set
-            oficial y efectos de audio de jugadas (Move, Capture, Check, GenericNotify).
+            oficial y efectos de audio acústicos generados por síntesis percusiva.
 
 -------------------------------------------------------------------------------
  2. chesslib (validación de jugadas, SAN, FEN, PGN)
