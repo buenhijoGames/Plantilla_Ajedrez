@@ -205,9 +205,14 @@
 
     <!-- Licencia -->
     <string name="info_licencia_titulo">Licencia de la app</string>
-    <string name="info_licencia_tipo">buenhijoGames Propietario</string>
-    <string name="info_licencia_descripcion">Esta aplicación es software propietario desarrollado por buenhijoGames. Todos los derechos reservados.</string>
-    <string name="info_licencia_abierta">Uso personal y de estudio gratuito sin publicidad.</string>
+    <string name="info_licencia_tipo">Licencia MIT (Código Abierto)</string>
+    <string name="info_licencia_descripcion">Esta aplicación es de código abierto. Puedes usar, modificar y compartir el código libremente siempre que se mantenga el aviso de copyright y la autoría de Manuel Salmerón Cerdán (buenhijoGames).</string>
+    <string name="info_licencia_abierta">Gratis, sin publicidad y de código abierto para fines educativos y personales.</string>
+
+    <!-- Código fuente -->
+    <string name="info_codigo_titulo">Código fuente</string>
+    <string name="info_codigo_url">https://github.com/buenhijoGames/Plantilla_Ajedrez</string>
+    <string name="info_codigo_descripcion">El código fuente completo de este proyecto está disponible en GitHub bajo Licencia MIT.</string>
 
     <!-- Terceros -->
     <string name="info_terceros_titulo">Componentes de terceros</string>

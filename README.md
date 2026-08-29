@@ -91,22 +91,28 @@ El proyecto sigue una arquitectura **Clean Architecture Modularizada** basada en
 
 ## 📜 Licencia y Atribuciones
 
-Copyright (c) 2026 **buenhijoGames**. Todos los derechos reservados.
+Este proyecto es software libre y de código abierto, distribuido bajo los términos de la **[Licencia MIT](LICENSE)**.
 
-Esta aplicación es software propietario desarrollado por buenhijoGames para uso personal y de estudio de ajedrez.
+```text
+Copyright (c) 2026 Manuel Salmerón Cerdán (buenhijoGames)
+```
+
+Puedes usar, estudiar, modificar y compartir este código libremente para fines educativos y personales, siempre que se mantenga el aviso de copyright y la autoría original.
 
 ### Componentes de terceros y créditos:
 - **Piezas de ajedrez Meridian:** Martin Sedlak ([kmar/chess_svg_piece_sets](https://github.com/kmar/chess_svg_piece_sets)) (CC0 1.0 Universal / Dominio Público).
-- **Efectos de sonido:** Síntesis acústica percusiva original desarrollada por buenhijoGames.
+- **Efectos de sonido:** Síntesis acústica percusiva original desarrollada por buenhijoGames (Licencia MIT).
 - **Lógica y notación de ajedrez:** `chesslib` por bhlangonijr (Apache License 2.0).
 - **Framework de desarrollo:** AndroidX, Jetpack Compose, Material 3, Hilt y Room por The Android Open Source Project (Apache License 2.0).
 - **Lenguaje y corrutinas:** Kotlin por JetBrains s.r.o. (Apache License 2.0).
 
-Consulta el archivo [NOTICE](NOTICE) para ver los textos completos de atribución legal de las librerías de terceros.
+Consulta el archivo [NOTICE](NOTICE) para ver los textos completos de atribución legal.
 
 ---
 
 ## ✉️ Contacto
 
+- **Autor:** Manuel Salmerón Cerdán
 - **Desarrollador:** buenhijoGames
 - **Correo electrónico:** buenhijogames@gmail.com
+- **Repositorio:** [https://github.com/buenhijoGames/Plantilla_Ajedrez](https://github.com/buenhijoGames/Plantilla_Ajedrez)

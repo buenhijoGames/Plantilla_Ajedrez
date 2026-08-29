@@ -935,17 +935,17 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
     - Se creó [herramientas/generar_sonidos.py](file:///c:/android/Plantilla_ajedrez/herramientas/generar_sonidos.py) para sintetizar matemáticamente mediante física acústica (resonancia de madera + impacto percusivo) los 4 efectos de audio: movimiento suave, doble captura, jaque resonante y enroque/especial.
     - Los nuevos archivos de audio son **100% propiedad intelectual original de buenhijoGames** (sin dependencias ni licencias de terceros).
 
-21. **🛡️ Eliminación de GPLv3 y Transición a Software Propietario (buenhijoGames):**
-    - Tras retirar todas las dependencias Copyleft (piezas CC0 y sonidos propios), se eliminó la oferta GPLv3 y la obligación de código abierto.
-    - [LICENSE](file:///c:/android/Plantilla_ajedrez/LICENSE) y [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE) actualizados a licencia propietaria de buenhijoGames con componentes de terceros bajo Apache 2.0 y CC0.
-    - [PantallaInfo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/info/PantallaInfo.kt) y [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) adaptados: retirada la sección de código fuente público y actualizada la información de licencia.
+21. **📜 Adopción Oficial de la Licencia MIT (Atribución Manuel Salmerón Cerdán / buenhijoGames):**
+    - Se configuró la **Licencia MIT** estándar en todo el proyecto: libre uso, modificación y distribución con la **obligación legal de conservar el copyright y citar al autor original** (*Manuel Salmerón Cerdán / buenhijoGames*).
+    - [LICENSE](file:///c:/android/Plantilla_ajedrez/LICENSE), [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE) y [README.md](file:///c:/android/Plantilla_ajedrez/README.md) actualizados.
+    - [PantallaInfo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/info/PantallaInfo.kt) y [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) actualizados con la tarjeta oficial de Licencia MIT y el enlace al repositorio GitHub.
 
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `main` (y `fase-e-pulido-temas-playstore`)
 - **Estado:**
-  - ✅ **Software Propietario buenhijoGames (100% Libre de GPLv3)**: Eliminada obligación de código abierto.
+  - ✅ **Licencia MIT (Atribución Manuel Salmerón Cerdán / buenhijoGames)**: Establecida al 100%.
   - ✅ **Efectos de Audio 100% Propios y Originales**: Sintetizados e instalados en `app/res/raw/`.
   - ✅ **Piezas Meridian CC0 (Dominio Público)**: Instaladas y respaldadas las anteriores en raíz.
   - ✅ **README.md oficial y profesional**: Creado y commiteado.
@@ -956,13 +956,14 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos Propios, Eliminación de Jugadas y Piezas CC0)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos Propios, Eliminación de Jugadas, Piezas CC0 y Licencia MIT)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
-1. **Comprobar estabilidad y feedback de Manolo** tras compilar en Android Studio con las nuevas licencias, sonidos y piezas.
-2. **Preparación final para Play Store**:
+1. **Subida a GitHub (Push)** de la rama `main` mediante la cuenta colaboradora `Salmeron52`.
+2. **Comprobar estabilidad y feedback de Manolo** tras compilar en Android Studio.
+3. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.
 3. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.

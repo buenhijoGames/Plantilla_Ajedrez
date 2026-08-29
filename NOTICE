@@ -1,13 +1,15 @@
 ================================================================================
- Plantilla de Ajedrez - Archivo NOTICE / ATRIBUCIONES DE TERCEROS
+ Plantilla de Ajedrez - Archivo NOTICE / ATRIBUCIONES
 ================================================================================
- Copyright (C) 2026 buenhijoGames <buenhijogames@gmail.com>
- Todos los derechos reservados.
+ Copyright (C) 2026 Manuel Salmerón Cerdán (buenhijoGames)
+ Correo: buenhijogames@gmail.com
+ Código fuente: https://github.com/buenhijoGames/Plantilla_Ajedrez
 
- Esta aplicación es software propietario desarrollado por buenhijoGames.
- Incorpora componentes de terceros bajo licencias de Dominio Público y
- permisivas (Apache License 2.0), cuyas atribuciones legales se detallan
- a continuación y son accesibles desde los ajustes de la aplicación.
+ Este proyecto se distribuye bajo la Licencia MIT (ver archivo LICENSE).
+ Puedes usar, modificar y compartir este código libremente siempre que se
+ mantenga el aviso de copyright y la autoría de Manuel Salmerón Cerdán / buenhijoGames.
+
+ Componentes y recursos de terceros incorporados bajo licencias permisivas / CC0:
 
 -------------------------------------------------------------------------------
  1. Piezas de Ajedrez Meridian (Dominio Público / CC0)
@@ -21,8 +23,9 @@
 -------------------------------------------------------------------------------
  2. Efectos de Sonido
 -------------------------------------------------------------------------------
- Propiedad: 100% Original buenhijoGames
- uso      : Síntesis acústica percusiva original desarrollada internamente para
+ Propiedad: 100% Original buenhijoGames (Licencia MIT)
+ autor    : Manuel Salmerón Cerdán (buenhijoGames)
+ uso      : Síntesis acústica percusiva original desarrollada para
             movimientos, capturas, jaques y enroques.
 
 -------------------------------------------------------------------------------
