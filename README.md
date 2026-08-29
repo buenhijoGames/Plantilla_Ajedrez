@@ -94,7 +94,8 @@ El proyecto sigue una arquitectura **Clean Architecture Modularizada** basada en
 Este proyecto es software libre y de código abierto, distribuido bajo los términos de la **[Licencia Pública General GNU v3.0 (GPLv3)](LICENSE)**.
 
 ### Componentes de terceros y créditos:
-- **Piezas cburnett y efectos de sonido:** Colin M. L. Burnett / [Lichess.org](https://lichess.org) (GPLv2+ / CC BY-SA 3.0 / CC0).
+- **Piezas de ajedrez Meridian:** Martin Sedlak ([kmar/chess_svg_piece_sets](https://github.com/kmar/chess_svg_piece_sets)) (CC0 1.0 Universal / Dominio Público).
+- **Efectos de sonido:** Lichess (CC0 / GPLv2+).
 - **Lógica y notación de ajedrez:** `chesslib` por bhlangonijr (Apache License 2.0).
 - **Framework de desarrollo:** AndroidX, Jetpack Compose, Material 3, Hilt y Room por The Android Open Source Project (Apache License 2.0).
 - **Lenguaje y corrutinas:** Kotlin por JetBrains s.r.o. (Apache License 2.0).

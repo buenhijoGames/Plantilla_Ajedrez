@@ -925,11 +925,17 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 18. **📄 Creación del README.md Oficial:**
     - [README.md](file:///c:/android/Plantilla_ajedrez/README.md): documento oficial del repositorio con badges de versión, descripción completa de funcionalidades, arquitectura modular Clean Architecture, requisitos, instrucciones de compilación, licencias y contacto.
 
+19. **♟️ Sustitución de Piezas por Set Meridian CC0 (Dominio Público):**
+    - Las piezas anteriores (*cburnett*, GPLv2+) han sido respaldadas en la carpeta de la raíz `piezas_antiguas_cburnett/`.
+    - Se instaló el set vectorial **Meridian** de Martin Sedlak (licencia **CC0 1.0 Universal / Dominio Público**), convertido a VectorDrawable XML en `:app` y `:data`.
+    - [herramientas/descargar_piezas.py](file:///c:/android/Plantilla_ajedrez/herramientas/descargar_piezas.py), [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE), [README.md](file:///c:/android/Plantilla_ajedrez/README.md) y [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) actualizados.
+
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `main` (y `fase-e-pulido-temas-playstore`)
 - **Estado:**
+  - ✅ **Piezas Meridian CC0 (Dominio Público)**: Instaladas y respaldadas las anteriores en raíz.
   - ✅ **README.md oficial y profesional**: Creado y commiteado.
   - ✅ **Rectificación y eliminación de jugadas con deshacer/rehacer**: Implementado al 100%.
   - ✅ **Efectos de sonido y switch en Ajustes**: Implementado al 100%.
@@ -938,14 +944,14 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos, Eliminación de Jugadas y README)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos, Eliminación de Jugadas y Piezas CC0)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
 1. **Subida a GitHub (Push)** de la rama `main` tras validar credenciales de `buenhijoGames`.
-2. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena, el botón Rehacer y la pantalla Info.
+2. **Comprobar estabilidad y feedback de Manolo** tras probar las nuevas piezas en el tablero y el PDF.
 3. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.
-3. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.
+4. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.

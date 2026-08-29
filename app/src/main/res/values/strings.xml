@@ -216,9 +216,9 @@
 
     <!-- Terceros -->
     <string name="info_terceros_titulo">Componentes de terceros</string>
-    <string name="info_terceros_piezas">Piezas y efectos de sonido (Lichess)</string>
-    <string name="info_terceros_piezas_licencia">GPLv2+ / CC0</string>
-    <string name="info_terceros_piezas_desc">Renderizado de piezas de ajedrez en el tablero, figurín de la planilla y efectos de audio de jugadas (Lichess standard/sfx).</string>
+    <string name="info_terceros_piezas">Piezas Meridian (Dominio Público) y audio</string>
+    <string name="info_terceros_piezas_licencia">CC0 / Public Domain</string>
+    <string name="info_terceros_piezas_desc">Renderizado de piezas de ajedrez en el tablero y figurín de la planilla (set Meridian CC0 por Martin Sedlak) y efectos de audio de jugadas.</string>
     <string name="info_terceros_chesslib">chesslib</string>
     <string name="info_terceros_chesslib_licencia">Apache 2.0</string>
     <string name="info_terceros_chesslib_desc">Validación de jugadas, notación SAN, generación de FEN y parseo de PGN.</string>
@@ -236,7 +236,7 @@
 
     <!-- Agradecimientos -->
     <string name="info_agradecimientos_titulo">Agradecimientos</string>
-    <string name="info_agradecimientos_lichess">A Lichess por las piezas cburnett y por promover el ajedrez abierto.</string>
+    <string name="info_agradecimientos_lichess">A Martin Sedlak por el set de piezas Meridian CC0 y a Lichess por los efectos de audio.</string>
     <string name="info_agradecimientos_chesslib">A bhlangonijr y colaboradores por chesslib.</string>
     <string name="info_agradecimientos_community">A la comunidad de ajedrez que hace posible el software libre.</string>
 

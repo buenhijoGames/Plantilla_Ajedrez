@@ -14,14 +14,14 @@
   atribución GPLv3 se reincorporará si se vuelve a empaquetar.)
 
 -------------------------------------------------------------------------------
- 1. Piezas cburnett y efectos de sonido (Lichess)
+ 1. Piezas Meridian (Dominio Público / CC0) y efectos de sonido
 -------------------------------------------------------------------------------
- Licencia: GNU General Public License v2.0 or any later version (GPLv2+) / CC0
- upstream : https://github.com/lichess-org/lila/tree/main/public/piece/cburnett
+ Licencia: CC0 1.0 Universal (Public Domain) / CC0
+ upstream : https://github.com/kmar/chess_svg_piece_sets (Meridian set)
             https://github.com/lichess-org/lila/tree/main/public/sound
- autor    : Colin Burnette (cburnett) y equipo de Lichess.
- uso      : SVG convertidas a ImageVector de Compose para el set por defecto
-            y efectos de audio de jugadas (Move, Capture, Check, GenericNotify).
+ autor    : Martin Sedlak (kmar) / Lichess audio.
+ uso      : SVG convertidas a VectorDrawable XML de Compose/Canvas para el set
+            oficial y efectos de audio de jugadas (Move, Capture, Check, GenericNotify).
 
 -------------------------------------------------------------------------------
  2. chesslib (validación de jugadas, SAN, FEN, PGN)
