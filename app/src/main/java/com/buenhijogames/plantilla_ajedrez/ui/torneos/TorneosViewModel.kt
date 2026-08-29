@@ -334,7 +334,7 @@ class TorneosViewModel @Inject constructor(
                         resultadoImportacion = partidasImportadas.size,
                     )
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _estado.update { it.copy(importandoPgn = false, resultadoImportacion = 0) }
             }
         }

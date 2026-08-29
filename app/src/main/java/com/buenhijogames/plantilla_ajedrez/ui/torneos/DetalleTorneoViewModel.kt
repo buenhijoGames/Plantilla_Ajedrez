@@ -163,7 +163,7 @@ class DetalleTorneoViewModel @Inject constructor(
         if (partidas.isEmpty()) return null
         return try {
             generadorPdf.generarPlantillas(partidas)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -183,7 +183,7 @@ class DetalleTorneoViewModel @Inject constructor(
         if (partidas.isEmpty()) return null
         return try {
             partidas.joinToString("\n\n") { generadorPgn.exportar(it) }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -219,7 +219,7 @@ class DetalleTorneoViewModel @Inject constructor(
                         resultadoImportacion = partidasImportadas.size,
                     )
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _estado.update { it.copy(importandoPgn = false, resultadoImportacion = 0) }
             }
         }

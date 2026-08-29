@@ -1,7 +1,8 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,8 +45,8 @@ fun DialogoNuevoTorneo(
         onDismissRequest = onCancelar,
         title = { Text(stringResource(R.string.torneo_nuevo_titulo)) },
         text = {
-            androidx.compose.foundation.layout.Column(
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 OutlinedTextField(
                     value = nombre,

@@ -13,7 +13,6 @@ import com.buenhijogames.plantilla_ajedrez.domain.repositorio.RepositorioPartida
 import com.buenhijogames.plantilla_ajedrez.navegacion.Destinos
 import com.buenhijogames.plantilla_ajedrez.preferencias.PreferenciasUsuario
 import com.buenhijogames.plantilla_ajedrez.ui.audio.ReproductorSonidos
-import com.buenhijogames.plantilla_ajedrez.ui.audio.TipoSonidoJugada
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Jugada de promoción pendiente de elegir pieza por el usuario.
@@ -311,7 +311,12 @@ class PartidaViewModel @Inject constructor(
             seleccionada != null && casilla in actual.destinosLegales -> {
                 if (esPromocion(fenContexto, seleccionada, casilla)) {
                     _estado.update {
-                        it.copy(promocionPendiente = JugadaPromocion(desde = seleccionada, hasta = casilla))
+                        it.copy(
+                            promocionPendiente = JugadaPromocion(
+                                desde = seleccionada,
+                                hasta = casilla
+                            )
+                        )
                     }
                 } else {
                     onJugar(seleccionada, casilla, null)
@@ -328,7 +333,12 @@ class PartidaViewModel @Inject constructor(
                 if (origenUnico != null) {
                     if (esPromocion(fenContexto, origenUnico, casilla)) {
                         _estado.update {
-                            it.copy(promocionPendiente = JugadaPromocion(desde = origenUnico, hasta = casilla))
+                            it.copy(
+                                promocionPendiente = JugadaPromocion(
+                                    desde = origenUnico,
+                                    hasta = casilla
+                                )
+                            )
                         }
                     } else {
                         onJugar(origenUnico, casilla, null)
@@ -338,7 +348,7 @@ class PartidaViewModel @Inject constructor(
 
                 val destinos = try {
                     motor.jugadasLegalesDesde(fenContexto, casilla)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     emptyList()
                 }
                 when {
@@ -346,7 +356,12 @@ class PartidaViewModel @Inject constructor(
                         val destino = destinos.first()
                         if (esPromocion(fenContexto, casilla, destino)) {
                             _estado.update {
-                                it.copy(promocionPendiente = JugadaPromocion(desde = casilla, hasta = destino))
+                                it.copy(
+                                    promocionPendiente = JugadaPromocion(
+                                        desde = casilla,
+                                        hasta = destino
+                                    )
+                                )
                             }
                         } else {
                             onJugar(casilla, destino, null)
@@ -385,7 +400,7 @@ class PartidaViewModel @Inject constructor(
         val origenes = piezasPropias.keys.filter { origen ->
             try {
                 destino in motor.jugadasLegalesDesde(fen, origen)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
         }
@@ -437,13 +452,13 @@ class PartidaViewModel @Inject constructor(
         if (actual.cargando) return
         val san = try {
             motor.jugadaASan(actual.fen, desde, hasta, promocion)
-        } catch (e: JugadaIlegalException) {
+        } catch (_: JugadaIlegalException) {
             marcarJugadaIlegal()
             return
         }
         val nuevoFen = try {
             motor.aplicarJugada(actual.fen, san)
-        } catch (e: JugadaIlegalException) {
+        } catch (_: JugadaIlegalException) {
             marcarJugadaIlegal()
             return
         }
@@ -496,13 +511,13 @@ class PartidaViewModel @Inject constructor(
         val caminoSeleccion = actual.caminoSeleccion ?: return
         val san = try {
             motor.jugadaASan(actual.fenVisible, desde, hasta, promocion)
-        } catch (e: JugadaIlegalException) {
+        } catch (_: JugadaIlegalException) {
             marcarJugadaIlegal()
             return
         }
         val nuevoFen = try {
             motor.aplicarJugada(actual.fenVisible, san)
-        } catch (e: JugadaIlegalException) {
+        } catch (_: JugadaIlegalException) {
             marcarJugadaIlegal()
             return
         }
@@ -691,7 +706,8 @@ class PartidaViewModel @Inject constructor(
             val ultimoPaso = caminoActual.pasos.last()
             if (ultimoPaso is PasoCamino.Lineal) {
                 if (ultimoPaso.cantidad > 1) {
-                    val nuevosPasos = caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(ultimoPaso.cantidad - 1)
+                    val nuevosPasos =
+                        caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(ultimoPaso.cantidad - 1)
                     mostrarCamino(CaminoPlanilla(nuevosPasos))
                 } else {
                     if (caminoActual.pasos.size > 1) {
@@ -746,7 +762,8 @@ class PartidaViewModel @Inject constructor(
                         return false
                     }
                 } else {
-                    val nuevosPasos = caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(siguientePly)
+                    val nuevosPasos =
+                        caminoActual.pasos.dropLast(1) + PasoCamino.Lineal(siguientePly)
                     mostrarCamino(CaminoPlanilla(nuevosPasos))
                     return true
                 }
@@ -783,7 +800,7 @@ class PartidaViewModel @Inject constructor(
         trabajoReproduccion = viewModelScope.launch {
             while (isActive) {
                 val delayMs = (_estado.value.segundosAuto.coerceAtLeast(1)) * 1000L
-                delay(delayMs)
+                delay(delayMs.milliseconds)
                 val pudoAvanzar = darPasoSiguiente()
                 if (!pudoAvanzar) {
                     _estado.update { it.copy(reproduciendoAuto = false) }
@@ -1024,7 +1041,7 @@ class PartidaViewModel @Inject constructor(
         for (san in sans) {
             fen = try {
                 motor.aplicarJugada(fen, san)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 break
             }
         }
@@ -1053,7 +1070,7 @@ class PartidaViewModel @Inject constructor(
                     resultado = actual.resultadoVisible,
                 )
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -1077,7 +1094,7 @@ class PartidaViewModel @Inject constructor(
                     resultado = actual.resultadoVisible,
                 )
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

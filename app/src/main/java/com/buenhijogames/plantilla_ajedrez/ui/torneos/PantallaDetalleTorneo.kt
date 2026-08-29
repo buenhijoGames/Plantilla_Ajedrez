@@ -1,6 +1,5 @@
 package com.buenhijogames.plantilla_ajedrez.ui.torneos
 
-import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,7 +30,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -99,7 +97,7 @@ fun PantallaDetalleTorneo(
                 scope.launch {
                     snackbarHostState.showSnackbar(textoArchivoGuardadoExito)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 scope.launch {
                     snackbarHostState.showSnackbar(textoArchivoGuardadoError)
                 }
@@ -137,7 +135,11 @@ fun PantallaDetalleTorneo(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(estado.torneo?.nombre ?: stringResource(R.string.torneo_detalle_titulo)) },
+                title = {
+                    Text(
+                        estado.torneo?.nombre ?: stringResource(R.string.torneo_detalle_titulo)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
@@ -347,8 +349,10 @@ private fun FilaPartida(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                val blancas = partida.blancas.trim().ifBlank { stringResource(R.string.partida_jugador_blanco) }
-                val negras = partida.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
+                val blancas = partida.blancas.trim()
+                    .ifBlank { stringResource(R.string.partida_jugador_blanco) }
+                val negras =
+                    partida.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
                 Text(
                     text = stringResource(R.string.partida_enfrentamiento, blancas, negras),
                     style = MaterialTheme.typography.titleMedium,

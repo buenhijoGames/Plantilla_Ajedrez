@@ -10,7 +10,7 @@
 
 - La app tendrá una pantalla específica para nombrar y cumplir con todas las licencias necesarias.
 
-- Si es necesario que mi el la app sea de código abierto, me dirás si es suficiente la dirección de github de la app: "https://github.com/Salmeron52/plantillas_ajedrez" donde iremos subiendo el código periódicamente.
+- Si es necesario que mi el la app sea de código abierto, me dirás si es suficiente la dirección de github de la app: "https://github.com/buenhijoGames/Plantilla_Ajedrez" donde iremos subiendo el código periódicamente.
 
 - Cuantos menos botones supérfluos estén a la vista, mejor. se puede poner un icono de tres puntos que al abrirse despliegue las opciones.
 

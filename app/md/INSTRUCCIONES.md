@@ -15,7 +15,7 @@ Stockfish está **retirado temporalmente** (sesión 05-ago-2026); si se retoma,
 iría **sólo post-partida** (anti-fraude) y con binario alineado a 16 KB.
 
 App **gratis, sin publicidad**, sin ánimo de lucro, open-source **GPL-3.0**.
-Repo público: https://github.com/Salmeron52/plantillas_ajedrez
+Repo público: https://github.com/buenhijoGames/Plantilla_Ajedrez
 
 ---
 
@@ -456,7 +456,7 @@ desde un módulo Hilt en `:data` (o `:app`).
   PGN import/export + Pantalla Info **sin commitear**, sesión 12-ago-2026)
 
 ### ⚠️ Remoto
-- El remoto `origin` (`Salmeron52/plantillas_ajedrez`) está **vacío**: nunca
+- El remoto `origin` (`buenhijoGames/Plantilla_Ajedrez`) está **vacío**: nunca
   se ha hecho push. Todo el trabajo existe solo en local. Pendiente
   `git push -u origin` de las ramas cuando Manolo lo autorice.
 
@@ -917,6 +917,11 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
       - Confirmación de Caballo (`e8=N`).
       - Cancelación del diálogo con limpieza de selección y estado.
 
+17. **🌐 Corrección y Actualización de URLs del Repositorio Oficial en GitHub:**
+    - Actualización integral de la dirección del repositorio en toda la aplicación y documentación: `https://github.com/buenhijoGames/Plantilla_Ajedrez`.
+    - [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml): recursos `info_codigo_url` e `info_contacto_github`.
+    - [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE), [Esta_App.md](file:///c:/android/Plantilla_ajedrez/Esta_App.md) e [INSTRUCCIONES.md](file:///c:/android/Plantilla_ajedrez/app/md/INSTRUCCIONES.md).
+
 ---
 
 ### Checkpoint y Estado de Versiones
@@ -924,16 +929,17 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 - **Estado:**
   - ✅ **Rectificación y eliminación de jugadas con deshacer/rehacer**: Implementado al 100%.
   - ✅ **Efectos de sonido y switch en Ajustes**: Implementado al 100%.
+  - ✅ **Suite de tests de promoción de peones**: 100% pasando.
   - ✅ **Fase A (Estructura Clean Architecture y Temas)**: 100% completada.
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play y Sonidos)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos y Eliminación de Jugadas)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
-1. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena y el botón Rehacer.
+1. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena, el botón Rehacer y la pantalla Info.
 2. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.

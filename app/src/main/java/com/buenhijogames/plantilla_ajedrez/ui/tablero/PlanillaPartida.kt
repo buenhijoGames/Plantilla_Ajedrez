@@ -112,14 +112,14 @@ fun PlanillaPartida(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ContenidoLista(
+    modifier: Modifier = Modifier,
     elementos: List<ElementoMovetext>,
     baseCamino: CaminoPlanilla,
     esLineaPrincipal: Boolean,
     caminoVisible: CaminoPlanilla?,
     caminoSeleccion: CaminoPlanilla?,
     onJugadaPulsada: (CaminoPlanilla) -> Unit,
-    cursiva: Boolean = false,
-    modifier: Modifier = Modifier,
+    cursiva: Boolean = false
 ) {
     val listaElementos = remember(elementos) { elementos.toMutableList() }
     FlowRow(
@@ -135,8 +135,7 @@ private fun ContenidoLista(
         var indiceVariante = 0
         var indice = 0
         while (indice < listaElementos.size) {
-            val elemento = listaElementos[indice]
-            when (elemento) {
+            when (val elemento = listaElementos[indice]) {
                 is ElementoMovetext.Jugada -> {
                     jugadasVistas++
                     val caminoJugada = baseCamino + PasoCamino.Lineal(jugadasVistas)

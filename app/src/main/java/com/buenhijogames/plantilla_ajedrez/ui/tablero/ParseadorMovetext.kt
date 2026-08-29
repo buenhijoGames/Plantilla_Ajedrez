@@ -287,7 +287,7 @@ fun simboloNag(codigo: Int): String = when (codigo) {
     23 -> "−+"
     24 -> "+−"
     25 -> "−+"
-    else -> "\$$codigo"
+    else -> $$"$$$codigo"
 }
 
 /**
@@ -330,7 +330,7 @@ fun serializarMovetext(elementos: List<ElementoMovetext>): String {
 
             is ElementoMovetext.Comentario -> piezas += "{${elemento.texto}}"
 
-            is ElementoMovetext.Nag -> piezas += "\$${elemento.codigo}"
+            is ElementoMovetext.Nag -> piezas += $$"$$${elemento.codigo}"
 
             is ElementoMovetext.Resultado -> piezas += elemento.texto
         }
@@ -351,17 +351,17 @@ fun serializarMovetext(elementos: List<ElementoMovetext>): String {
 private fun serializarVariante(elementos: List<ElementoMovetext>): String {
     val piezas = mutableListOf<String>()
     for (elemento in elementos) {
-        when (elemento) {
-            is ElementoMovetext.Jugada -> piezas += elemento.san
+        piezas += when (elemento) {
+            is ElementoMovetext.Jugada -> elemento.san
 
             is ElementoMovetext.Variante ->
-                piezas += "( ${serializarVariante(elemento.elementos)} )"
+                "( ${serializarVariante(elemento.elementos)} )"
 
-            is ElementoMovetext.Comentario -> piezas += "{${elemento.texto}}"
+            is ElementoMovetext.Comentario -> "{${elemento.texto}}"
 
-            is ElementoMovetext.Nag -> piezas += "\$${elemento.codigo}"
+            is ElementoMovetext.Nag -> $$"$$${elemento.codigo}"
 
-            is ElementoMovetext.Resultado -> piezas += elemento.texto
+            is ElementoMovetext.Resultado -> elemento.texto
         }
     }
     return piezas.joinToString(" ")

@@ -54,7 +54,7 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
             throw JugadaIlegalException("Jugada no valida: $san", e)
         }
         if (!ok) throw JugadaIlegalException("Jugada ilegal: $san")
-        return board.getFen()
+        return board.fen
     }
 
     /**
@@ -72,7 +72,7 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
         val board = Board().cargar(fen)
         val origen = Square.fromValue(desde.normalizarCasilla())
         val destino = Square.fromValue(hasta.normalizarCasilla())
-        val piezaPromo = promocion?.aPiece(board.getSideToMove())
+        val piezaPromo = promocion?.aPiece(board.sideToMove)
         val move = if (piezaPromo != null) Move(origen, destino, piezaPromo) else Move(origen, destino)
 
         // Validamos legalidad real de ajedrez: [Board.isMoveLegal] (con
@@ -83,7 +83,7 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
         // [MoveGenerator.generateLegalMoves].
         val legales = try {
             MoveGenerator.generateLegalMoves(board)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList<Move>()
         }
         if (move !in legales) {
@@ -99,7 +99,7 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
         moves.add(move)
         return try {
             moves.toSanArray().last()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // En caso de fallo de conversion, devolvemos la notacion
             // compacta desde-hasta (menos amigable pero no rompe la app).
             "$desde$hasta${promocion?.let { "=$it" } ?: ""}"
@@ -116,10 +116,10 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
         if (board.getPiece(origen) == Piece.NONE) return emptyList()
         val legales = try {
             MoveGenerator.generateLegalMoves(board)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return emptyList()
         }
-        return legales.filter { it.getFrom() == origen }.map { it.getTo().name.lowercase() }
+        return legales.filter { it.from == origen }.map { it.to.name.lowercase() }
     }
 
     /**
@@ -136,7 +136,7 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
      */
     override fun esTablas(fen: String): Boolean {
         val board = Board().cargar(fen)
-        return board.isDraw || board.isInsufficientMaterial || board.isRepetition()
+        return board.isDraw || board.isInsufficientMaterial || board.isRepetition
     }
 
     /**
@@ -151,9 +151,9 @@ class AdaptadorChesslib @Inject constructor() : PuertoMotorAjedrez {
         val sinJugadasLegales = board.legalMoves().isEmpty()
         return when {
             sinJugadasLegales && board.isKingAttacked ->
-                if (board.getSideToMove() == Side.WHITE) ResultadoPartida.GANA_NEGRAS
+                if (board.sideToMove == Side.WHITE) ResultadoPartida.GANA_NEGRAS
                 else ResultadoPartida.GANA_BLANCAS
-            sinJugadasLegales || board.isDraw || board.isInsufficientMaterial || board.isRepetition() ->
+            sinJugadasLegales || board.isDraw || board.isInsufficientMaterial || board.isRepetition ->
                 ResultadoPartida.TABLAS
             else -> ResultadoPartida.EN_CURSO
         }

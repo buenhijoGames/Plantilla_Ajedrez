@@ -20,6 +20,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.graphics.createBitmap
 
 /**
  * Implementacion de [PuertoPdf] con `android.graphics.pdf.PdfDocument`.
@@ -320,9 +321,9 @@ class AdaptadorPdf @Inject constructor(
         // 1. Calcular el ancho total del bloque (figura + texto) para centrarlo horizontalmente en la celda.
         var anchoTotal = 0f
         for (segmento in segmentos) {
-            when (segmento) {
-                is SegmentoFigurin.Pieza -> anchoTotal += altoIcono
-                is SegmentoFigurin.Texto -> anchoTotal += pinturaTexto.measureText(segmento.texto)
+            anchoTotal += when (segmento) {
+                is SegmentoFigurin.Pieza -> altoIcono
+                is SegmentoFigurin.Texto -> pinturaTexto.measureText(segmento.texto)
             }
         }
 
@@ -423,7 +424,7 @@ class AdaptadorPdf @Inject constructor(
         if (drawable !is VectorDrawable) return null
         val ancho = drawable.intrinsicWidth.coerceAtLeast(1)
         val alto = drawable.intrinsicHeight.coerceAtLeast(1)
-        val bitmap = Bitmap.createBitmap(ancho, alto, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(ancho, alto)
         val lienzo = Canvas(bitmap)
         drawable.setBounds(0, 0, ancho, alto)
         drawable.draw(lienzo)

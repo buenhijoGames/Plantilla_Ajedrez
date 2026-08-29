@@ -1,6 +1,9 @@
 package com.buenhijogames.plantilla_ajedrez.ui.tablero
 
 import android.content.res.Configuration
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,22 +20,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.Icons.AutoMirrored
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenRotation
-import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,17 +52,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -124,7 +125,7 @@ fun PantallaPartida(
                 scope.launch {
                     snackbarHostState.showSnackbar(textoArchivoGuardadoExito)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 scope.launch {
                     snackbarHostState.showSnackbar(textoArchivoGuardado)
                 }
@@ -192,6 +193,7 @@ fun PantallaPartida(
             estado.blancas.trim(),
             estado.negras.trim()
         )
+
         estado.evento.isNotBlank() -> estado.evento.trim()
         else -> stringResource(R.string.partida_titulo)
     }
@@ -210,7 +212,7 @@ fun PantallaPartida(
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.accion_volver),
                         )
                     }
@@ -248,10 +250,10 @@ fun PantallaPartida(
                     IconButton(
                         onClick = viewModel::deshacerJugada,
                         enabled = !estado.cargando && estado.jugadasSan.isNotEmpty() &&
-                            estado.promocionPendiente == null && !estado.modoEdicion,
+                                estado.promocionPendiente == null && !estado.modoEdicion,
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Undo,
+                            imageVector = AutoMirrored.Filled.Undo,
                             contentDescription = stringResource(R.string.accion_deshacer),
                         )
                     }
@@ -263,7 +265,7 @@ fun PantallaPartida(
                             enabled = !estado.cargando,
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Redo,
+                                imageVector = AutoMirrored.Filled.Redo,
                                 contentDescription = stringResource(R.string.accion_rehacer),
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -405,7 +407,11 @@ fun PantallaPartida(
                                 onNagCambiado = viewModel::actualizarNagEdicion,
                                 onGuardar = viewModel::guardarEdicion,
                                 onEliminarJugada = {
-                                    estado.caminoSeleccion?.let { viewModel.solicitarEliminacionJugada(it) }
+                                    estado.caminoSeleccion?.let {
+                                        viewModel.solicitarEliminacionJugada(
+                                            it
+                                        )
+                                    }
                                 },
                                 onSalir = viewModel::salirModoEdicion,
                             )
@@ -478,7 +484,11 @@ fun PantallaPartida(
                                 onNagCambiado = viewModel::actualizarNagEdicion,
                                 onGuardar = viewModel::guardarEdicion,
                                 onEliminarJugada = {
-                                    estado.caminoSeleccion?.let { viewModel.solicitarEliminacionJugada(it) }
+                                    estado.caminoSeleccion?.let {
+                                        viewModel.solicitarEliminacionJugada(
+                                            it
+                                        )
+                                    }
                                 },
                                 onSalir = viewModel::salirModoEdicion,
                             )
@@ -780,8 +790,10 @@ private fun OverflowMenuPartida(
  */
 @Composable
 private fun textoEstado(estado: EstadoPartida): String {
-    val nombreBlancas = estado.blancas.trim().ifBlank { stringResource(R.string.partida_jugador_blanco) }
-    val nombreNegras = estado.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
+    val nombreBlancas =
+        estado.blancas.trim().ifBlank { stringResource(R.string.partida_jugador_blanco) }
+    val nombreNegras =
+        estado.negras.trim().ifBlank { stringResource(R.string.partida_jugador_negro) }
     return stringResource(R.string.partida_enfrentamiento, nombreBlancas, nombreNegras)
 }
 
@@ -1020,7 +1032,7 @@ private fun BarraControlesReproduccion(
             // Jugada anterior
             IconButton(onClick = onRetroceder) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    imageVector = AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.control_anterior),
                 )
             }
@@ -1040,7 +1052,7 @@ private fun BarraControlesReproduccion(
             // Jugada siguiente
             IconButton(onClick = onAvanzar) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    imageVector = AutoMirrored.Filled.ArrowForward,
                     contentDescription = stringResource(R.string.control_siguiente),
                 )
             }
@@ -1048,7 +1060,7 @@ private fun BarraControlesReproduccion(
             // Ir al final
             IconButton(onClick = onIrAlFinal) {
                 Icon(
-                    imageVector = Icons.Filled.Undo,
+                    imageVector = AutoMirrored.Filled.Undo,
                     contentDescription = stringResource(R.string.control_ir_final),
                 )
             }

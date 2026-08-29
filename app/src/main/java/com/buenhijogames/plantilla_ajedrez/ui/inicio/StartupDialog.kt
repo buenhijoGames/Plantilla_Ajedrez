@@ -36,10 +36,10 @@ fun StartupDialog(
         title = { Text(stringResource(R.string.inicio_titulo)) },
         text = {
             androidx.compose.foundation.layout.Column {
-                androidx.compose.material3.TextButton(onClick = onAbrir) {
+                TextButton(onClick = onAbrir) {
                     Text(stringResource(R.string.inicio_abrir))
                 }
-                androidx.compose.material3.TextButton(onClick = onNuevo) {
+                TextButton(onClick = onNuevo) {
                     Text(stringResource(R.string.inicio_nuevo))
                 }
             }

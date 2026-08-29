@@ -211,7 +211,7 @@
 
     <!-- Código fuente -->
     <string name="info_codigo_titulo">Código fuente</string>
-    <string name="info_codigo_url">https://github.com/Salmeron52/plantillas_ajedrez</string>
+    <string name="info_codigo_url">https://github.com/buenhijoGames/Plantilla_Ajedrez</string>
     <string name="info_codigo_descripcion">El código fuente completo de esta aplicación está disponible en GitHub. Puedes clonar, contribuir o reportar problemas.</string>
 
     <!-- Terceros -->
@@ -232,7 +232,7 @@
     <!-- Contacto -->
     <string name="info_contacto_titulo">Contacto</string>
     <string name="info_contacto_correo">Correo electrónico: buenhijogames@gmail.com</string>
-    <string name="info_contacto_github">GitHub: https://github.com/Salmeron52/plantillas_ajedrez</string>
+    <string name="info_contacto_github">GitHub: https://github.com/buenhijoGames/Plantilla_Ajedrez</string>
 
     <!-- Agradecimientos -->
     <string name="info_agradecimientos_titulo">Agradecimientos</string>
