@@ -922,11 +922,15 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
     - [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml): recursos `info_codigo_url` e `info_contacto_github`.
     - [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE), [Esta_App.md](file:///c:/android/Plantilla_ajedrez/Esta_App.md) e [INSTRUCCIONES.md](file:///c:/android/Plantilla_ajedrez/app/md/INSTRUCCIONES.md).
 
+18. **📄 Creación del README.md Oficial:**
+    - [README.md](file:///c:/android/Plantilla_ajedrez/README.md): documento oficial del repositorio con badges de versión, descripción completa de funcionalidades, arquitectura modular Clean Architecture, requisitos, instrucciones de compilación, licencias y contacto.
+
 ---
 
 ### Checkpoint y Estado de Versiones
-- **Rama activa:** `fase-e-pulido-temas-playstore`
+- **Rama activa:** `main` (y `fase-e-pulido-temas-playstore`)
 - **Estado:**
+  - ✅ **README.md oficial y profesional**: Creado y commiteado.
   - ✅ **Rectificación y eliminación de jugadas con deshacer/rehacer**: Implementado al 100%.
   - ✅ **Efectos de sonido y switch en Ajustes**: Implementado al 100%.
   - ✅ **Suite de tests de promoción de peones**: 100% pasando.
@@ -934,13 +938,14 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
   - ✅ **Fase B (Persistencia Room y Migraciones)**: 100% completada.
   - ✅ **Fase C (Tablero Canvas, Notación y Motor FIDE)**: 100% completada.
   - ✅ **Fase D (Exportación FIDE PDF y PGN SAF)**: 100% completada.
-  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos y Eliminación de Jugadas)**: 100% completada.
+  - ✅ **Fase E (Pulido, Icono Oficial, Multi-página PDF Torneo, Matches, Auto-Play, Sonidos, Eliminación de Jugadas y README)**: 100% completada.
 
 ---
 
 ### Dónde retomar en la próxima sesión:
-1. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena, el botón Rehacer y la pantalla Info.
-2. **Preparación final para Play Store**:
+1. **Subida a GitHub (Push)** de la rama `main` tras validar credenciales de `buenhijoGames`.
+2. **Comprobar estabilidad y feedback de Manolo** tras probar la rectificación de jugadas, eliminación en cadena, el botón Rehacer y la pantalla Info.
+3. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.
 3. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.
