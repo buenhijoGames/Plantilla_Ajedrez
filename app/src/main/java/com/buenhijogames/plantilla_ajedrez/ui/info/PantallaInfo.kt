@@ -82,19 +82,6 @@ fun PantallaInfo(
             item { SeccionCaracteristicas() }
             item { SeccionAutor() }
             item { SeccionLicencia() }
-            item {
-                SeccionCodigoFuente(
-                    onAbrirUrl = { url ->
-                        try {
-                            contexto.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            )
-                        } catch (_: Exception) {
-                            // Sin navegador disponible, no hacer nada.
-                        }
-                    },
-                )
-            }
             item { SeccionTerceros() }
             item { SeccionContacto() }
             item { SeccionAgradecimientos() }
@@ -293,53 +280,7 @@ private fun SeccionLicencia() {
     }
 }
 
-/**
- * Sección "Código fuente": tarjeta cliclable que abre el repositorio GitHub.
- *
- * @param onAbrirUrl Callback que recibe la URL y la abre en el navegador.
- */
-@Composable
-private fun SeccionCodigoFuente(
-    onAbrirUrl: (String) -> Unit,
-) {
-    val url = stringResource(R.string.info_codigo_url)
-    SeccionTitulo(texto = stringResource(R.string.info_codigo_titulo))
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { onAbrirUrl(url) },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        ),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = url,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.info_codigo_descripcion),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-    }
-}
+
 
 /**
  * Datos de un componente de terceros (referencias a recursos de strings).

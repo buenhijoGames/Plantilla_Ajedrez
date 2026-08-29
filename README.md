@@ -91,7 +91,9 @@ El proyecto sigue una arquitectura **Clean Architecture Modularizada** basada en
 
 ## 📜 Licencia y Atribuciones
 
-Este proyecto es software libre y de código abierto, distribuido bajo los términos de la **[Licencia Pública General GNU v3.0 (GPLv3)](LICENSE)**.
+Copyright (c) 2026 **buenhijoGames**. Todos los derechos reservados.
+
+Esta aplicación es software propietario desarrollado por buenhijoGames para uso personal y de estudio de ajedrez.
 
 ### Componentes de terceros y créditos:
 - **Piezas de ajedrez Meridian:** Martin Sedlak ([kmar/chess_svg_piece_sets](https://github.com/kmar/chess_svg_piece_sets)) (CC0 1.0 Universal / Dominio Público).
@@ -100,7 +102,7 @@ Este proyecto es software libre y de código abierto, distribuido bajo los térm
 - **Framework de desarrollo:** AndroidX, Jetpack Compose, Material 3, Hilt y Room por The Android Open Source Project (Apache License 2.0).
 - **Lenguaje y corrutinas:** Kotlin por JetBrains s.r.o. (Apache License 2.0).
 
-Consulta el archivo [NOTICE](NOTICE) para ver los textos completos de copyright y atribución.
+Consulta el archivo [NOTICE](NOTICE) para ver los textos completos de atribución legal de las librerías de terceros.
 
 ---
 
@@ -108,4 +110,3 @@ Consulta el archivo [NOTICE](NOTICE) para ver los textos completos de copyright 
 
 - **Desarrollador:** buenhijoGames
 - **Correo electrónico:** buenhijogames@gmail.com
-- **Repositorio:** [https://github.com/buenhijoGames/Plantilla_Ajedrez](https://github.com/buenhijoGames/Plantilla_Ajedrez)

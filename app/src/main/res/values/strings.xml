@@ -205,14 +205,9 @@
 
     <!-- Licencia -->
     <string name="info_licencia_titulo">Licencia de la app</string>
-    <string name="info_licencia_tipo">GNU General Public License v3.0 (GPLv3)</string>
-    <string name="info_licencia_descripcion">Esta app es software libre. Puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General GNU tal como está publicada por la Free Software Foundation, ya sea la versión 3 de la Licencia, o (a tu elección) cualquier versión posterior.</string>
-    <string name="info_licencia_abierta">Código abierto: todo el código fuente está disponible públicamente.</string>
-
-    <!-- Código fuente -->
-    <string name="info_codigo_titulo">Código fuente</string>
-    <string name="info_codigo_url">https://github.com/buenhijoGames/Plantilla_Ajedrez</string>
-    <string name="info_codigo_descripcion">El código fuente completo de esta aplicación está disponible en GitHub. Puedes clonar, contribuir o reportar problemas.</string>
+    <string name="info_licencia_tipo">buenhijoGames Propietario</string>
+    <string name="info_licencia_descripcion">Esta aplicación es software propietario desarrollado por buenhijoGames. Todos los derechos reservados.</string>
+    <string name="info_licencia_abierta">Uso personal y de estudio gratuito sin publicidad.</string>
 
     <!-- Terceros -->
     <string name="info_terceros_titulo">Componentes de terceros</string>

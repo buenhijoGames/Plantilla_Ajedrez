@@ -935,11 +935,17 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
     - Se creó [herramientas/generar_sonidos.py](file:///c:/android/Plantilla_ajedrez/herramientas/generar_sonidos.py) para sintetizar matemáticamente mediante física acústica (resonancia de madera + impacto percusivo) los 4 efectos de audio: movimiento suave, doble captura, jaque resonante y enroque/especial.
     - Los nuevos archivos de audio son **100% propiedad intelectual original de buenhijoGames** (sin dependencias ni licencias de terceros).
 
+21. **🛡️ Eliminación de GPLv3 y Transición a Software Propietario (buenhijoGames):**
+    - Tras retirar todas las dependencias Copyleft (piezas CC0 y sonidos propios), se eliminó la oferta GPLv3 y la obligación de código abierto.
+    - [LICENSE](file:///c:/android/Plantilla_ajedrez/LICENSE) y [NOTICE](file:///c:/android/Plantilla_ajedrez/NOTICE) actualizados a licencia propietaria de buenhijoGames con componentes de terceros bajo Apache 2.0 y CC0.
+    - [PantallaInfo.kt](file:///c:/android/Plantilla_ajedrez/app/src/main/java/com/buenhijogames/plantilla_ajedrez/ui/info/PantallaInfo.kt) y [strings.xml](file:///c:/android/Plantilla_ajedrez/app/src/main/res/values/strings.xml) adaptados: retirada la sección de código fuente público y actualizada la información de licencia.
+
 ---
 
 ### Checkpoint y Estado de Versiones
 - **Rama activa:** `main` (y `fase-e-pulido-temas-playstore`)
 - **Estado:**
+  - ✅ **Software Propietario buenhijoGames (100% Libre de GPLv3)**: Eliminada obligación de código abierto.
   - ✅ **Efectos de Audio 100% Propios y Originales**: Sintetizados e instalados en `app/res/raw/`.
   - ✅ **Piezas Meridian CC0 (Dominio Público)**: Instaladas y respaldadas las anteriores en raíz.
   - ✅ **README.md oficial y profesional**: Creado y commiteado.
@@ -955,9 +961,8 @@ Se ha creado el documento maestro [PLAN_MEJORAS.md](file:///c:/android/Plantilla
 ---
 
 ### Dónde retomar en la próxima sesión:
-1. **Subida a GitHub (Push)** de la rama `main` tras validar credenciales de `buenhijoGames`.
-2. **Comprobar estabilidad y feedback de Manolo** tras probar los nuevos sonidos propios y las piezas en el tablero y el PDF.
-3. **Preparación final para Play Store**:
+1. **Comprobar estabilidad y feedback de Manolo** tras compilar en Android Studio con las nuevas licencias, sonidos y piezas.
+2. **Preparación final para Play Store**:
    - Comprobación de ofuscación R8 / ProGuard (`proguard-rules.pro`).
    - Verificación de metadatos, traducciones y assets para publicación.
-4. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.
+3. Recordar solicitar siempre: *"MANOLO, POR FAVOR COMPILE DESDE ANDROID STUDIO Y VERIFIQUE ESTABILIDAD"* tras cualquier modificación de código.

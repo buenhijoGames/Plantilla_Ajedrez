@@ -1,68 +1,59 @@
 ================================================================================
- Plantilla_ajedrez - Archivo NOTICE / TERCEROS
+ Plantilla de Ajedrez - Archivo NOTICE / ATRIBUCIONES DE TERCEROS
 ================================================================================
- Copyright (C) 2026  buenhijoGames <buenhijogames@gmail.com>
+ Copyright (C) 2026 buenhijoGames <buenhijogames@gmail.com>
+ Todos los derechos reservados.
 
- Código fuente de la app: https://github.com/buenhijoGames/Plantilla_Ajedrez
-
- Este proyecto se distribuye bajo Licencia Pública General GNU v3.0 (GPLv3)
- o posterior (ver archivo LICENSE). Incorpora componentes de terceros cuyas
- licencias se reproducen a continuación. La atribución de cada uno es
- obligatoria y se mantiene visible en la app desde Ajustes -> Licencias.
-
- (Nota: el motor Stockfish está retirado temporalmente de la app; su
-  atribución GPLv3 se reincorporará si se vuelve a empaquetar.)
+ Esta aplicación es software propietario desarrollado por buenhijoGames.
+ Incorpora componentes de terceros bajo licencias de Dominio Público y
+ permisivas (Apache License 2.0), cuyas atribuciones legales se detallan
+ a continuación y son accesibles desde los ajustes de la aplicación.
 
 -------------------------------------------------------------------------------
- 1. Piezas Meridian (Dominio Público / CC0) y efectos de sonido originales
+ 1. Piezas de Ajedrez Meridian (Dominio Público / CC0)
 -------------------------------------------------------------------------------
- Licencia: CC0 1.0 Universal (Public Domain) / Original buenhijoGames
+ Licencia : CC0 1.0 Universal (Public Domain Dedication)
  upstream : https://github.com/kmar/chess_svg_piece_sets (Meridian set)
- autor    : Martin Sedlak (kmar) / Síntesis de audio original buenhijoGames.
- uso      : SVG convertidas a VectorDrawable XML de Compose/Canvas para el set
-            oficial y efectos de audio acústicos generados por síntesis percusiva.
+ autor    : Martin Sedlak (kmar).
+ uso      : Diseños vectoriales de piezas de ajedrez convertidos a VectorDrawable
+            XML de Android para el tablero interactivo y la planilla FIDE en PDF.
 
 -------------------------------------------------------------------------------
- 2. chesslib (validación de jugadas, SAN, FEN, PGN)
+ 2. Efectos de Sonido
 -------------------------------------------------------------------------------
- Licencia: Apache License 2.0
+ Propiedad: 100% Original buenhijoGames
+ uso      : Síntesis acústica percusiva original desarrollada internamente para
+            movimientos, capturas, jaques y enroques.
+
+-------------------------------------------------------------------------------
+ 3. chesslib (Validación de Reglas FIDE, SAN, FEN y PGN)
+-------------------------------------------------------------------------------
+ Licencia : Apache License 2.0
  upstream : https://github.com/bhlangonijr/chesslib
- Copyright (c) bhlangonijr y colaboradores.
+ Copyright: (c) bhlangonijr y colaboradores.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
--------------------------------------------------------------------------------
- 3. AndroidX, Jetpack Compose, Material 3, Hilt, Room, Navigation
--------------------------------------------------------------------------------
- Licencia: Apache License 2.0
- upstream : https://source.android.com/  (Jetpack)
- Copyright (c) The Android Open Source Project.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -------------------------------------------------------------------------------
- 4. Kotlin, Kotlin Coroutines, KSP
+ 4. AndroidX, Jetpack Compose, Material 3, Hilt, Room y Navigation
 -------------------------------------------------------------------------------
- Licencia: Apache License 2.0
+ Licencia : Apache License 2.0
+ upstream : https://source.android.com/
+ Copyright: (c) The Android Open Source Project (AOSP) / Google LLC.
+
+-------------------------------------------------------------------------------
+ 5. Lenguaje Kotlin, Coroutines y KSP
+-------------------------------------------------------------------------------
+ Licencia : Apache License 2.0
  upstream : https://kotlinlang.org/
- Copyright (c) JetBrains s.r.o.
-
-================================================================================
- Oferta de código fuente (GPLv3, sección 6)
-================================================================================
- De acuerdo con la sección 6 de la GPLv3, el código fuente completo y
- correspondiente de esta aplicación está disponible públicamente en:
-   https://github.com/buenhijoGames/Plantilla_Ajedrez
- Esta oferta es válida durante al menos los 3 años siguientes a la
- publicación de cada versión, o mientras se distribuya el producto, lo que
- dure más. Si por algún motivo no pudieras acceder al repositorio, escríbenos
- a buenhijogames@gmail.com y te haremos llegar el código fuente en un
- medio físico duradero a coste de reproducción.
+ Copyright: (c) JetBrains s.r.o.
